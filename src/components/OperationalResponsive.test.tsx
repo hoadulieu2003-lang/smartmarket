@@ -162,6 +162,7 @@ describe('Operational responsive contract', () => {
     render(<MarketFeeCollectionSection />);
 
     expect(screen.getByText(/Tổng chưa thu \(14 sạp\)/i)).toBeDefined();
+    expect(screen.getByTestId('fee-uncollected-amount').textContent).toBe('16.800.000đ');
     expect(screen.getByText(/Nợ phí quá hạn \(4 sạp\)/i)).toBeDefined();
   });
 });

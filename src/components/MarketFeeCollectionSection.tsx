@@ -4,8 +4,18 @@ import React, { useState } from 'react';
 import { CheckCircle2, FileText, Receipt, XCircle } from 'lucide-react';
 import { MARKET_FEE_COLLECTION } from '../data/mockMarketData';
 
+const parseCurrency = (value: string) => Number(value.replace(/[^\d]/g, ''));
+const formatCurrency = (value: number) => `${new Intl.NumberFormat('vi-VN').format(value)}đ`;
+
 export default function MarketFeeCollectionSection() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const uncollectedAmount = formatCurrency(
+    Math.max(
+      parseCurrency(MARKET_FEE_COLLECTION.totalTarget) - parseCurrency(MARKET_FEE_COLLECTION.collected),
+      0
+    )
+  );
 
   const triggerExport = () => {
     setToastMsg('Đã xuất báo cáo thu phí định kỳ tháng 08/2026 (PDF & Excel)');
@@ -63,7 +73,7 @@ export default function MarketFeeCollectionSection() {
 
         <div className="p-3 bg-amber-50 rounded border border-amber-200">
           <span className="text-amber-800 text-[10px] uppercase font-bold block">Tổng chưa thu (14 sạp)</span>
-          <span className="text-lg font-extrabold font-mono text-amber-900">16.800.000đ</span>
+          <span data-testid="fee-uncollected-amount" className="text-lg font-extrabold font-mono text-amber-900">{uncollectedAmount}</span>
         </div>
 
         <div className="p-3 bg-rose-50 rounded border border-rose-200">
