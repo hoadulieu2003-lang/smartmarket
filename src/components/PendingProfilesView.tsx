@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { 
   ArrowLeft, CheckCircle2, Search, XCircle,
 } from 'lucide-react';
+import { URGENT_ACTIONS } from '../data/mockMarketData';
 
 interface PendingProfilesViewProps {
   onBackToMap: () => void;
@@ -91,6 +92,9 @@ export default function PendingProfilesView({ onBackToMap }: PendingProfilesView
     }
     return true;
   });
+  const totalPendingProfiles = URGENT_ACTIONS.pendingProfiles.totalPending;
+  const overdueProfiles = URGENT_ACTIONS.pendingProfiles.overdue;
+  const pendingProfiles = totalPendingProfiles - overdueProfiles;
 
   return (
     <div className="max-w-full overflow-hidden rounded border border-slate-200 bg-white p-4 text-xs shadow-xs font-sans">
@@ -108,7 +112,8 @@ export default function PendingProfilesView({ onBackToMap }: PendingProfilesView
               Thẩm Định Hồ Sơ Đăng Ký & Chuyển Nhượng Sạp
             </h2>
             <p className="text-[11px] text-slate-500">
-              Tổng cộng có <strong className="font-mono">{profilesList.length}</strong> hồ sơ đang trong quy trình xử lý
+              Tổng cộng có <strong className="font-mono">{totalPendingProfiles}</strong> hồ sơ đang trong quy trình xử lý
+              <span className="block">Đang hiển thị {profilesList.length} hồ sơ mẫu để thao tác nhanh</span>
             </p>
           </div>
         </div>
@@ -134,7 +139,7 @@ export default function PendingProfilesView({ onBackToMap }: PendingProfilesView
               filterType === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'
             }`}
           >
-            Tất cả ({profilesList.length})
+            Tất cả ({totalPendingProfiles})
           </button>
           <button
             type="button"
@@ -144,7 +149,7 @@ export default function PendingProfilesView({ onBackToMap }: PendingProfilesView
               filterType === 'overdue' ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-800'
             }`}
           >
-            Quá hạn ({profilesList.filter(p => p.status === 'overdue').length})
+            Quá hạn ({overdueProfiles})
           </button>
           <button
             type="button"
@@ -154,7 +159,7 @@ export default function PendingProfilesView({ onBackToMap }: PendingProfilesView
               filterType === 'pending' ? 'bg-amber-500 text-slate-950' : 'bg-amber-50 text-amber-800'
             }`}
           >
-            Đang xử lý ({profilesList.filter(p => p.status === 'pending').length})
+            Đang xử lý ({pendingProfiles})
           </button>
           </div>
         </div>

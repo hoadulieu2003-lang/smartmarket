@@ -33,6 +33,14 @@ export default function UrgentActionCards({
     }));
   };
 
+  const handleComplaintCardKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+
+    event.preventDefault();
+    onSelectFilter('complaint');
+  };
+
   return (
     <section className="mb-4 max-w-full overflow-hidden">
       <div className="mb-2.5 flex flex-col gap-2 border-b border-slate-200 pb-2 lg:flex-row lg:items-center lg:justify-between">
@@ -53,7 +61,11 @@ export default function UrgentActionCards({
 
       <div className="grid max-w-full grid-cols-1 divide-y divide-slate-200 rounded border border-slate-200 bg-white shadow-xs md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-12">
         <div 
+          role="button"
+          tabIndex={0}
+          aria-label="Mức 1 • Phản ánh khẩn cấp - Lọc sơ đồ phản ánh"
           onClick={() => onSelectFilter('complaint')}
+          onKeyDown={handleComplaintCardKeyDown}
           className="group flex min-h-[13rem] cursor-pointer flex-col justify-between p-4 transition-colors hover:bg-rose-50/30 md:col-span-2 xl:col-span-4"
         >
           <div>
@@ -149,6 +161,7 @@ export default function UrgentActionCards({
             className={`mt-1.5 space-y-1.5 ${expandedLevels.infrastructure ? '' : 'hidden md:block'}`}
           >
               {areaAlerts.locations.map((loc) => (
+                onSelectAreaAlert ? (
                 <button
                   type="button"
                   key={loc.id}
@@ -166,6 +179,20 @@ export default function UrgentActionCards({
                   </div>
                   <div className="text-[11px] text-amber-800 truncate mt-0.5">{loc.detail}</div>
                 </button>
+                ) : (
+                <div
+                  key={loc.id}
+                  className="min-h-11 w-full rounded border border-amber-200/80 bg-amber-50/50 p-2 text-left text-xs font-sans"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-amber-950 truncate">{loc.name}</span>
+                    <span className="font-mono font-bold text-[10px] bg-amber-200 text-amber-900 px-1 rounded">
+                      {loc.count} ca
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-amber-800 truncate mt-0.5">{loc.detail}</div>
+                </div>
+                )
               ))}
             </div>
         </div>

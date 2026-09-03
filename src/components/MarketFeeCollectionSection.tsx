@@ -62,7 +62,7 @@ export default function MarketFeeCollectionSection() {
         </div>
 
         <div className="p-3 bg-amber-50 rounded border border-amber-200">
-          <span className="text-amber-800 text-[10px] uppercase font-bold block">Chưa thu (14 sạp)</span>
+          <span className="text-amber-800 text-[10px] uppercase font-bold block">Tổng chưa thu (14 sạp)</span>
           <span className="text-lg font-extrabold font-mono text-amber-900">16.800.000đ</span>
         </div>
 
