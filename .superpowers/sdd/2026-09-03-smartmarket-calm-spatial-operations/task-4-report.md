@@ -25,3 +25,18 @@
 ## Notes
 
 No spatial fixture geometry, renderer prop contract, map callback, layer state, duty state, zoom flow, or fullscreen state was changed.
+
+## Review Fix
+
+- Removed the `infrastructure` layer checkbox/count path because `page.tsx` only owns real state for `cctv`, `sensors`, and `fireExit`.
+- Removed `aria-haspopup="menu"` from the layer popover trigger because the popover contains checkbox controls, not a menu role.
+- Added explicit `aria-label` values to duty view buttons so icon-only mobile states keep accessible names.
+- Added regression tests for real layer count/callbacks, missing infrastructure no-op control, and duty labels.
+
+Post-fix verification:
+
+- `npm test -- src/components/MapToolbar.responsive.test.tsx --run`: PASS, 5/5 tests.
+- `npm test -- --run`: PASS, 66/66 tests.
+- `npx tsc --noEmit`: PASS.
+- `npx eslint src/components/MapToolbar.tsx src/components/MapToolbar.responsive.test.tsx`: PASS.
+- `git diff --check`: PASS.

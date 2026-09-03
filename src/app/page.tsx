@@ -365,7 +365,7 @@ export default function SmartMarketHome() {
                   viewEngine={viewEngine}
                   onToggleViewEngine={setViewEngine}
                   layers={layers}
-                  onToggleLayer={handleToggleLayer as any}
+                  onToggleLayer={handleToggleLayer}
                   zoomLevel={zoomLevel}
                   onZoomIn={handleZoomIn}
                   onZoomOut={handleZoomOut}

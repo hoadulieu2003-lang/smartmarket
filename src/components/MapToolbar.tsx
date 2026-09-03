@@ -19,8 +19,7 @@ import {
   Compass,
   Search,
   ShieldAlert,
-  ChevronDown,
-  Wrench
+  ChevronDown
 } from 'lucide-react';
 
 interface MapToolbarProps {
@@ -32,9 +31,8 @@ interface MapToolbarProps {
     cctv: boolean;
     sensors: boolean;
     fireExit: boolean;
-    infrastructure?: boolean;
   };
-  onToggleLayer: (layer: 'cctv' | 'sensors' | 'fireExit' | 'infrastructure') => void;
+  onToggleLayer: (layer: 'cctv' | 'sensors' | 'fireExit') => void;
   zoomLevel: number;
   onZoomIn: () => void;
   onZoomOut: () => void;
@@ -93,7 +91,6 @@ export default function MapToolbar({
     layers.cctv,
     layers.sensors,
     layers.fireExit,
-    layers.infrastructure ?? true,
   ].filter(Boolean).length;
   const dutyOptions: Array<{
     key: 'all' | 'sanitation' | 'security_fire' | 'finance';
@@ -216,7 +213,6 @@ export default function MapToolbar({
               type="button"
               onClick={() => setIsLayersOpen(!isLayersOpen)}
               aria-expanded={isLayersOpen}
-              aria-haspopup="menu"
               className={`flex min-h-11 cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${
                 isLayersOpen || activeLayersCount > 0
                   ? 'bg-slate-100 border-slate-300 text-slate-900 shadow-2xs'
@@ -227,7 +223,7 @@ export default function MapToolbar({
               <Layers className="w-3.5 h-3.5 text-[#076C31]" />
               <span>Lớp bản đồ</span>
               <span className="bg-emerald-100 text-[#076C31] text-[10px] font-mono font-extrabold px-1.5 py-0.2 rounded">
-                {activeLayersCount}/4
+                {activeLayersCount}/3
               </span>
               <ChevronDown className="w-3 h-3 text-slate-400" />
             </button>
@@ -277,19 +273,6 @@ export default function MapToolbar({
                     className="w-4 h-4 rounded text-[#076C31] focus:ring-0 cursor-pointer accent-[#076C31]"
                   />
                 </label>
-
-                <label className="flex min-h-11 cursor-pointer select-none items-center justify-between rounded-lg px-2 py-1.5 hover:bg-slate-50">
-                  <div className="flex items-center gap-2">
-                    <Wrench className="w-3.5 h-3.5 text-slate-600" />
-                    <span className="font-semibold text-slate-800 text-xs">Hạ tầng kỹ thuật & Rác</span>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={layers.infrastructure ?? true}
-                    onChange={() => onToggleLayer('infrastructure')}
-                    className="w-4 h-4 rounded text-[#076C31] focus:ring-0 cursor-pointer accent-[#076C31]"
-                  />
-                </label>
               </div>
             )}
           </div>
@@ -312,6 +295,7 @@ export default function MapToolbar({
                   type="button"
                   onClick={() => onSelectDutyView(duty.key)}
                   aria-pressed={dutyView === duty.key}
+                  aria-label={`Chọn chế độ ca trực: ${duty.label}`}
                   className={`flex min-h-11 flex-none cursor-pointer items-center gap-1 rounded px-2.5 py-2 font-bold transition-colors ${
                     dutyView === duty.key
                       ? 'bg-white text-slate-950 shadow-xs border border-slate-200'

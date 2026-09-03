@@ -24,7 +24,7 @@ const renderToolbar = () => {
       onSelectFloor={handlers.onSelectFloor}
       viewEngine="2d_svg"
       onToggleViewEngine={handlers.onToggleViewEngine}
-      layers={{ cctv: true, sensors: true, fireExit: false, infrastructure: true }}
+      layers={{ cctv: true, sensors: true, fireExit: false }}
       onToggleLayer={handlers.onToggleLayer}
       zoomLevel={1}
       onZoomIn={handlers.onZoomIn}
@@ -72,5 +72,28 @@ describe('MapToolbar responsive controls', () => {
     expect(handlers.onZoomOut).toHaveBeenCalledTimes(1);
     expect(handlers.onZoomIn).toHaveBeenCalledTimes(1);
     expect(handlers.onResetZoom).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps layer popover bound to real layer state only', () => {
+    const handlers = renderToolbar();
+    const layerButton = screen.getByRole('button', { name: /Lớp bản đồ/i });
+
+    expect(layerButton.getAttribute('aria-haspopup')).toBeNull();
+    expect(layerButton.textContent).toContain('2/3');
+
+    fireEvent.click(layerButton);
+
+    expect(screen.queryByText(/Hạ tầng kỹ thuật/i)).toBeNull();
+    fireEvent.click(screen.getByLabelText(/Camera CCTV/i));
+    expect(handlers.onToggleLayer).toHaveBeenCalledWith('cctv');
+  });
+
+  it('names duty icon controls even when visible labels collapse on mobile', () => {
+    renderToolbar();
+
+    expect(screen.getByLabelText('Chọn chế độ ca trực: Toàn cảnh')).toBeDefined();
+    expect(screen.getByLabelText('Chọn chế độ ca trực: Ca Vệ Sinh')).toBeDefined();
+    expect(screen.getByLabelText('Chọn chế độ ca trực: Ca An Ninh/PCCC')).toBeDefined();
+    expect(screen.getByLabelText('Chọn chế độ ca trực: Ca Thu Phí')).toBeDefined();
   });
 });
