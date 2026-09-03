@@ -37,7 +37,8 @@ import {
   Store,
   MapPin,
   AlertTriangle,
-  Compass
+  Compass,
+  Wrench
 } from 'lucide-react';
 
 export default function SmartMarketHome() {
@@ -108,7 +109,7 @@ export default function SmartMarketHome() {
       ...prev,
       [stallId]: { teamName, status: 'in_progress' }
     }));
-    setDispatchToast(`✓ Đã điều phối thành công ${teamName} đến xử lý sự cố!`);
+    setDispatchToast(`Đã điều phối thành công ${teamName} đến xử lý sự cố!`);
     setTimeout(() => setDispatchToast(null), 4500);
     setQuickActionStall(null);
   };
@@ -404,23 +405,26 @@ export default function SmartMarketHome() {
                     {/* Bộ lọc riêng trong phân khu */}
                     <div className="flex items-center gap-1 text-[11px]">
                       <span className="text-slate-500 font-bold hidden md:inline mr-1">Lọc trong khu:</span>
-                      {[
-                        { key: 'all', label: `● Tất cả (${zoneStalls.length})` },
-                        { key: 'p0', label: `🔴 Khẩn cấp (${zoneStalls.filter((s) => s.state.complaintsCount > 0).length})` },
-                        { key: 'warning', label: `🟠 Cần chú ý (${zoneStalls.filter((s) => s.state.contractDaysLeft <= 30 || s.state.feeStatus === 'overdue').length})` },
-                        { key: 'maintenance', label: `🟡 Bảo trì (${zoneStalls.filter((s) => s.state.isUnderMaintenance).length})` },
-                        { key: 'empty', label: `⚪ Sạp trống (${zoneStalls.filter((s) => !s.state.isOccupied).length})` },
-                      ].map((flt) => (
+                      {([
+                        { key: 'all', label: `Tất cả (${zoneStalls.length})`, marker: 'bg-slate-300' },
+                        { key: 'p0', label: `Khẩn cấp (${zoneStalls.filter((s) => s.state.complaintsCount > 0).length})`, marker: 'bg-rose-600' },
+                        { key: 'warning', label: `Cần chú ý (${zoneStalls.filter((s) => s.state.contractDaysLeft <= 30 || s.state.feeStatus === 'overdue').length})`, marker: 'bg-amber-500' },
+                        { key: 'maintenance', label: `Bảo trì (${zoneStalls.filter((s) => s.state.isUnderMaintenance).length})`, marker: 'bg-yellow-400' },
+                        { key: 'empty', label: `Sạp trống (${zoneStalls.filter((s) => !s.state.isOccupied).length})`, marker: 'border border-slate-300 bg-white' },
+                      ] as const).map((flt) => (
                         <button
                           key={flt.key}
-                          onClick={() => setZoneFilter(flt.key as any)}
-                          className={`px-2.5 py-1 rounded-md font-bold transition-all cursor-pointer ${
+                          type="button"
+                          onClick={() => setZoneFilter(flt.key)}
+                          aria-pressed={zoneFilter === flt.key}
+                          className={`flex min-h-11 items-center gap-1.5 rounded-md px-2.5 py-2 font-bold transition-colors cursor-pointer ${
                             zoneFilter === flt.key
                               ? 'bg-[#076C31] text-white shadow-xs'
                               : 'bg-white text-slate-700 hover:bg-emerald-100 border border-emerald-200'
                           }`}
                         >
-                          {flt.label}
+                          <span className={`h-2 w-2 rounded-full ${flt.marker}`} aria-hidden="true"></span>
+                          <span>{flt.label}</span>
                         </button>
                       ))}
                     </div>
@@ -431,14 +435,17 @@ export default function SmartMarketHome() {
                 {dispatchToast && (
                   <div className="bg-emerald-700 text-white px-4 py-2 font-sans font-bold text-xs flex items-center justify-between shadow-md transition-all">
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 animate-ping" />
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-100" aria-hidden="true" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 motion-safe:animate-ping" aria-hidden="true" />
                       <span>{dispatchToast}</span>
                     </div>
                     <button
+                      type="button"
                       onClick={() => setDispatchToast(null)}
-                      className="text-emerald-200 hover:text-white cursor-pointer ml-4 font-bold"
+                      className="ml-4 flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded text-emerald-200 font-bold hover:bg-emerald-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                      aria-label="Đóng thông báo điều phối"
                     >
-                      ✕
+                      <X className="h-4 w-4" aria-hidden="true" />
                     </button>
                   </div>
                 )}
@@ -448,15 +455,17 @@ export default function SmartMarketHome() {
                   <div className="flex items-center gap-2">
                     <span className="text-slate-500 font-bold uppercase text-[10px]">Mặt bằng đối chiếu:</span>
                     <div className="inline-flex rounded bg-white p-0.5 border border-slate-300 text-xs">
-                      {[
+                      {([
                         { key: 'A', label: 'Chợ Đồng Xuân (160 sạp)' },
                         { key: 'B', label: 'Chợ Bến Thành chữ L' },
                         { key: 'C', label: 'Chợ An Đông 2 Block' },
-                      ].map((fix) => (
+                      ] as const).map((fix) => (
                         <button
                           key={fix.key}
-                          onClick={() => setActiveFixtureKey(fix.key as any)}
-                          className={`px-2.5 py-0.5 rounded font-medium transition-colors cursor-pointer ${
+                          type="button"
+                          onClick={() => setActiveFixtureKey(fix.key)}
+                          aria-pressed={activeFixtureKey === fix.key}
+                          className={`min-h-11 rounded px-2.5 py-2 font-medium transition-colors cursor-pointer ${
                             activeFixtureKey === fix.key
                               ? 'bg-[#076C31] text-white font-bold shadow-xs'
                               : 'text-slate-600 hover:text-slate-900'
@@ -471,17 +480,17 @@ export default function SmartMarketHome() {
                     <div className="hidden xl:flex items-center gap-2 px-2.5 py-0.5 bg-slate-50 border border-slate-200 rounded text-[11px] font-sans">
                       <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Ưu tiên:</span>
                       <span className="flex items-center gap-1 font-bold text-rose-700">
-                        <span className="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
-                        <span>● P0 Khẩn cấp</span>
+                        <span className="w-2 h-2 rounded-full bg-rose-600 motion-safe:animate-ping" aria-hidden="true"></span>
+                        <span>P0 Khẩn cấp</span>
                       </span>
                       <span className="text-slate-300">•</span>
                       <span className="flex items-center gap-1 font-bold text-amber-800">
-                        <span>▲</span>
+                        <span className="h-0 w-0 border-x-[5px] border-b-[9px] border-x-transparent border-b-amber-500" aria-hidden="true"></span>
                         <span>Chú ý</span>
                       </span>
                       <span className="text-slate-300">•</span>
                       <span className="flex items-center gap-1 font-bold text-yellow-800">
-                        <span>🔧</span>
+                        <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
                         <span>Bảo trì</span>
                       </span>
                       <span className="text-slate-300">•</span>
@@ -498,10 +507,12 @@ export default function SmartMarketHome() {
                     </div>
                     {isFullscreen && (
                       <button
+                        type="button"
                         onClick={() => setIsFullscreen(false)}
                         className="px-2.5 py-0.5 rounded bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs cursor-pointer flex items-center gap-1"
+                        aria-label="Thoát toàn màn hình"
                       >
-                        ✕ Thoát toàn màn hình (ESC)
+                        <X className="h-3.5 w-3.5" aria-hidden="true" /> Thoát toàn màn hình (ESC)
                       </button>
                     )}
                   </div>
@@ -590,15 +601,15 @@ export default function SmartMarketHome() {
         onClose={handleCloseDrawer}
         onQuickDispatch={(s, team) => handleQuickDispatch(s.id, team)}
         onExtendContract={(s) => {
-          setDispatchToast(`✓ Đã gửi thông báo gia hạn hợp đồng tới chủ sạp ${s.code}`);
+          setDispatchToast(`Đã gửi thông báo gia hạn hợp đồng tới chủ sạp ${s.code}`);
           setTimeout(() => setDispatchToast(null), 4500);
         }}
         onCollectFee={(s) => {
-          setDispatchToast(`✓ Đã ghi nhận thu phí dịch vụ sạp ${s.code} thành công`);
+          setDispatchToast(`Đã ghi nhận thu phí dịch vụ sạp ${s.code} thành công`);
           setTimeout(() => setDispatchToast(null), 4500);
         }}
         onViewComplaints={(s) => {
-          setDispatchToast(`✓ Đang mở hồ sơ bằng chứng hiện trường sạp ${s.code}`);
+          setDispatchToast(`Đang mở hồ sơ bằng chứng hiện trường sạp ${s.code}`);
           setTimeout(() => setDispatchToast(null), 4500);
         }}
       />
