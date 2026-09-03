@@ -10,6 +10,7 @@ interface HeaderProps {
   urgentCount?: number;
   isMobileMenuOpen?: boolean;
   onOpenMobileMenu?: () => void;
+  onToggleMobileMenu?: () => void;
   mobileMenuButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
@@ -20,6 +21,7 @@ export default function Header({
   urgentCount = 4,
   isMobileMenuOpen = false,
   onOpenMobileMenu,
+  onToggleMobileMenu,
   mobileMenuButtonRef
 }: HeaderProps) {
   const [currentTime, setCurrentTime] = useState('');
@@ -41,7 +43,7 @@ export default function Header({
       <button
         ref={mobileMenuButtonRef}
         type="button"
-        onClick={onOpenMobileMenu}
+        onClick={onToggleMobileMenu ?? onOpenMobileMenu}
         aria-label={isMobileMenuOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'}
         aria-controls="application-sidebar"
         aria-expanded={isMobileMenuOpen}
@@ -92,10 +94,14 @@ export default function Header({
         >
           <Bell className="w-4 h-4" />
           {urgentCount > 0 && (
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
+            <span
+              aria-hidden="true"
+              data-urgent-ping="motion"
+              className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-600 motion-safe:animate-ping"
+            ></span>
           )}
           {urgentCount > 0 && (
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-600"></span>
+            <span aria-hidden="true" className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-600"></span>
           )}
         </button>
 

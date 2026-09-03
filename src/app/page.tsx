@@ -312,7 +312,7 @@ export default function SmartMarketHome() {
           onSearchChange={setSearchQuery}
           urgentCount={URGENT_ACTIONS.complaints.total}
           isMobileMenuOpen={isMobileSidebarOpen}
-          onOpenMobileMenu={() => setIsMobileSidebarOpen(true)}
+          onToggleMobileMenu={() => setIsMobileSidebarOpen((open) => !open)}
           mobileMenuButtonRef={mobileMenuButtonRef}
         />
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 
@@ -38,7 +38,7 @@ describe('ApplicationShell responsive navigation contract', () => {
   });
 
   it('keeps search and notifications discoverable by accessible text', () => {
-    render(
+    const { container } = render(
       <Header
         searchQuery=""
         onSearchChange={vi.fn()}
@@ -49,5 +49,49 @@ describe('ApplicationShell responsive navigation contract', () => {
 
     expect(screen.getByPlaceholderText(/Tìm mã sạp/i)).toBeDefined();
     expect(screen.getByRole('button', { name: /Nhật ký hoạt động/i })).toBeDefined();
+    const urgentPing = container.querySelector('[data-urgent-ping="motion"]');
+    expect(urgentPing).not.toBeNull();
+    const urgentPingClasses = urgentPing?.className.split(/\s+/) ?? [];
+    expect(urgentPingClasses).toContain('motion-safe:animate-ping');
+    expect(urgentPingClasses).not.toContain('animate-ping');
+  });
+
+  it('does not expose closed mobile sidebar controls to keyboard or accessibility users', () => {
+    render(
+      <Sidebar
+        isCollapsed={false}
+        onToggleCollapse={vi.fn()}
+        currentView="market_map"
+        onSelectView={vi.fn()}
+        onScrollToFees={vi.fn()}
+        onFilterComplaints={vi.fn()}
+        isMobileOpen={false}
+        onCloseMobile={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByRole('button', { name: /Đóng menu điều hướng/i })).toBeNull();
+    expect(screen.queryByTestId('mobile-sidebar-panel')).toBeNull();
+  });
+
+  it('uses a truthful toggle action when the mobile menu is already open', () => {
+    const onToggleMobileMenu = vi.fn();
+
+    render(
+      <Header
+        searchQuery=""
+        onSearchChange={vi.fn()}
+        urgentCount={0}
+        isMobileMenuOpen
+        onToggleMobileMenu={onToggleMobileMenu}
+      />
+    );
+
+    const menuButton = screen.getByRole('button', { name: /Đóng menu điều hướng/i });
+    expect(menuButton.getAttribute('aria-expanded')).toBe('true');
+
+    fireEvent.click(menuButton);
+
+    expect(onToggleMobileMenu).toHaveBeenCalledTimes(1);
   });
 });

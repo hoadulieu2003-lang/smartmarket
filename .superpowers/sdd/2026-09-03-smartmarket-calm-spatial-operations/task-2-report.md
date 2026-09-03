@@ -134,3 +134,100 @@ The focused lint command required by Task 2 passes.
 
 - The worktree still contains many unrelated untracked project files that predate this task. I staged only the four task files and this report.
 - `src/app/page.tsx` has broader pre-existing lint debt outside Task 2's focused lint command. I did not refactor it because the task explicitly limited scope to responsive shell behavior and preserving map/data logic.
+
+## Review Fix — 2026-09-03
+
+### Findings addressed
+
+- P1: Closed mobile sidebar controls were still in the DOM and accessibility tree. Fixed by rendering a desktop sidebar separately from the mobile off-canvas panel and rendering the mobile scrim/panel only while open.
+- P2: Header mobile menu button could say `Đóng menu điều hướng` while the page handler only opened the menu. Fixed by adding a truthful toggle prop and wiring the page to toggle open/closed.
+- P2: Urgent notification ping used unconditional `animate-ping`. Fixed by changing the animated marker to `motion-safe:animate-ping`.
+
+### Covering RED
+
+Command:
+
+```powershell
+npm test -- src/components/ApplicationShell.test.tsx --run
+```
+
+Output summary:
+
+```text
+Test Files  1 failed (1)
+Tests  3 failed | 2 passed (5)
+Failure 1: expected urgent ping marker with data-urgent-ping="motion" to exist.
+Failure 2: closed Sidebar still exposed multiple role="button" controls named /Đóng menu điều hướng/i.
+Failure 3: expanded Header menu trigger did not call onToggleMobileMenu.
+Exit code: 1
+```
+
+### Covering GREEN
+
+Command:
+
+```powershell
+npm test -- src/components/ApplicationShell.test.tsx --run
+```
+
+Output summary:
+
+```text
+Test Files  1 passed (1)
+Tests  5 passed (5)
+Duration  1.72s
+Exit code: 0
+```
+
+### Re-run verification
+
+Full Vitest:
+
+```powershell
+npm test -- --run
+```
+
+```text
+Test Files  8 passed (8)
+Tests  49 passed (49)
+Duration  4.06s
+Exit code: 0
+```
+
+Focused ESLint:
+
+```powershell
+npx eslint src/components/Sidebar.tsx src/components/Header.tsx src/components/ApplicationShell.test.tsx
+```
+
+```text
+No output
+Exit code: 0
+```
+
+TypeScript:
+
+```powershell
+npx tsc --noEmit
+```
+
+```text
+No output
+Exit code: 0
+```
+
+Diff check:
+
+```powershell
+git diff --check
+```
+
+```text
+Exit code: 0
+Warnings only: Git reports LF will be replaced by CRLF the next time it touches the four changed source/test files.
+No whitespace errors.
+```
+
+### Review fix commit
+
+- Review fix commit SHA: generated after this report update is staged; final SHA is returned in the task response.

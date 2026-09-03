@@ -50,8 +50,6 @@ export default function Sidebar({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isMobileOpen, onCloseMobile]);
 
-  const showCollapsed = isCollapsed && !isMobileOpen;
-
   const navigationGroups: Array<{ groupTitle: string; items: NavigationItem[] }> = [
     {
       groupTitle: 'VẬN HÀNH MẶT BẰNG',
@@ -142,23 +140,19 @@ export default function Sidebar({
     }
   ];
 
-  return (
-    <>
-    <button
-      type="button"
-      aria-label="Đóng menu điều hướng"
-      className={`fixed inset-0 z-30 bg-slate-950/35 transition-opacity md:hidden ${
-        isMobileOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
-      }`}
-      onClick={onCloseMobile}
-    />
-    <aside
-      id="application-sidebar"
+  const renderPanel = (mode: 'desktop' | 'mobile') => {
+    const isMobilePanel = mode === 'mobile';
+    const showCollapsed = !isMobilePanel && isCollapsed;
+
+    return (
+      <aside
+      id={isMobilePanel ? 'application-sidebar' : 'desktop-application-sidebar'}
       aria-label="Điều hướng chính"
-      className={`fixed inset-y-0 left-0 z-40 flex h-[100dvh] w-72 max-w-[85vw] shrink-0 select-none flex-col justify-between border-r border-[var(--color-slate-border)] bg-[var(--color-slate-surface)] text-[var(--color-slate-text-muted)] shadow-xl transition-transform duration-200 md:relative md:z-30 md:h-auto md:max-w-none md:translate-x-0 md:shadow-xs ${
-        isMobileOpen ? 'translate-x-0' : '-translate-x-full'
-      } ${
-        showCollapsed ? 'md:w-16' : 'md:w-60'
+      data-testid={isMobilePanel ? 'mobile-sidebar-panel' : undefined}
+      className={`shrink-0 select-none flex-col justify-between border-r border-[var(--color-slate-border)] bg-[var(--color-slate-surface)] text-[var(--color-slate-text-muted)] ${
+        isMobilePanel
+          ? 'fixed inset-y-0 left-0 z-40 flex h-[100dvh] w-72 max-w-[85vw] shadow-xl'
+          : `hidden md:relative md:z-30 md:flex md:h-auto md:shadow-xs ${showCollapsed ? 'md:w-16' : 'md:w-60'}`
       }`}
     >
       {/* Brand Header */}
@@ -183,23 +177,26 @@ export default function Sidebar({
               </div>
             </div>
           )}
-          <button
-            type="button"
-            onClick={onToggleCollapse}
-            aria-label={showCollapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
-            className="hidden h-11 w-11 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] md:flex"
-            title={showCollapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
-          >
-            {showCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          </button>
-          <button
-            type="button"
-            onClick={onCloseMobile}
-            aria-label="Đóng menu điều hướng"
-            className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200/70 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] md:hidden"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          {isMobilePanel ? (
+            <button
+              type="button"
+              onClick={onCloseMobile}
+              aria-label="Đóng menu điều hướng"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200/70 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] md:hidden"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              aria-label={showCollapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
+              className="hidden h-11 w-11 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] md:flex"
+              title={showCollapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
+            >
+              {showCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            </button>
+          )}
         </div>
 
         {/* Navigation Groups */}
@@ -222,7 +219,7 @@ export default function Sidebar({
                       key={item.id}
                       onClick={() => {
                         item.onClick?.();
-                        if (isMobileOpen) onCloseMobile?.();
+                        if (isMobilePanel) onCloseMobile?.();
                       }}
                       aria-label={item.badge ? `${item.label} ${item.badge}` : item.label}
                       className={`w-full min-h-11 flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] ${
@@ -281,6 +278,23 @@ export default function Sidebar({
         )}
       </div>
     </aside>
+    );
+  };
+
+  return (
+    <>
+    {isMobileOpen && (
+      <>
+        <button
+          type="button"
+          aria-label="Đóng menu điều hướng"
+          className="fixed inset-0 z-30 bg-slate-950/35 md:hidden"
+          onClick={onCloseMobile}
+        />
+        {renderPanel('mobile')}
+      </>
+    )}
+    {renderPanel('desktop')}
     </>
   );
 }
