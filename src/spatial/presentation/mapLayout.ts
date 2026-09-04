@@ -1,9 +1,16 @@
 import type {
+  AisleEntity,
+  FacilityEntity,
   FloorEntity,
+  GateEntity,
+  IncidentEntity,
+  InfrastructureEntity,
   LocalCoordinateSystem,
   PolygonGeometry,
   RectangleGeometry,
   SpatialGeometry,
+  StallEntity,
+  ZoneEntity,
 } from '../model/types';
 
 export type GeometryMap = Record<string, SpatialGeometry>;
@@ -11,13 +18,13 @@ export type GeometryMap = Record<string, SpatialGeometry>;
 export interface MapPresentationLayout {
   coordinateSystem: LocalCoordinateSystem;
   boundary: PolygonGeometry;
-  zones: GeometryMap;
-  stalls: GeometryMap;
-  aisles: GeometryMap;
-  gates: GeometryMap;
-  facilities: GeometryMap;
-  infrastructures: GeometryMap;
-  incidents: GeometryMap;
+  zones: Record<string, ZoneEntity['geometry']>;
+  stalls: Record<string, StallEntity['geometry']>;
+  aisles: Record<string, AisleEntity['geometry']>;
+  gates: Record<string, GateEntity['geometry']>;
+  facilities: Record<string, FacilityEntity['geometry']>;
+  infrastructures: Record<string, InfrastructureEntity['geometry']>;
+  incidents: Record<string, IncidentEntity['geometry']>;
 }
 
 interface RectFrame {
@@ -79,13 +86,13 @@ function createBaseLayout(floor: FloorEntity): MapPresentationLayout {
       rotationConvention: { ...floor.coordinateSystem.rotationConvention },
     },
     boundary: cloneSpatialGeometry(floor.boundary) as PolygonGeometry,
-    zones: Object.fromEntries(floor.zones.map((zone) => [zone.id, cloneSpatialGeometry(zone.geometry)])),
-    stalls: Object.fromEntries(floor.stalls.map((stall) => [stall.id, cloneSpatialGeometry(stall.geometry)])),
-    aisles: Object.fromEntries(floor.aisles.map((aisle) => [aisle.id, cloneSpatialGeometry(aisle.geometry)])),
-    gates: Object.fromEntries(floor.gates.map((gate) => [gate.id, cloneSpatialGeometry(gate.geometry)])),
-    facilities: Object.fromEntries(floor.facilities.map((facility) => [facility.id, cloneSpatialGeometry(facility.geometry)])),
-    infrastructures: Object.fromEntries(floor.infrastructures.map((infra) => [infra.id, cloneSpatialGeometry(infra.geometry)])),
-    incidents: Object.fromEntries(floor.incidents.map((incident) => [incident.id, cloneSpatialGeometry(incident.geometry)])),
+    zones: Object.fromEntries(floor.zones.map((zone) => [zone.id, cloneSpatialGeometry(zone.geometry)])) as MapPresentationLayout['zones'],
+    stalls: Object.fromEntries(floor.stalls.map((stall) => [stall.id, cloneSpatialGeometry(stall.geometry)])) as MapPresentationLayout['stalls'],
+    aisles: Object.fromEntries(floor.aisles.map((aisle) => [aisle.id, cloneSpatialGeometry(aisle.geometry)])) as MapPresentationLayout['aisles'],
+    gates: Object.fromEntries(floor.gates.map((gate) => [gate.id, cloneSpatialGeometry(gate.geometry)])) as MapPresentationLayout['gates'],
+    facilities: Object.fromEntries(floor.facilities.map((facility) => [facility.id, cloneSpatialGeometry(facility.geometry)])) as MapPresentationLayout['facilities'],
+    infrastructures: Object.fromEntries(floor.infrastructures.map((infra) => [infra.id, cloneSpatialGeometry(infra.geometry)])) as MapPresentationLayout['infrastructures'],
+    incidents: Object.fromEntries(floor.incidents.map((incident) => [incident.id, cloneSpatialGeometry(incident.geometry)])) as MapPresentationLayout['incidents'],
   };
 }
 

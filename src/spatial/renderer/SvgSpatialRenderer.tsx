@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import type { FloorEntity, StallEntity } from '../model/types';
+import React, { useState, useEffect, useMemo } from 'react';
+import { RotateCcw } from 'lucide-react';
+import type { FloorEntity, StallEntity, SpatialGeometry } from '../model/types';
 import { 
   getZonePresentationStyle, 
   getAislePresentationStyle, 
@@ -9,6 +10,7 @@ import {
   getIncidentPresentationStyle 
 } from './presentationAdapter';
 import { StallGlyph } from './StallGlyph';
+import { getMapPresentationLayout, getPresentationGeometry } from '../presentation/mapLayout';
 
 export interface SvgSpatialRendererProps {
   floor: FloorEntity;
@@ -32,6 +34,42 @@ export interface SvgSpatialRendererProps {
   onSelectZone?: (zoneId: string) => void;
   selectedZone?: string | null;
   operationalFilter?: 'all' | 'p0' | 'warning' | 'maintenance' | 'empty';
+}
+
+function geometryBounds(geometry: SpatialGeometry) {
+  if (geometry.type === 'rectangle') {
+    return {
+      minX: geometry.x,
+      minY: geometry.y,
+      maxX: geometry.x + geometry.width,
+      maxY: geometry.y + geometry.height,
+    };
+  }
+
+  if (geometry.type === 'polygon') {
+    const xs = geometry.vertices.map(([x]) => x);
+    const ys = geometry.vertices.map(([, y]) => y);
+    return {
+      minX: Math.min(...xs),
+      minY: Math.min(...ys),
+      maxX: Math.max(...xs),
+      maxY: Math.max(...ys),
+    };
+  }
+
+  if (geometry.type === 'point') {
+    const [x, y] = geometry.coordinates;
+    return { minX: x, minY: y, maxX: x, maxY: y };
+  }
+
+  const xs = geometry.points.map(([x]) => x);
+  const ys = geometry.points.map(([, y]) => y);
+  return {
+    minX: Math.min(...xs),
+    minY: Math.min(...ys),
+    maxX: Math.max(...xs),
+    maxY: Math.max(...ys),
+  };
 }
 
 /**
@@ -79,15 +117,18 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
     );
   }
 
-  const { width: coordWidth, height: coordHeight } = floor.coordinateSystem;
+  const layout = useMemo(() => getMapPresentationLayout(floor), [floor]);
+  const { width: coordWidth, height: coordHeight } = layout.coordinateSystem;
 
   // Auto-center camera onto selectedZone when entering ZONE_FOCUS
   useEffect(() => {
     if (selectedZone) {
       const zone = floor.zones?.find((z) => z.id === selectedZone);
-      if (zone && zone.geometry && zone.geometry.type === 'rectangle') {
-        const zCenterX = zone.geometry.x + zone.geometry.width / 2;
-        const zCenterY = zone.geometry.y + zone.geometry.height / 2;
+      const zoneGeometry = zone ? getPresentationGeometry(layout, zone.id, zone.geometry) : null;
+      if (zoneGeometry) {
+        const bounds = geometryBounds(zoneGeometry);
+        const zCenterX = (bounds.minX + bounds.maxX) / 2;
+        const zCenterY = (bounds.minY + bounds.maxY) / 2;
         const shiftX = (coordWidth / 2 - zCenterX) * 0.85;
         const shiftY = (coordHeight / 2 - zCenterY) * 0.85;
         setPan({ x: Math.round(shiftX), y: Math.round(shiftY) });
@@ -95,7 +136,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
     } else {
       setPan({ x: 0, y: 0 });
     }
-  }, [selectedZone, coordWidth, coordHeight, floor.zones]);
+  }, [selectedZone, coordWidth, coordHeight, floor.zones, layout]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {
@@ -220,11 +261,11 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
         {/* ------------------------------------------------------------- */}
         {/* LAYER 1: FLOOR BOUNDARY & GRID BACKGROUND */}
         {/* ------------------------------------------------------------- */}
-        {showLayers.boundary && floor.boundary && (
+        {showLayers.boundary && layout.boundary && (
           <g id="layer-boundary">
-            {floor.boundary.type === 'polygon' && (
+            {layout.boundary.type === 'polygon' && (
               <polygon
-                points={formatPoints(floor.boundary.vertices)}
+                points={formatPoints(layout.boundary.vertices)}
                 fill="url(#spatial-grid-pattern)"
                 stroke="#cbd5e1"
                 strokeWidth="2.5"
@@ -241,16 +282,17 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
           const isHovered = internalHoveredId === zone.id;
           const style = getZonePresentationStyle(zone, isHovered);
           const zoneColor = zone.visualTheme?.colorToken || '#076C31';
+          const zoneGeometry = getPresentationGeometry(layout, zone.id, zone.geometry);
 
           return (
             <g key={zone.id} id={`zone-${zone.id}`}>
-              {zone.geometry.type === 'rectangle' ? (
+              {zoneGeometry.type === 'rectangle' ? (
                 <>
                   <rect
-                    x={zone.geometry.x}
-                    y={zone.geometry.y}
-                    width={zone.geometry.width}
-                    height={zone.geometry.height}
+                    x={zoneGeometry.x}
+                    y={zoneGeometry.y}
+                    width={zoneGeometry.width}
+                    height={zoneGeometry.height}
                     fill="#f8fafc"
                     stroke={isHovered ? "#94a3b8" : "#e2e8f0"}
                     strokeWidth={1}
@@ -262,11 +304,11 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
                     const zoneStalls = floor.stalls?.filter(s => s.zoneId === zone.id || s.code.startsWith(zone.code)) || [];
                     const zoneIssuesCount = zoneStalls.filter(s => (s.state.complaintsCount > 0 || (s.state.issues && s.state.issues.length > 0))).length;
                     const hasP0InZone = zoneStalls.some(s => s.state.complaintsCount > 0 && ((s.state.issues?.[0] as any)?.priority === 'P0' || s.code === 'A12' || s.code === 'E08' || s.code === 'C11'));
-                    const bannerWidth = Math.min(zone.geometry.width - 16, 280);
+                    const bannerWidth = Math.min(zoneGeometry.width - 16, 280);
 
                     return (
                       <g 
-                        transform={`translate(${zone.geometry.x + 8}, ${zone.geometry.y + 6})`}
+                        transform={`translate(${zoneGeometry.x + 8}, ${zoneGeometry.y + 6})`}
                         onClick={() => onSelectZone?.(zone.id)}
                         className="cursor-pointer group select-none"
                       >
@@ -309,7 +351,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
                               textAnchor="middle"
                               className="font-sans font-bold"
                             >
-                              {hasP0InZone ? `🔴 ${zoneIssuesCount} sự cố khẩn cấp` : `⚠️ ${zoneIssuesCount} việc chú ý`}
+                              {hasP0InZone ? `P0 • ${zoneIssuesCount} sự cố khẩn cấp` : `! • ${zoneIssuesCount} việc chú ý`}
                             </text>
                           </g>
                         )}
@@ -317,9 +359,9 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
                     );
                   })()}
                 </>
-              ) : zone.geometry.type === 'polygon' ? (
+              ) : zoneGeometry.type === 'polygon' ? (
                 <polygon
-                  points={formatPoints(zone.geometry.vertices)}
+                  points={formatPoints(zoneGeometry.vertices)}
                   fill={style.fill}
                   stroke={style.stroke}
                   strokeWidth={style.strokeWidth}
@@ -336,26 +378,27 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
         {showLayers.aisles && floor.aisles?.map(aisle => {
           const isHovered = internalHoveredId === aisle.id;
           const style = getAislePresentationStyle(aisle, isHovered);
+          const aisleGeometry = getPresentationGeometry(layout, aisle.id, aisle.geometry);
 
           return (
             <g key={aisle.id} id={`aisle-${aisle.id}`}>
-              {aisle.geometry.type === 'polygon' && aisle.geometry.vertices && (
+              {aisleGeometry.type === 'polygon' && aisleGeometry.vertices && (
                 <polygon
-                  points={formatPoints(aisle.geometry.vertices)}
+                  points={formatPoints(aisleGeometry.vertices)}
                   fill="url(#walkway-paver-pattern)"
                   stroke="#e2e8f0"
                   strokeWidth="1.5"
                 />
               )}
 
-              {aisle.geometry.type === 'path' && (
+              {aisleGeometry.type === 'path' && (
                 <path
-                  d={formatPath(aisle.geometry.points)}
+                  d={formatPath(aisleGeometry.points)}
                   fill="none"
                   stroke={style.stroke}
-                  strokeWidth={style.strokeWidth}
-                  strokeLinecap={aisle.geometry.cap || 'round'}
-                  strokeLinejoin={aisle.geometry.join || 'round'}
+                  strokeWidth={aisleGeometry.width || style.strokeWidth}
+                  strokeLinecap={aisleGeometry.cap || 'round'}
+                  strokeLinejoin={aisleGeometry.join || 'round'}
                   strokeDasharray={style.strokeDasharray}
                 />
               )}
@@ -369,6 +412,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
         {showLayers.infrastructure && infraList.map(infra => {
           const isHovered = internalHoveredId === infra.id;
           const style = getInfrastructurePresentationStyle(infra, isHovered);
+          const infraGeometry = getPresentationGeometry(layout, infra.id, infra.geometry);
 
           return (
             <g 
@@ -383,8 +427,8 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
               {(infra.type === 'cctv_camera' || infra.type === 'cctv') && (
                 <g>
                   {(() => {
-                    const cx = infra.geometry.type === 'point' ? infra.geometry.coordinates[0] : (infra.geometry as any).cx || 0;
-                    const cy = infra.geometry.type === 'point' ? infra.geometry.coordinates[1] : (infra.geometry as any).cy || 0;
+                    const cx = infraGeometry.type === 'point' ? infraGeometry.coordinates[0] : 0;
+                    const cy = infraGeometry.type === 'point' ? infraGeometry.coordinates[1] : 0;
                     return (
                       <>
                         <path
@@ -441,28 +485,28 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
               )}
 
               {/* IoT Drainage & Waste Point */}
-              {(infra.type === 'drainage' || infra.type === 'drainage_manhole' || infra.type === 'drainage_pipe' || infra.type === 'waste_point') && infra.geometry.type === 'rectangle' && (
+              {(infra.type === 'drainage' || infra.type === 'drainage_manhole' || infra.type === 'drainage_pipe' || infra.type === 'waste_point') && infraGeometry.type === 'rectangle' && (
                 <g>
                   <rect
-                    x={infra.geometry.x}
-                    y={infra.geometry.y}
-                    width={infra.geometry.width}
-                    height={infra.geometry.height}
+                    x={infraGeometry.x}
+                    y={infraGeometry.y}
+                    width={infraGeometry.width}
+                    height={infraGeometry.height}
                     fill={String(infra.type).includes('drainage') ? '#e0f2fe' : '#fef3c7'}
                     stroke={String(infra.type).includes('drainage') ? '#0284c7' : '#d97706'}
                     strokeWidth="1.5"
                     rx="3"
                   />
                   <text
-                    x={infra.geometry.x + infra.geometry.width / 2}
-                    y={infra.geometry.y + infra.geometry.height / 2 + 3}
+                    x={infraGeometry.x + infraGeometry.width / 2}
+                    y={infraGeometry.y + infraGeometry.height / 2 + 3}
                     textAnchor="middle"
                     fontSize="8"
                     fontWeight="bold"
                     fill={String(infra.type).includes('drainage') ? '#0369a1' : '#b45309'}
                     className="font-mono"
                   >
-                    {String(infra.type).includes('drainage') ? '💧' : '♻️'}
+                    {String(infra.type).includes('drainage') ? 'H2O' : 'W'}
                   </text>
                 </g>
               )}
@@ -476,9 +520,10 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
         {showLayers.facilities && floor.facilities?.map(facility => {
           const isHovered = internalHoveredId === facility.id;
           const isSelected = selectedEntityId === facility.id;
+          const facilityGeometry = getPresentationGeometry(layout, facility.id, facility.geometry);
 
-          if (facility.geometry.type === 'rectangle') {
-            const { x, y, width, height } = facility.geometry;
+          if (facilityGeometry.type === 'rectangle') {
+            const { x, y, width, height } = facilityGeometry;
             return (
               <g 
                 key={facility.id} 
@@ -538,8 +583,9 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
         {/* LAYER 6: GATES (6 ENTRY/EXIT PORTALS WITH REAL STREET NAMES) */}
         {/* ------------------------------------------------------------- */}
         {showLayers.gates && floor.gates?.map(gate => {
-          if (gate.geometry.type === 'rectangle') {
-            const { x, y, width, height } = gate.geometry;
+          const gateGeometry = getPresentationGeometry(layout, gate.id, gate.geometry);
+          if (gateGeometry.type === 'rectangle') {
+            const { x, y, width, height } = gateGeometry;
             const isEmergency = gate.type === 'emergency_exit';
             return (
               <g key={gate.id} id={`gate-${gate.id}`}>
@@ -586,6 +632,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
             >
               <StallGlyph
                 stall={stall}
+                presentationGeometry={layout.stalls[stall.id]}
                 isSelected={isSelected}
                 isHovered={internalHoveredId === stall.id}
                 isMacroView={zoomLevel !== undefined && zoomLevel < 0.85}
@@ -604,9 +651,10 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
         {showLayers.incidents && floor.incidents?.map(incident => {
           const isSelected = selectedEntityId === incident.id;
           const style = getIncidentPresentationStyle(incident);
+          const incidentGeometry = getPresentationGeometry(layout, incident.id, incident.geometry);
 
-          const coords: [number, number] = incident.geometry.type === 'point' 
-            ? incident.geometry.coordinates 
+          const coords: [number, number] = incidentGeometry.type === 'point'
+            ? incidentGeometry.coordinates
             : [0, 0];
 
           return (
@@ -627,7 +675,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
         {/* ------------------------------------------------------------- */}
         {/* CAD SCALE BAR & ORIENTATION INDICATOR (BOTTOM-LEFT) */}
         {/* ------------------------------------------------------------- */}
-        <g transform="translate(30, 895)">
+        <g transform={`translate(30, ${Math.max(30, coordHeight - 30)})`}>
           <rect width="180" height="24" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
           <line x1="12" y1="12" x2="62" y2="12" stroke="#0f172a" strokeWidth="2" />
           <line x1="12" y1="8" x2="12" y2="16" stroke="#0f172a" strokeWidth="2" />
@@ -649,7 +697,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
           className="absolute bottom-4 right-4 z-20 px-3 py-1.5 bg-white/95 hover:bg-white text-slate-800 text-xs font-bold rounded-lg shadow-md border border-slate-300 flex items-center gap-1.5 cursor-pointer backdrop-blur-xs transition-all hover:shadow-lg"
           title="Căn giữa lại khung nhìn toàn chợ"
         >
-          <span>⟲</span>
+          <RotateCcw aria-hidden="true" className="h-3.5 w-3.5" />
           <span>Căn giữa bản đồ</span>
         </button>
       )}
