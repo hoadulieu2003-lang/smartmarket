@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useMemo, useSyncExternalStore } from 'react';
 import { RotateCcw } from 'lucide-react';
 import type { FloorEntity, StallEntity, SpatialGeometry } from '../model/types';
 import { 
@@ -72,6 +72,27 @@ function geometryBounds(geometry: SpatialGeometry) {
   };
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+const MOBILE_VIEWPORT_QUERY = '(max-width: 639px)';
+
+function subscribeToViewport(onChange: () => void) {
+  if (typeof window.matchMedia !== 'function') return () => undefined;
+  const mediaQuery = window.matchMedia(MOBILE_VIEWPORT_QUERY);
+  mediaQuery.addEventListener('change', onChange);
+  return () => mediaQuery.removeEventListener('change', onChange);
+}
+
+function getViewportSnapshot() {
+  return typeof window.matchMedia === 'function' && window.matchMedia(MOBILE_VIEWPORT_QUERY).matches;
+}
+
+function getServerViewportSnapshot() {
+  return false;
+}
+
 /**
  * GENERIC 2D SVG SPATIAL RENDERER — ARCHITECTURAL BLUEPRINT EDITION
  * 
@@ -119,9 +140,26 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
 
   const layout = useMemo(() => getMapPresentationLayout(floor), [floor]);
   const { width: coordWidth, height: coordHeight } = layout.coordinateSystem;
+  const isNarrowViewportSnapshot = useSyncExternalStore(subscribeToViewport, getViewportSnapshot, getServerViewportSnapshot);
+  const isNarrowViewport = isNarrowViewportSnapshot || (typeof window !== 'undefined' && getViewportSnapshot());
+  const mobileViewBox = useMemo(() => {
+    if (!isNarrowViewport) return `0 0 ${coordWidth} ${coordHeight}`;
+
+    const focusStall = floor.stalls.find((stall) => stall.code === 'A12')
+      ?? floor.stalls.find((stall) => stall.state.hasActiveIssues)
+      ?? floor.stalls[0];
+    const focusGeometry = focusStall ? layout.stalls[focusStall.id] : null;
+    if (!focusGeometry) return `0 0 ${coordWidth} ${coordHeight}`;
+
+    const bounds = geometryBounds(focusGeometry);
+    const centerX = (bounds.minX + bounds.maxX) / 2;
+    const focusWidth = Math.min(coordWidth, Math.max(coordHeight * 0.72, coordWidth * 0.42));
+    const x = clamp(centerX - focusWidth / 2, 0, coordWidth - focusWidth);
+    return `${Math.round(x)} 0 ${Math.round(focusWidth)} ${coordHeight}`;
+  }, [coordHeight, coordWidth, floor.stalls, isNarrowViewport, layout]);
 
   // Auto-center camera onto selectedZone when entering ZONE_FOCUS
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (selectedZone) {
       const zone = floor.zones?.find((z) => z.id === selectedZone);
       const zoneGeometry = zone ? getPresentationGeometry(layout, zone.id, zone.geometry) : null;
@@ -198,8 +236,9 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
       } ${className}`}
     >
       <svg
-        viewBox={`0 0 ${coordWidth} ${coordHeight}`}
-        preserveAspectRatio="xMidYMid meet"
+        suppressHydrationWarning
+        viewBox={mobileViewBox}
+        preserveAspectRatio={isNarrowViewport ? 'xMidYMid slice' : 'xMidYMid meet'}
         className="w-full h-full drop-shadow-sm font-sans block"
       >
         <defs>

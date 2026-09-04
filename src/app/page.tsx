@@ -520,8 +520,8 @@ export default function SmartMarketHome() {
 
                 {/* VIEW ENGINE 1: 2D VECTOR BLUEPRINT SVG */}
                 {viewEngine === '2d_svg' ? (
-                  <div className={`relative p-0 bg-slate-50 border-t border-slate-200 overflow-hidden flex items-center justify-center ${
-                    isFullscreen ? 'flex-1 w-full h-full min-h-0' : 'w-full min-h-[680px] h-[calc(100vh-290px)]'
+                  <div data-testid="map-canvas" className={`map-canvas relative p-0 bg-slate-50 border-t border-slate-200 overflow-hidden flex items-center justify-center ${
+                    isFullscreen ? 'flex-1 w-full h-full min-h-0' : 'w-full min-h-[560px] h-[min(78dvh,900px)] sm:min-h-[600px] lg:min-h-[720px]'
                   }`}>
                     <div
                       className="transition-transform duration-200 origin-center w-full h-full flex items-center justify-center"
