@@ -74,4 +74,13 @@ describe('GENERIC 2D SVG SPATIAL RENDERER INTEGRATION', () => {
       spine.type === 'polygon' ? spine.vertices.map(([x, y]) => `${x},${y}`).join(' ') : undefined
     );
   });
+
+  it('uses zone accents and an explicit issue marker in the live SVG map', () => {
+    const { container } = render(<SvgSpatialRenderer floor={FIXTURE_A_DONG_XUAN} />);
+    const zoneSurface = container.querySelector('#zone-zone_A > rect');
+
+    expect(zoneSurface?.getAttribute('fill')).toBe(FIXTURE_A_DONG_XUAN.zones.find((zone) => zone.id === 'zone_A')?.visualTheme?.colorToken);
+    expect(zoneSurface?.getAttribute('fill-opacity')).toBe('0.1');
+    expect(container.querySelector('[data-testid="stall-issue-marker-A12"]')).not.toBeNull();
+  });
 });

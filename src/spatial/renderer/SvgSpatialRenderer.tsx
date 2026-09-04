@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useLayoutEffect, useMemo, useSyncExternalStore } from 'react';
+import React, { useState, useLayoutEffect, useMemo, useSyncExternalStore } from 'react';
 import { RotateCcw } from 'lucide-react';
 import type { FloorEntity, StallEntity, SpatialGeometry } from '../model/types';
 import { 
@@ -82,6 +82,9 @@ function subscribeToViewport(onChange: () => void) {
   if (typeof window.matchMedia !== 'function') return () => undefined;
   const mediaQuery = window.matchMedia(MOBILE_VIEWPORT_QUERY);
   mediaQuery.addEventListener('change', onChange);
+  // Re-check once after hydration; some embedded browsers establish their
+  // emulated viewport after the first client render without emitting change.
+  Promise.resolve().then(onChange);
   return () => mediaQuery.removeEventListener('change', onChange);
 }
 
@@ -141,7 +144,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
   const layout = useMemo(() => getMapPresentationLayout(floor), [floor]);
   const { width: coordWidth, height: coordHeight } = layout.coordinateSystem;
   const isNarrowViewportSnapshot = useSyncExternalStore(subscribeToViewport, getViewportSnapshot, getServerViewportSnapshot);
-  const isNarrowViewport = isNarrowViewportSnapshot || (typeof window !== 'undefined' && getViewportSnapshot());
+  const isNarrowViewport = isNarrowViewportSnapshot;
   const mobileViewBox = useMemo(() => {
     if (!isNarrowViewport) return `0 0 ${coordWidth} ${coordHeight}`;
 
@@ -320,7 +323,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
         {showLayers.zones && floor.zones?.map(zone => {
           const isHovered = internalHoveredId === zone.id;
           const style = getZonePresentationStyle(zone, isHovered);
-          const zoneColor = zone.visualTheme?.colorToken || '#076C31';
+          const zoneColor = style.fill;
           const zoneGeometry = getPresentationGeometry(layout, zone.id, zone.geometry);
 
           return (
@@ -332,9 +335,11 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
                     y={zoneGeometry.y}
                     width={zoneGeometry.width}
                     height={zoneGeometry.height}
-                    fill="#f8fafc"
-                    stroke={isHovered ? "#94a3b8" : "#e2e8f0"}
-                    strokeWidth={1}
+                    fill={zoneColor}
+                    fillOpacity="0.1"
+                    stroke={style.stroke}
+                    strokeOpacity={isHovered ? 0.9 : 0.55}
+                    strokeWidth={isHovered ? 1.8 : 1.2}
                     strokeDasharray="6,4"
                     rx="8"
                   />
@@ -349,22 +354,32 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
                       <g 
                         transform={`translate(${zoneGeometry.x + 8}, ${zoneGeometry.y + 6})`}
                         onClick={() => onSelectZone?.(zone.id)}
+                        onKeyDown={(event) => {
+                          if ((event.key === 'Enter' || event.key === ' ') && onSelectZone) {
+                            event.preventDefault();
+                            onSelectZone(zone.id);
+                          }
+                        }}
+                        role={onSelectZone ? 'button' : undefined}
+                        tabIndex={onSelectZone ? 0 : undefined}
+                        aria-label={onSelectZone ? `Mở luồng nghiệp vụ ${zone.name}` : undefined}
                         className="cursor-pointer group select-none"
                       >
-                        <rect 
-                          width={bannerWidth} 
-                          height="20" 
-                          rx="4" 
-                          fill="#f1f5f9" 
-                          stroke="#e2e8f0"
+                        <rect
+                          width={bannerWidth}
+                          height="20"
+                          rx="4"
+                          fill={zoneColor}
+                          fillOpacity="0.95"
+                          stroke={zoneColor}
                           strokeWidth="1"
                         />
-                        <circle cx="10" cy="10" r="3.5" fill="#64748b" />
+                        <circle cx="10" cy="10" r="3.5" fill={style.textColor} opacity="0.88" />
                         <text
                           x="20"
                           y="14"
-                          fill="#334155"
-                          fontSize="10"
+                          fill={style.textColor}
+                          fontSize="9"
                           fontWeight="800"
                           className="tracking-wider uppercase font-mono"
                         >
@@ -402,6 +417,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
                 <polygon
                   points={formatPoints(zoneGeometry.vertices)}
                   fill={style.fill}
+                  fillOpacity="0.1"
                   stroke={style.stroke}
                   strokeWidth={style.strokeWidth}
                   strokeDasharray={style.strokeDasharray}

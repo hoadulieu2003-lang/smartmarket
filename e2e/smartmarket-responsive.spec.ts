@@ -31,6 +31,14 @@ test.describe('Smartmarket responsive drawer behavior', () => {
 
       const stallA12 = page.locator('#stall-stall_A12');
       await expect(stallA12).toBeVisible();
+      if (viewport.width < 640) {
+        await expect
+          .poll(async () => {
+            const viewBox = await page.locator('#zone-zone_A').evaluate((node) => (node as SVGElement).ownerSVGElement?.getAttribute('viewBox') || '');
+            return Number(viewBox.split(/\s+/)[2]);
+          })
+          .toBeLessThan(1000);
+      }
       await stallA12.scrollIntoViewIfNeeded();
       await stallA12.click();
 

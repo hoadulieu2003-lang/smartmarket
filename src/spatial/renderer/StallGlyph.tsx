@@ -176,6 +176,68 @@ export const StallGlyph: React.FC<StallGlyphProps> = ({
         />
       ) : null}
 
+      {/* REAL-WORLD STALL DETAILS: COUNTER EDGE + SMALL PRODUCT BAYS */}
+      {renderGeometry.type === 'rectangle' && width >= 46 && height >= 38 && (
+        <g pointerEvents="none" opacity="0.72">
+          <rect
+            x={renderGeometry.x + 4}
+            y={renderGeometry.y + 4}
+            width={Math.max(4, width - 8)}
+            height={Math.max(3, height - 8)}
+            fill="none"
+            stroke={style.stroke}
+            strokeWidth="0.8"
+            opacity="0.5"
+            rx="2"
+          />
+          <rect
+            x={renderGeometry.x + 5}
+            y={renderGeometry.y + height - 10}
+            width={Math.max(6, width - 10)}
+            height="5"
+            fill={style.stroke}
+            opacity="0.28"
+            rx="1.5"
+          />
+          {[0, 1, 2].map((bay) => (
+            <rect
+              key={bay}
+              x={renderGeometry.x + 7 + bay * Math.max(5, (width - 18) / 3)}
+              y={renderGeometry.y + height - 9}
+              width={Math.max(3, (width - 22) / 3)}
+              height="3"
+              fill={style.stroke}
+              opacity="0.68"
+              rx="0.75"
+            />
+          ))}
+        </g>
+      )}
+
+      {/* DIRECTLY VISIBLE ATTENTION MARKER, COMPLEMENTING THE TEXT BADGE */}
+      {(isP0 || unifiedBadge?.priority === 'attention') && (
+        <g data-testid={`stall-issue-marker-${stall.code}`} pointerEvents="none">
+          <circle
+            cx={centerX + width / 2 - 2}
+            cy={centerY - height / 2 + 2}
+            r={Math.max(6, Math.min(10, width / 8))}
+            fill={unifiedBadge?.badgeBg || '#e11d48'}
+            stroke="#ffffff"
+            strokeWidth="1.5"
+          />
+          <text
+            x={centerX + width / 2 - 2}
+            y={centerY - height / 2 + 5.5}
+            textAnchor="middle"
+            fontSize="9"
+            fontWeight="900"
+            fill="#ffffff"
+          >
+            !
+          </text>
+        </g>
+      )}
+
       {/* ------------------------------------------------------------- */}
       {/* LAYER 2: MAINTENANCE PATTERN OVERLAY */}
       {/* ------------------------------------------------------------- */}

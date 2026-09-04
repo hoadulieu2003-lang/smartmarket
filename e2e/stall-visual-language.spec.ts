@@ -40,6 +40,12 @@ test.describe('Smartmarket stall visual language', () => {
 
     const stallA12 = page.locator('#stall-stall_A12');
     await expect(stallA12).toBeVisible();
+    await expect
+      .poll(async () => {
+        const viewBox = await page.locator('#zone-zone_A').evaluate((node) => (node as SVGElement).ownerSVGElement?.getAttribute('viewBox') || '');
+        return Number(viewBox.split(/\s+/)[2]);
+      })
+      .toBeLessThan(1000);
     await stallA12.click();
 
     const drawer = page.getByRole('dialog', { name: /SẠP A12/i });

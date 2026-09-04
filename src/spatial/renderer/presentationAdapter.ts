@@ -51,6 +51,20 @@ export interface GenericEntityStyle {
   isPulsing?: boolean;
 }
 
+/** Pick a readable label color for the solid zone ribbon (WCAG AA target). */
+function getReadableZoneTextColor(hexColor: string): string {
+  const match = hexColor.replace('#', '').match(/^([0-9a-f]{6})$/i);
+  if (!match) return '#0f172a';
+
+  const channels = [0, 2, 4].map((offset) => parseInt(match[1].slice(offset, offset + 2), 16) / 255);
+  const luminance = channels.reduce((sum, channel, index) => {
+    const linear = channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+    return sum + linear * [0.2126, 0.7152, 0.0722][index];
+  }, 0);
+  const whiteContrast = 1.05 / (luminance + 0.05);
+  return whiteContrast >= 4.5 ? '#ffffff' : '#0f172a';
+}
+
 export function getStallSvgStyle(
   stall: StallEntity,
   options: { isSelected?: boolean; isHovered?: boolean } = {}
@@ -207,12 +221,13 @@ export function getStallPresentationStyle(
 }
 
 export function getZonePresentationStyle(zone: ZoneEntity, isHovered = false): GenericEntityStyle {
+  const accent = zone.visualTheme?.colorToken || '#076C31';
   return {
-    fill: '#f8fafc',
-    stroke: isHovered ? '#94a3b8' : '#e2e8f0',
+    fill: accent,
+    stroke: accent,
     strokeWidth: isHovered ? 1.5 : 1.0,
     strokeDasharray: '6,4',
-    textColor: '#475569',
+    textColor: getReadableZoneTextColor(accent),
   };
 }
 

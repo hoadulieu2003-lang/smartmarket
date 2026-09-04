@@ -28,6 +28,15 @@ test.describe('curated responsive market map', () => {
       await expect(page.locator('#zone-zone_A')).toBeVisible();
       await expect(page.locator('#stall-stall_A12')).toBeVisible();
 
+      if (viewport.width < 640) {
+        await expect
+          .poll(async () => {
+            const mobileViewBox = await page.locator('#zone-zone_A').evaluate((node) => (node as SVGElement).ownerSVGElement?.getAttribute('viewBox') || '');
+            return Number(mobileViewBox.split(/\s+/)[2]);
+          })
+          .toBeLessThan(1000);
+      }
+
       await page.getByRole('button', { name: /Chợ Bến Thành chữ L/i }).click();
       await expect(page.locator('#stall-stall_L02_ROTATED')).toBeVisible();
 
