@@ -169,4 +169,35 @@ describe('STALL GLYPH SVG COMPONENT (PHASE 3B.2.1)', () => {
     fireEvent.keyDown(group, { key: ' ' });
     expect(onSelect).toHaveBeenCalledTimes(3);
   });
+
+  it('renders presentation geometry while returning the canonical stall on select', () => {
+    const onSelect = vi.fn();
+    const presentationGeometry = {
+      type: 'rectangle' as const,
+      x: 640,
+      y: 320,
+      width: 120,
+      height: 72,
+    };
+    const { container } = render(
+      <svg>
+        <StallGlyph
+          stall={baseStall}
+          presentationGeometry={presentationGeometry}
+          onSelect={onSelect}
+        />
+      </svg>
+    );
+
+    const group = container.querySelector('#stall-stall_A12')!;
+    const baseRect = group.querySelector('rect');
+    expect(baseRect?.getAttribute('x')).toBe('640');
+    expect(baseRect?.getAttribute('y')).toBe('320');
+    expect(baseRect?.getAttribute('width')).toBe('120');
+    expect(baseRect?.getAttribute('height')).toBe('72');
+
+    fireEvent.click(group);
+    expect(onSelect).toHaveBeenCalledWith(baseStall);
+    expect(onSelect.mock.calls[0][0].geometry).toEqual(baseStall.geometry);
+  });
 });

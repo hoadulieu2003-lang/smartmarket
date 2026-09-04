@@ -7,6 +7,7 @@ import { deriveStallVisual } from '../presentation/stallVisualAdapter';
 
 export interface StallGlyphProps {
   stall: StallEntity;
+  presentationGeometry?: StallEntity['geometry'];
   isSelected?: boolean;
   isHovered?: boolean;
   isMacroView?: boolean;
@@ -18,6 +19,7 @@ export interface StallGlyphProps {
 
 export const StallGlyph: React.FC<StallGlyphProps> = ({
   stall,
+  presentationGeometry,
   isSelected = false,
   isHovered = false,
   isMacroView = false,
@@ -30,22 +32,23 @@ export const StallGlyph: React.FC<StallGlyphProps> = ({
   const descriptor = deriveStallVisual(stall, { selected: isSelected, operationalFilter });
   const unifiedBadge = descriptor.unifiedBadge;
   const isDimmed = propDimmed ?? descriptor.isDimmed ?? false;
+  const renderGeometry = presentationGeometry ?? stall.geometry;
 
   // 1. Calculate Geometry & Center Point
   let centerX = 0;
   let centerY = 0;
   let width = 60;
   let height = 40;
-  let rotationAngle = stall.rotation ?? stall.geometry.rotation ?? 0;
+  let rotationAngle = stall.rotation ?? (renderGeometry.type === 'rectangle' ? renderGeometry.rotation : undefined) ?? 0;
 
-  if (stall.geometry.type === 'rectangle') {
-    width = stall.geometry.width;
-    height = stall.geometry.height;
-    centerX = stall.geometry.x + width / 2;
-    centerY = stall.geometry.y + height / 2;
-  } else if (stall.geometry.type === 'polygon') {
-    const xs = stall.geometry.vertices.map(v => v[0]);
-    const ys = stall.geometry.vertices.map(v => v[1]);
+  if (renderGeometry.type === 'rectangle') {
+    width = renderGeometry.width;
+    height = renderGeometry.height;
+    centerX = renderGeometry.x + width / 2;
+    centerY = renderGeometry.y + height / 2;
+  } else if (renderGeometry.type === 'polygon') {
+    const xs = renderGeometry.vertices.map(v => v[0]);
+    const ys = renderGeometry.vertices.map(v => v[1]);
     const minX = Math.min(...xs);
     const maxX = Math.max(...xs);
     const minY = Math.min(...ys);
@@ -150,10 +153,10 @@ export const StallGlyph: React.FC<StallGlyphProps> = ({
       {/* ------------------------------------------------------------- */}
       {/* LAYER 1: BASE GEOMETRY (RECTANGLE / POLYGON) */}
       {/* ------------------------------------------------------------- */}
-      {stall.geometry.type === 'rectangle' ? (
+      {renderGeometry.type === 'rectangle' ? (
         <rect
-          x={stall.geometry.x}
-          y={stall.geometry.y}
+          x={renderGeometry.x}
+          y={renderGeometry.y}
           width={width}
           height={height}
           fill={style.fill}
@@ -163,9 +166,9 @@ export const StallGlyph: React.FC<StallGlyphProps> = ({
           strokeDasharray={style.strokeDasharray}
           className={isInteractive ? 'hover:filter hover:brightness-95 transition-all' : ''}
         />
-      ) : stall.geometry.type === 'polygon' ? (
+      ) : renderGeometry.type === 'polygon' ? (
         <polygon
-          points={formatPoints(stall.geometry.vertices)}
+          points={formatPoints(renderGeometry.vertices)}
           fill={style.fill}
           stroke={style.stroke}
           strokeWidth={style.strokeWidth}
@@ -177,10 +180,10 @@ export const StallGlyph: React.FC<StallGlyphProps> = ({
       {/* LAYER 2: MAINTENANCE PATTERN OVERLAY */}
       {/* ------------------------------------------------------------- */}
       {style.hasHatch && (
-        stall.geometry.type === 'rectangle' ? (
+        renderGeometry.type === 'rectangle' ? (
           <rect
-            x={stall.geometry.x}
-            y={stall.geometry.y}
+            x={renderGeometry.x}
+            y={renderGeometry.y}
             width={width}
             height={height}
             fill="url(#maintenance-hatch)"
@@ -188,9 +191,9 @@ export const StallGlyph: React.FC<StallGlyphProps> = ({
             rx="3"
             pointerEvents="none"
           />
-        ) : stall.geometry.type === 'polygon' ? (
+        ) : renderGeometry.type === 'polygon' ? (
           <polygon
-            points={formatPoints(stall.geometry.vertices)}
+            points={formatPoints(renderGeometry.vertices)}
             fill="url(#maintenance-hatch)"
             opacity="0.45"
             pointerEvents="none"
