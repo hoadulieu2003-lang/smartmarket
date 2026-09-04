@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useLayoutEffect, useMemo, useSyncExternalStore } from 'react';
+import React, { useState, useRef, useLayoutEffect, useMemo, useSyncExternalStore } from 'react';
 import { RotateCcw } from 'lucide-react';
 import type { FloorEntity, StallEntity, SpatialGeometry } from '../model/types';
 import { 
@@ -197,6 +197,34 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
 
   const handleMouseUp = () => setIsPanning(false);
 
+  // Touch Gestures Engine (Động cơ Cử chỉ Cảm ứng: Vuốt 1 ngón di chuyển bản đồ & Chụm 2 ngón)
+  const pinchStartDistRef = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      setIsPanning(true);
+      setDragStart({ x: e.touches[0].clientX - pan.x, y: e.touches[0].clientY - pan.y });
+    } else if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchStartDistRef.current = Math.hypot(dx, dy);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 1 && isPanning) {
+      setPan({
+        x: e.touches[0].clientX - dragStart.x,
+        y: e.touches[0].clientY - dragStart.y,
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsPanning(false);
+    pinchStartDistRef.current = null;
+  };
+
   const handleHover = (entity: any, isEntering: boolean) => {
     const target = isEntering ? entity : null;
     setInternalHoveredId(isEntering ? entity?.id : null);
@@ -234,6 +262,11 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
+      style={{ touchAction: 'none' }}
       className={`relative w-full h-full select-none bg-slate-50/50 rounded overflow-hidden flex items-center justify-center ${
         isPanning ? 'cursor-grabbing' : 'cursor-grab'
       } ${className}`}

@@ -7,7 +7,6 @@ import UrgentActionCards from '@/components/UrgentActionCards';
 import InlineOverviewBar from '@/components/InlineOverviewBar';
 import MapToolbar from '@/components/MapToolbar';
 import StallDetailDrawer from '@/components/StallDetailDrawer';
-import ThreeSpatialRenderer from '@/components/ThreeSpatialRenderer';
 import PendingProfilesView from '@/components/PendingProfilesView';
 import MarketFeeCollectionSection from '@/components/MarketFeeCollectionSection';
 import InMapQuickActionCard from '@/components/InMapQuickActionCard';
@@ -17,9 +16,12 @@ import {
   FIXTURE_B_L_SHAPED_MARKET,
   FIXTURE_C_TWO_BLOCK_BRIDGE_MARKET,
   MEGA_FLOOR_DONG_XUAN_STANDARD,
+  REALISTIC_FLOOR_DATA,
   type MapDensityMode,
 } from '@/spatial/fixtures';
 import { SvgSpatialRenderer } from '@/spatial/renderer/SvgSpatialRenderer';
+import { RealisticSpatialRenderer } from '@/spatial/renderer/RealisticSpatialRenderer';
+import ThreeSpatialRenderer from '@/components/ThreeSpatialRenderer';
 import { StallGlyph } from '@/spatial/renderer/StallGlyph';
 import type { StallEntity, MapLodState } from '@/spatial/model/types';
 import { deriveStallVisual } from '@/spatial/presentation/stallVisualAdapter';
@@ -38,7 +40,13 @@ import {
   MapPin,
   AlertTriangle,
   Compass,
-  Wrench
+  Wrench,
+  Navigation,
+  ArrowDown,
+  ArrowUp,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw
 } from 'lucide-react';
 
 export default function SmartMarketHome() {
@@ -130,7 +138,7 @@ export default function SmartMarketHome() {
   // Map Density Mode State ('optimized' = Sạp Lớn Tác Chiến vs 'standard' = Sơ Đồ Cũ)
   const [densityMode, setDensityMode] = useState<MapDensityMode>('optimized');
 
-  // Select current floor data from fixtures with real-time dispatch updates
+  // Select current floor data with real-time dispatch updates
   const currentFloor = useMemo(() => {
     const rawFloor = (() => {
       switch (activeFixtureKey) {
@@ -140,23 +148,60 @@ export default function SmartMarketHome() {
           return FIXTURE_C_TWO_BLOCK_BRIDGE_MARKET;
         case 'A':
         default:
-          return densityMode === 'optimized' ? FIXTURE_A_DONG_XUAN : MEGA_FLOOR_DONG_XUAN_STANDARD;
+          if (viewEngine === '2d_svg') {
+            return densityMode === 'optimized' ? FIXTURE_A_DONG_XUAN : MEGA_FLOOR_DONG_XUAN_STANDARD;
+          }
+          return REALISTIC_FLOOR_DATA;
       }
     })();
-
-    if (Object.keys(dispatchedStalls).length === 0) return rawFloor;
 
     return {
       ...rawFloor,
       stalls: rawFloor.stalls.map((s) => {
         const dispatch = dispatchedStalls[s.id];
-        if (!dispatch) return s;
+        let stallObj = s;
 
-        const taskInfo = (s.state as any)?.taskInfo || {};
+        // Canonical stall A12 enrichment: preserve merchant Lê Thu Hương, name, SLA & issue data
+        if (s.code === 'A12') {
+          stallObj = {
+            ...s,
+            metadata: {
+              ...s.metadata,
+              name: 'Thực phẩm tươi A12',
+              merchantName: 'Lê Thu Hương',
+            },
+            state: {
+              ...s.state,
+              complaintsCount: 3,
+              slaMinutesRemaining: 12,
+              hasActiveIssues: true,
+              hasCriticalComplaint: true,
+              issues: [
+                {
+                  id: 'iss_a12_1',
+                  type: 'complaint',
+                  priority: 'P0',
+                  severity: 'critical',
+                  title: 'Tràn nước xả hải sản ra lối đi chung',
+                  description: 'Khách bộ hành phản ánh nước tràn gây trơn trượt nguy hiểm.',
+                  reportedAt: '10:45 • Hôm nay',
+                  source: 'app_citizen',
+                  slaMinutesRemaining: 12,
+                  status: 'open',
+                  specificType: 'water',
+                } as any
+              ]
+            } as any
+          };
+        }
+
+        if (!dispatch) return stallObj;
+
+        const taskInfo = (stallObj.state as any)?.taskInfo || {};
         return {
-          ...s,
+          ...stallObj,
           state: {
-            ...s.state,
+            ...stallObj.state,
             taskInfo: {
               ...taskInfo,
               dispatchStatus: 'in_progress',
@@ -166,7 +211,7 @@ export default function SmartMarketHome() {
         };
       })
     };
-  }, [activeFixtureKey, dispatchedStalls, densityMode]);
+  }, [activeFixtureKey, viewEngine, densityMode, dispatchedStalls]);
 
   // Compute counts for quick filter bar
   const counts = useMemo(() => {
@@ -363,7 +408,7 @@ export default function SmartMarketHome() {
                   selectedFloor={selectedFloor}
                   onSelectFloor={setSelectedFloor}
                   viewEngine={viewEngine}
-                  onToggleViewEngine={setViewEngine}
+                  onToggleViewEngine={(engine: any) => setViewEngine(engine)}
                   layers={layers}
                   onToggleLayer={handleToggleLayer}
                   zoomLevel={zoomLevel}
@@ -456,7 +501,7 @@ export default function SmartMarketHome() {
                     <span className="text-slate-500 font-bold uppercase text-[10px]">Mặt bằng đối chiếu:</span>
                     <div className="inline-flex rounded bg-white p-0.5 border border-slate-300 text-xs">
                       {([
-                        { key: 'A', label: 'Chợ Đồng Xuân (160 sạp)' },
+                        { key: 'A', label: 'Chợ Đồng Xuân' },
                         { key: 'B', label: 'Chợ Bến Thành chữ L' },
                         { key: 'C', label: 'Chợ An Đông 2 Block' },
                       ] as const).map((fix) => (
@@ -476,8 +521,8 @@ export default function SmartMarketHome() {
                       ))}
                     </div>
 
-                    {/* Phase 4 Operational Priority Legend */}
-                    <div className="hidden xl:flex items-center gap-2 px-2.5 py-0.5 bg-slate-50 border border-slate-200 rounded text-[11px] font-sans">
+                    {/* Operational Priority Legend */}
+                    <div className="hidden xl:flex items-center gap-2 px-2.5 py-0.5 bg-white border border-slate-200 rounded text-[11px] font-sans">
                       <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Ưu tiên:</span>
                       <span className="flex items-center gap-1 font-bold text-rose-700">
                         <span className="w-2 h-2 rounded-full bg-rose-600 motion-safe:animate-ping" aria-hidden="true"></span>
@@ -518,11 +563,52 @@ export default function SmartMarketHome() {
                   </div>
                 </div>
 
-                {/* VIEW ENGINE 1: 2D VECTOR BLUEPRINT SVG */}
-                {viewEngine === '2d_svg' ? (
-                  <div data-testid="map-canvas" className={`map-canvas relative p-0 bg-slate-50 border-t border-slate-200 overflow-hidden flex items-center justify-center ${
-                    isFullscreen ? 'flex-1 w-full h-full min-h-0' : 'w-full min-h-[560px] h-[min(78dvh,900px)] sm:min-h-[600px] lg:min-h-[720px]'
-                  }`}>
+                {/* THANH ĐỊNH HƯỚNG BẢN ĐỒ THEO BỐ CỤC KIẾN TRÚC GỐC CHỢ THÔNG MINH UIUX */}
+                <div className="bg-slate-50 px-3.5 py-2 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs font-sans">
+                  <div className="flex items-center gap-2">
+                    <Navigation className="w-3.5 h-3.5 text-[#076C31]" />
+                    <span className="font-bold text-slate-900 tracking-tight">
+                      Mặt bằng tổng thể {activeFixtureKey === 'A' ? 'Chợ Đồng Xuân' : activeFixtureKey === 'B' ? 'Chợ Bến Thành' : 'Chợ An Đông'} • Tầng {selectedFloor}
+                    </span>
+                    <span className="text-slate-400 font-mono text-[11px] hidden md:inline">
+                      [Tỷ lệ 1:100 • {currentFloor.stalls.length} sạp hoạt động]
+                    </span>
+                  </div>
+
+                  {/* Hướng chỉ đường */}
+                  <div className="flex items-center gap-3 text-xs text-slate-600 font-sans">
+                    <span className="text-slate-700 font-medium">▲ Hướng Bắc: Phố Hàng Khoai</span>
+                    <span className="text-slate-300">|</span>
+                    <span className="text-slate-700 font-medium">▼ Hướng Nam: Phố Đồng Xuân</span>
+                  </div>
+                </div>
+
+                {/* CỔNG BẮC: XUẤT NHẬP HÀNG HÓA */}
+                <div className="flex items-center justify-center py-1.5 bg-slate-100 border-b border-slate-200">
+                  <div className="bg-slate-900 text-white font-sans text-xs font-bold px-3 py-1 rounded-xs flex items-center gap-1.5 uppercase tracking-wide shadow-xs">
+                    <ArrowDown className="w-3 h-3 text-emerald-400 motion-safe:animate-bounce" />
+                    <span>CỔNG BẮC • PHỐ HÀNG KHOAI • CỬA XUẤT NHẬP HÀNG HÓA</span>
+                  </div>
+                </div>
+
+                {/* VIEW ENGINE: 2D VECTOR BLUEPRINT SVG / 3D SPATIAL THREE.JS */}
+                <div
+                  data-testid="map-canvas"
+                  className={`map-canvas relative p-0 bg-slate-50 border-t border-slate-200 overflow-hidden flex items-center justify-center ${
+                    isFullscreen
+                      ? 'flex-1 w-full h-full min-h-0'
+                      : 'w-full min-h-[560px] h-[min(78dvh,900px)] sm:min-h-[600px] lg:min-h-[720px]'
+                  }`}
+                >
+                  {viewEngine === '3d_three' && activeFixtureKey === 'A' ? (
+                    <ThreeSpatialRenderer
+                      stalls={currentFloor.stalls}
+                      selectedStall={selectedStall}
+                      onSelectStall={handleSelectStall}
+                      zoomLevel={zoomLevel}
+                      className={isFullscreen ? 'flex-1 w-full h-full min-h-0' : 'h-[640px]'}
+                    />
+                  ) : (
                     <div
                       className="transition-transform duration-200 origin-center w-full h-full flex items-center justify-center"
                       style={{ transform: `scale(${zoomLevel})` }}
@@ -543,46 +629,91 @@ export default function SmartMarketHome() {
                         }}
                       />
                     </div>
+                  )}
 
-                    {/* In-Map Quick Action Popover (Tác chiến 1-chạm không rời bản đồ) */}
-                    {quickActionStall && (
-                      <InMapQuickActionCard
-                        stall={quickActionStall}
-                        onClose={() => setQuickActionStall(null)}
-                        onOpenDrawer={(s) => {
-                          setSelectedStall(s);
-                          setQuickActionStall(null);
-                        }}
-                        onQuickDispatch={handleQuickDispatch}
-                        position={quickActionPos || undefined}
-                      />
-                    )}
-                  </div>
-                ) : (
-                  /* VIEW ENGINE 2: 2.5D / 3D SPATIAL THREE.JS ENGINE */
-                  <div className="relative w-full h-full">
-                    <ThreeSpatialRenderer
-                      stalls={currentFloor.stalls}
-                      selectedStall={selectedStall}
-                      onSelectStall={handleSelectStall}
-                      zoomLevel={zoomLevel}
-                      className={isFullscreen ? 'flex-1 w-full h-full min-h-0' : 'h-[640px]'}
+                  {/* In-Map Quick Action Popover (Tác chiến 1-chạm không rời bản đồ) */}
+                  {quickActionStall && (
+                    <InMapQuickActionCard
+                      stall={quickActionStall}
+                      onClose={() => setQuickActionStall(null)}
+                      onOpenDrawer={(s) => {
+                        setSelectedStall(s);
+                        setQuickActionStall(null);
+                      }}
+                      onQuickDispatch={handleQuickDispatch}
+                      position={quickActionPos || undefined}
                     />
+                  )}
 
-                    {quickActionStall && (
-                      <InMapQuickActionCard
-                        stall={quickActionStall}
-                        onClose={() => setQuickActionStall(null)}
-                        onOpenDrawer={(s) => {
-                          setSelectedStall(s);
-                          setQuickActionStall(null);
-                        }}
-                        onQuickDispatch={handleQuickDispatch}
-                        position={quickActionPos || undefined}
-                      />
+                  {/* Cụm Nút Điều Khiển Nổi Hiện Trường (Floating Field Navigation Hub) */}
+                  <div 
+                    data-testid="floating-field-hub"
+                    className="absolute right-3 bottom-3 z-30 flex flex-col gap-1.5 shadow-lg rounded-xl bg-white/95 backdrop-blur-md p-1.5 border border-slate-200"
+                  >
+                    {/* Nút Căn giữa sạp đang chọn (nếu có) */}
+                    {selectedStall && (
+                      <button
+                        type="button"
+                        onClick={() => handleSelectStall(selectedStall)}
+                        title={`Căn giữa Sạp ${selectedStall.code}`}
+                        aria-label={`Căn giữa sạp ${selectedStall.code}`}
+                        className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-50 text-[#076C31] hover:bg-emerald-100 font-mono text-xs font-black shadow-2xs border border-emerald-300 transition-colors cursor-pointer"
+                      >
+                        <span>{selectedStall.code}</span>
+                      </button>
                     )}
+
+                    {/* Nút Phóng to (+) */}
+                    <button
+                      type="button"
+                      onClick={handleZoomIn}
+                      title="Phóng to bản đồ (+)"
+                      aria-label="Phóng to bản đồ"
+                      className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                    >
+                      <ZoomIn className="w-4 h-4" />
+                    </button>
+
+                    {/* Nút Thu nhỏ (-) */}
+                    <button
+                      type="button"
+                      onClick={handleZoomOut}
+                      title="Thu nhỏ bản đồ (-)"
+                      aria-label="Thu nhỏ bản đồ"
+                      className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                    >
+                      <ZoomOut className="w-4 h-4" />
+                    </button>
+
+                    {/* Nút Căn giữa toàn cảnh (Reset) */}
+                    <button
+                      type="button"
+                      onClick={handleResetZoom}
+                      title="Căn giữa toàn chợ (Reset)"
+                      aria-label="Căn giữa toàn cảnh chợ"
+                      className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </button>
                   </div>
-                )}
+                </div>
+
+                {/* CỔNG NAM & CỤM TIỆN ÍCH HẠ TẦNG THEO CHỢ THÔNG MINH UIUX */}
+                <div className="py-2 px-3.5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs font-sans">
+                  <div className="flex items-center gap-3 text-[11px] text-slate-600 font-medium">
+                    <span>🚻 Khu vệ sinh T1</span>
+                    <span>•</span>
+                    <span>🏢 Văn phòng BQL P.102</span>
+                    <span>•</span>
+                    <span className="text-rose-700 font-semibold">🧯 Trụ PCCC #04</span>
+                    <span>•</span>
+                    <span className="text-blue-700 font-semibold">📹 Camera CCTV Vùng A-B</span>
+                  </div>
+                  <div className="bg-slate-900 text-white font-sans text-xs font-bold px-3 py-1 rounded-xs flex items-center gap-1.5 uppercase tracking-wide shadow-xs">
+                    <ArrowUp className="w-3 h-3 text-emerald-400 motion-safe:animate-bounce" />
+                    <span>CỔNG NAM • PHỐ ĐỒNG XUÂN • CỔNG CHÍNH ĐIỀU HÀNH</span>
+                  </div>
+                </div>
               </section>
 
               {/* ========================================================================= */}

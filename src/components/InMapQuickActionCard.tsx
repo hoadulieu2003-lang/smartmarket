@@ -35,13 +35,22 @@ export default function InMapQuickActionCard({
   const isP0 = issue?.priority === 'P0' || stall.code === 'A12' || stall.code === 'E08' || stall.code === 'C11';
   const isDispatched = dispatchStatus === 'in_progress' || dispatchStatus === 'dispatched';
 
+  // Responsive layout detection: trên di động dưới 640px, dock cố định đáy; trên tablet/desktop thì neo vị trí
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+
   return (
     <div 
-      className="absolute z-40 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-slate-200/90 w-84 p-3.5 text-slate-850 font-sans transition-all animate-in fade-in zoom-in-95 duration-150"
-      style={{
-        left: position ? `${Math.min(Math.max(position.x - 168, 20), window.innerWidth - 360)}px` : '50%',
-        top: position ? `${Math.max(position.y - 180, 20)}px` : '20%',
-      }}
+      className="z-40 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-slate-200/90 p-3.5 text-slate-850 font-sans transition-all animate-in fade-in zoom-in-95 duration-150 fixed inset-x-3 bottom-4 sm:absolute sm:inset-x-auto sm:bottom-auto sm:w-84 max-w-[calc(100vw-24px)]"
+      style={
+        !isMobile && position
+          ? {
+              left: `${Math.min(Math.max(position.x - 168, 20), Math.max(window.innerWidth - 360, 20))}px`,
+              top: `${Math.max(position.y - 180, 20)}px`,
+            }
+          : !isMobile
+          ? { left: '50%', top: '20%', transform: 'translateX(-50%)' }
+          : undefined
+      }
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header with Stall Code & Close */}
@@ -104,14 +113,14 @@ export default function InMapQuickActionCard({
           <div className="grid grid-cols-2 gap-1.5">
             <button
               onClick={() => onQuickDispatch(stall.id, 'Tổ Vệ Sinh Ca Sáng')}
-              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1 cursor-pointer"
+              className="min-h-11 px-2.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1 cursor-pointer"
             >
               <span>🧹 Tổ Vệ Sinh</span>
             </button>
 
             <button
               onClick={() => onQuickDispatch(stall.id, 'Đội Bảo Vệ Trực Ban')}
-              className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1 cursor-pointer"
+              className="min-h-11 px-2.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1 cursor-pointer"
             >
               <span>🛡️ Đội Bảo Vệ</span>
             </button>

@@ -85,6 +85,28 @@ export default function StallDetailDrawer({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose, stall]);
 
+  const [isExpanded, setIsExpanded] = useState<boolean>(true);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+
+  const handleDragTouchStart = (e: React.TouchEvent) => {
+    setTouchStartY(e.touches[0].clientY);
+  };
+
+  const handleDragTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartY === null) return;
+    const deltaY = e.changedTouches[0].clientY - touchStartY;
+    if (deltaY > 50) {
+      if (isExpanded) {
+        setIsExpanded(false);
+      } else {
+        onClose();
+      }
+    } else if (deltaY < -50) {
+      setIsExpanded(true);
+    }
+    setTouchStartY(null);
+  };
+
   if (!stall) return null;
 
   const descriptor = deriveStallVisual(stall, { selected: true });
@@ -109,66 +131,100 @@ export default function StallDetailDrawer({
   const hasFeePending = state.feeStatus === 'overdue' || state.feeStatus === 'pending';
 
   return (
-    <div
-      id="decision-panel-drawer"
-      data-testid="decision-panel"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="decision-panel-title"
-      className="fixed inset-y-0 right-0 z-50 flex w-full max-w-full flex-col overflow-hidden bg-white text-slate-800 shadow-2xl ring-1 ring-slate-900/10 motion-safe:animate-in motion-safe:slide-in-from-right motion-safe:duration-200 sm:inset-y-3 sm:right-3 sm:h-auto sm:w-[min(420px,calc(100vw-32px))] sm:rounded-lg font-sans"
-    >
+    <>
+      {/* Mobile/Tablet Backdrop Overlay (Lớp phủ mờ nền khi mở trên thiết bị hiện trường) */}
+      <div 
+        data-testid="drawer-backdrop"
+        className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-2xs transition-opacity lg:hidden"
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
-      {/* Top Header */}
-      <div className="flex items-start justify-between gap-3 border-b border-slate-200 bg-slate-50/90 p-4">
-        <div className="min-w-0 flex-1">
-          <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-            <span className="rounded bg-[var(--color-brand-green)] px-2 py-0.5 font-mono text-xs font-black text-white shadow-xs">
-              SẠP {stall.code}
-            </span>
-            <span className="text-[11px] text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-300 font-semibold">
-              {stall.zoneId ? `Khu ${stall.zoneId.replace('zone_', '')}` : 'Khu A'} • T1
-            </span>
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-[var(--color-brand-green)]">
-              {state.isOccupied ? 'Kinh doanh' : 'Sạp trống'}
-            </span>
-          </div>
-          <h2 id="decision-panel-title" className="break-words text-base font-extrabold leading-tight text-slate-900">
-            SẠP {stall.code} — {metadata.name || 'Gian hàng tiêu chuẩn'}
-          </h2>
-          <div className="mt-1 break-words text-xs text-slate-500">
-            Chủ sạp: <strong className="text-slate-800 font-semibold">{metadata.merchantName || 'Chưa cập nhật'}</strong>
-          </div>
+      <div
+        id="decision-panel-drawer"
+        data-testid="decision-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="decision-panel-title"
+        onTouchStart={handleDragTouchStart}
+        onTouchEnd={handleDragTouchEnd}
+        className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-full flex-col overflow-hidden bg-white text-slate-800 shadow-2xl ring-1 ring-slate-900/10 motion-safe:animate-in motion-safe:slide-in-from-right motion-safe:duration-200 sm:inset-y-3 sm:right-3 sm:h-auto sm:w-[min(420px,calc(100vw-32px))] sm:rounded-lg font-sans transition-all duration-300 ${
+          !isExpanded ? 'max-h-[46vh] bottom-0 top-auto sm:inset-y-3' : 'max-h-full'
+        }`}
+      >
+
+        {/* Tactile Drag Handle Pill for Mobile/Tablet Gesture Feedback (Gờ kéo điều khiển xúc giác) */}
+        <div 
+          data-testid="drag-handle-pill"
+          className="flex cursor-grab active:cursor-grabbing items-center justify-center py-2 bg-slate-50/95 border-b border-slate-200/60 lg:hidden select-none"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          role="button"
+          tabIndex={0}
+          aria-label={isExpanded ? 'Gờ kéo thu gọn bảng' : 'Gờ kéo mở rộng bảng'}
+        >
+          <div className="h-1.5 w-12 rounded-full bg-slate-300 transition-colors hover:bg-slate-400" />
         </div>
 
-        <button
-          onClick={onClose}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-200/70 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] cursor-pointer"
-          aria-label="Đóng bảng chi tiết"
-          title="Đóng bảng chi tiết"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
+        {/* Top Header */}
+        <div className="flex items-start justify-between gap-3 border-b border-slate-200 bg-slate-50/90 p-3 sm:p-4">
+          <div className="min-w-0 flex-1">
+            <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+              <span className="rounded bg-[var(--color-brand-green)] px-2 py-0.5 font-mono text-xs font-black text-white shadow-xs">
+                SẠP {stall.code}
+              </span>
+              <span className="text-[11px] text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-300 font-semibold">
+                {stall.zoneId ? `Khu ${stall.zoneId.replace('zone_', '')}` : 'Khu A'} • T1
+              </span>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-[var(--color-brand-green)]">
+                {state.isOccupied ? 'Kinh doanh' : 'Sạp trống'}
+              </span>
+              {/* Quick toggle expanded indicator on mobile */}
+              <button
+                type="button"
+                data-testid="toggle-sheet-mode-btn"
+                onClick={() => setIsExpanded((prev) => !prev)}
+                className="lg:hidden text-[10px] font-bold text-slate-500 hover:text-slate-800 underline ml-1 cursor-pointer"
+              >
+                {isExpanded ? 'Thu gọn (38%)' : 'Mở rộng (85%)'}
+              </button>
+            </div>
+            <h2 id="decision-panel-title" className="break-words text-base font-extrabold leading-tight text-slate-900">
+              SẠP {stall.code} — {metadata.name || 'Gian hàng tiêu chuẩn'}
+            </h2>
+            <div className="mt-1 break-words text-xs text-slate-500">
+              Chủ sạp: <strong className="text-slate-800 font-semibold">{metadata.merchantName || 'Chưa cập nhật'}</strong>
+            </div>
+          </div>
 
-      {/* Toast Notification Alert */}
-      {toastMessage && (
-        <div className="flex items-center justify-between gap-3 border-b border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-semibold text-[var(--color-brand-green)]">
-          <span className="flex min-w-0 items-center gap-1.5 break-words">
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--color-brand-green)]" aria-hidden="true" /> {toastMessage}
-          </span>
           <button
-            type="button"
-            onClick={() => setToastMessage(null)}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-emerald-800 font-bold hover:bg-emerald-100 cursor-pointer"
-            aria-label="Ẩn thông báo"
+            onClick={onClose}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-200/70 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] cursor-pointer"
+            aria-label="Đóng bảng chi tiết"
+            title="Đóng bảng chi tiết"
           >
-            <X className="h-4 w-4" aria-hidden="true" />
+            <X className="w-5 h-5" />
           </button>
         </div>
-      )}
 
-      {/* Decision Panel Scrollable Body (6 KHỐI CHUẨN HÓA) */}
-      <div className="flex-1 space-y-3.5 overflow-y-auto overscroll-contain p-3.5 text-xs sm:p-4">
+        {/* Toast Notification Alert */}
+        {toastMessage && (
+          <div className="flex items-center justify-between gap-3 border-b border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-semibold text-[var(--color-brand-green)]">
+            <span className="flex min-w-0 items-center gap-1.5 break-words">
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--color-brand-green)]" aria-hidden="true" /> {toastMessage}
+            </span>
+            <button
+              type="button"
+              onClick={() => setToastMessage(null)}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-emerald-800 font-bold hover:bg-emerald-100 cursor-pointer"
+              aria-label="Ẩn thông báo"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+        )}
+
+        {/* Decision Panel Scrollable Body (6 KHỐI CHUẨN HÓA) */}
+        <div className="flex-1 space-y-3.5 overflow-y-auto overscroll-contain p-3.5 text-xs sm:p-4">
 
         {/* ========================================================================= */}
         {/* KHỐI 1: MÃ SẠP VÀ MỨC ƯU TIÊN */}
@@ -455,5 +511,6 @@ export default function StallDetailDrawer({
       </div>
 
     </div>
+    </>
   );
 }
