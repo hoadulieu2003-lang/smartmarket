@@ -1,0 +1,47 @@
+{
+  "success": true,
+  "data": [
+    {
+      "date": "2026-08-30",
+      "revenue": 0,
+      "orderCount": 0,
+      "complaintCount": 0
+    },
+    {
+      "date": "2026-08-31",
+      "revenue": 0,
+      "orderCount": 0,
+      "complaintCount": 0
+    },
+    {
+      "date": "2026-09-01",
+      "revenue": 0,
+      "orderCount": 0,
+      "complaintCount": 0
+    },
+    {
+      "date": "2026-09-02",
+      "revenue": 0,
+      "orderCount": 0,
+      "complaintCount": 0
+    },
+    {
+      "date": "2026-09-03",
+      "revenue": 0,
+      "orderCount": 0,
+      "complaintCount": 0
+    },
+    {
+      "date": "2026-09-04",
+      "revenue": 0,
+      "orderCount": 0,
+      "complaintCount": 0
+    },
+    {
+      "date": "2026-09-05",
+      "revenue": 0,
+      "orderCount": 0,
+      "complaintCount": 0
+    }
+  ]
+}

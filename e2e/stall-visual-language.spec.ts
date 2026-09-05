@@ -1,8 +1,7 @@
 import { expect, test } from '@playwright/test';
-
 test.describe('Smartmarket stall visual language', () => {
   test('loads the current operations shell, opens stall A12, and switches fixtures', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/?fixture=A');
 
     await expect(page.getByRole('heading', { name: 'SMART MARKET' })).toBeVisible();
     await expect(page.getByTestId('map-toolbar')).toBeVisible();
@@ -29,7 +28,7 @@ test.describe('Smartmarket stall visual language', () => {
 
   test('keeps the operations shell usable on a narrow mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/');
+    await page.goto('/?fixture=A');
 
     await expect(page.getByRole('banner')).toBeVisible();
     await expect(page.getByRole('textbox', { name: /Tìm kiếm sạp/i })).toBeVisible();
@@ -52,5 +51,24 @@ test.describe('Smartmarket stall visual language', () => {
     await expect(drawer).toBeVisible();
     await expect(drawer).toHaveClass(/w-full/);
     await expect(drawer.getByRole('button', { name: /Đóng bảng chi tiết/i }).first()).toBeVisible();
+  });
+
+  test('opens normal stall A20 with operational actions and supports keyboard activation', async ({ page }) => {
+    await page.goto('/?fixture=A');
+
+    const stallA20 = page.locator('#stall-stall_A20');
+    await expect(stallA20).toBeVisible();
+    await stallA20.focus();
+    await page.keyboard.press('Enter');
+
+    const drawer = page.getByRole('dialog', { name: /SẠP A20/i });
+    await expect(drawer).toBeVisible();
+    await expect(drawer.getByRole('heading', { name: /SẠP A20/i })).toBeVisible();
+    await expect(drawer.getByRole('button', { name: /Xem Lịch Sử Sạp/i })).toBeVisible();
+    await expect(drawer.getByRole('button', { name: /Liên hệ sạp/i })).toBeVisible();
+    await expect(drawer.getByRole('button', { name: /Hồ sơ hợp đồng/i })).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await expect(drawer).toBeHidden();
   });
 });

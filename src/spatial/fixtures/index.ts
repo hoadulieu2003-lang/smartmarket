@@ -7,13 +7,16 @@ import {
   type MapDensityMode 
 } from '../../data/megaMarketData';
 
+import { REALISTIC_FLOOR_DATA } from '../../data/realisticMarketData';
+import { LIVE_FLOOR_DONG_XUAN } from './liveMarketFixture';
+
 /**
  * ============================================================================
  * FIXTURE A: CHỢ ĐỒNG XUÂN TẦNG 1 (160 SẠP HÀNG • 5 PHÂN KHU CHỨC NĂNG)
  * ============================================================================
  */
 export const FIXTURE_A_DONG_XUAN: FloorEntity = MEGA_FLOOR_DONG_XUAN;
-export { MEGA_FLOOR_DONG_XUAN_STANDARD, buildMegaFloorDongXuan, type MapDensityMode };
+export { MEGA_FLOOR_DONG_XUAN_STANDARD, buildMegaFloorDongXuan, type MapDensityMode, REALISTIC_FLOOR_DATA };
 
 /**
  * ============================================================================
@@ -844,5 +847,14 @@ export const FIXTURE_C_TWO_BLOCK_BRIDGE_MARKET: FloorEntity = {
 export const ALL_CANONICAL_FIXTURES: Record<string, FloorEntity> = {
   fixture_a: FIXTURE_A_DONG_XUAN,
   fixture_b: FIXTURE_B_L_SHAPED_MARKET,
-  fixture_c: FIXTURE_C_TWO_BLOCK_BRIDGE_MARKET
+  fixture_c: FIXTURE_C_TWO_BLOCK_BRIDGE_MARKET,
+  fixture_live: LIVE_FLOOR_DONG_XUAN
 };
+
+export {
+  LIVE_FLOOR_DONG_XUAN,
+  LIVE_MARKET_METADATA,
+  LIVE_ZONES,
+  LIVE_STALLS
+} from './liveMarketFixture';
+

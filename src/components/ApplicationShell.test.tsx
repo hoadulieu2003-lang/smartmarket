@@ -30,11 +30,10 @@ describe('ApplicationShell responsive navigation contract', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: /Tổng quan sơ đồ/i })).toBeDefined();
-    expect(screen.getByRole('button', { name: /Sạp hàng không gian 38/i })).toBeDefined();
-    expect(screen.getByRole('button', { name: /Hồ sơ tiểu thương 7/i })).toBeDefined();
-    expect(screen.getByRole('button', { name: /Phản ánh & Khiếu nại 12/i })).toBeDefined();
-    expect(screen.getByRole('button', { name: /Thu phí thị trường 93%/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /Tổng quan/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /Sơ đồ chợ/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /Bản đồ GIS/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /Duyệt hồ sơ tiểu thương/i })).toBeDefined();
   });
 
   it('keeps search and notifications discoverable by accessible text', () => {

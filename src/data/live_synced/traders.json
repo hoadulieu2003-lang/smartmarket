@@ -1,0 +1,519 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "d94ffebf-8eb3-4d79-80be-eec6df1b787f",
+      "fullName": "Bảo Phạm",
+      "avatar": "https://s240-ava-talk.zadn.vn/b/8/2/b/3/240/670463f296e45558d5bbb193d560b819.jpg",
+      "phone": "0934433864",
+      "email": null,
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-07-25T14:57:24.336Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000002",
+        "name": "Thịt"
+      },
+      "stall": {
+        "id": "36ee1f1a-b829-4ac0-aa1a-fb8f48569a87",
+        "code": "A-02",
+        "name": null
+      },
+      "contractEndDate": "2028-07-24T00:00:00.000Z",
+      "ratingAvg": 4,
+      "openComplaintCount": 1
+    },
+    {
+      "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "fullName": "Hòa",
+      "avatar": "https://s240-ava-talk.zadn.vn/4/4/6/f/5/240/50c5c7c0e8c9d2c2394e4820dbf1e058.jpg",
+      "phone": "0357634420",
+      "email": null,
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-07-25T14:36:07.975Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "stall": {
+        "id": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+        "code": "A-03",
+        "name": null
+      },
+      "contractEndDate": "2028-07-24T00:00:00.000Z",
+      "ratingAvg": 5,
+      "openComplaintCount": 1
+    },
+    {
+      "id": "d2000000-0000-4000-8000-000000000002",
+      "fullName": "Ngọc Lan Đặc Sản",
+      "avatar": null,
+      "phone": "0978000002",
+      "email": null,
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-07-19T13:10:25.136Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "stall": {
+        "id": "9a3f8d49-aea6-4104-9cc3-a728e2cadd96",
+        "code": "D01-06",
+        "name": "Gian hàng gia vị"
+      },
+      "contractEndDate": "2027-02-24T00:00:00.000Z",
+      "ratingAvg": 5,
+      "openComplaintCount": 0
+    },
+    {
+      "id": "1892d7fb-be15-472e-b4d5-0a7cbd418fd8",
+      "fullName": "Bùi Thu Hà",
+      "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/08-kitchenware.jpeg",
+      "phone": "0398260015",
+      "email": "merchant.cho-demo-20260802-v1.16@example.invalid",
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-06-30T02:15:00.000Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000008",
+        "name": "Gia dụng"
+      },
+      "stall": {
+        "id": "51171698-690d-4bda-bb08-cbbee9113f0f",
+        "code": "D260802V1-S16",
+        "name": "Sạp Gia dụng Thu Hà"
+      },
+      "contractEndDate": "2027-06-30T00:00:00.000Z",
+      "ratingAvg": 4.1,
+      "openComplaintCount": 0
+    },
+    {
+      "id": "601e5fd0-aeef-44cb-9898-69ef228de595",
+      "fullName": "Đặng Thu Hà",
+      "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/07-market-clothing.jpeg",
+      "phone": "0398260014",
+      "email": "merchant.cho-demo-20260802-v1.15@example.invalid",
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-06-30T02:14:00.000Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000007",
+        "name": "Quần áo"
+      },
+      "stall": {
+        "id": "327c7c97-7928-4f0e-ae20-7375258059cd",
+        "code": "D260802V1-S15",
+        "name": "Sạp Quần áo Thu Hà"
+      },
+      "contractEndDate": "2027-06-30T00:00:00.000Z",
+      "ratingAvg": 4.2,
+      "openComplaintCount": 0
+    },
+    {
+      "id": "ffbaf108-5e90-4ecc-aba8-d24b81b8ae08",
+      "fullName": "Vũ Thu Hà",
+      "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/06-pho-noodle-soup.jpeg",
+      "phone": "0398260013",
+      "email": "merchant.cho-demo-20260802-v1.14@example.invalid",
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-06-30T02:13:00.000Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000006",
+        "name": "Ẩm thực"
+      },
+      "stall": {
+        "id": "6065983a-5988-4c09-aade-f9b96c47f252",
+        "code": "D260802V1-S14",
+        "name": "Sạp Ẩm thực Thu Hà"
+      },
+      "contractEndDate": "2027-06-30T00:00:00.000Z",
+      "ratingAvg": 4.1,
+      "openComplaintCount": 1
+    },
+    {
+      "id": "291b03b8-a07f-4dca-b7b2-68f909869786",
+      "fullName": "Hoàng Thu Hà",
+      "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/05-fish-sauce-spices.jpeg",
+      "phone": "0398260012",
+      "email": "merchant.cho-demo-20260802-v1.13@example.invalid",
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-06-30T02:12:00.000Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000005",
+        "name": "Gia vị"
+      },
+      "stall": {
+        "id": "06ee709d-edb0-4d4d-b0e0-2d0cb39a3589",
+        "code": "D260802V1-S13",
+        "name": "Sạp Gia vị Thu Hà"
+      },
+      "contractEndDate": "2027-06-30T00:00:00.000Z",
+      "ratingAvg": 4.2,
+      "openComplaintCount": 2
+    },
+    {
+      "id": "d90003aa-c044-4b9f-aece-018828410ec2",
+      "fullName": "Phạm Thu Hà",
+      "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/04-rice-grains.jpeg",
+      "phone": "0398260011",
+      "email": "merchant.cho-demo-20260802-v1.12@example.invalid",
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-06-30T02:11:00.000Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000004",
+        "name": "Đồ khô"
+      },
+      "stall": {
+        "id": "b545d89b-b31e-4712-80f8-e8d754f5a630",
+        "code": "D260802V1-S12",
+        "name": "Sạp Đồ khô Thu Hà"
+      },
+      "contractEndDate": "2027-06-30T00:00:00.000Z",
+      "ratingAvg": 4.1,
+      "openComplaintCount": 1
+    },
+    {
+      "id": "190b69f8-7d9c-44fd-9f6c-5c4ee780cef1",
+      "fullName": "Lê Thu Hà",
+      "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/03-fresh-fish.jpeg",
+      "phone": "0398260010",
+      "email": "merchant.cho-demo-20260802-v1.11@example.invalid",
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-06-30T02:10:00.000Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000003",
+        "name": "Hải sản"
+      },
+      "stall": {
+        "id": "79d05346-6f1b-47ad-a934-80335ad33454",
+        "code": "D260802V1-S11",
+        "name": "Sạp Hải sản Thu Hà"
+      },
+      "contractEndDate": "2027-06-30T00:00:00.000Z",
+      "ratingAvg": 4.2,
+      "openComplaintCount": 2
+    },
+    {
+      "id": "7ca7c1d0-376f-4d70-b5de-8166693ed804",
+      "fullName": "Trần Thu Hà",
+      "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/02-premium-pork.jpeg",
+      "phone": "0398260009",
+      "email": "merchant.cho-demo-20260802-v1.10@example.invalid",
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-06-30T02:09:00.000Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000002",
+        "name": "Thịt"
+      },
+      "stall": {
+        "id": "51e9b527-2492-4355-aa68-a622b130161a",
+        "code": "D260802V1-S10",
+        "name": "Sạp Thịt Thu Hà"
+      },
+      "contractEndDate": "2027-06-30T00:00:00.000Z",
+      "ratingAvg": 4.1,
+      "openComplaintCount": 1
+    },
+    {
+      "id": "e2051643-3b08-4b4a-abed-39138b537834",
+      "fullName": "Nguyễn Thu Hà",
+      "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/01-leafy-greens.jpeg",
+      "phone": "0398260008",
+      "email": "merchant.cho-demo-20260802-v1.09@example.invalid",
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-06-30T02:08:00.000Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "stall": {
+        "id": "8619f232-1e18-462b-ac2c-c8375828ff3f",
+        "code": "D260802V1-S09",
+        "name": "Sạp Rau củ quả Thu Hà"
+      },
+      "contractEndDate": "2027-06-30T00:00:00.000Z",
+      "ratingAvg": 4.2,
+      "openComplaintCount": 2
+    },
+    {
+      "id": "d2000000-0000-4000-8000-000000000006",
+      "fullName": "Cô Ba Rau Sạch",
+      "avatar": null,
+      "phone": "0978000006",
+      "email": null,
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-06-21T13:10:25.158Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "stall": {
+        "id": "8fc74215-d682-4d57-9c39-ea4f0b665946",
+        "code": "D04-07",
+        "name": "Quầy đặc sản"
+      },
+      "contractEndDate": "2027-02-25T00:00:00.000Z",
+      "ratingAvg": 0,
+      "openComplaintCount": 1
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000012",
+      "fullName": "Tiểu thương Hải Sản HN",
+      "avatar": null,
+      "phone": "0911000002",
+      "email": null,
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-06-11T05:56:36.307Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000003",
+        "name": "Hải sản"
+      },
+      "stall": null,
+      "contractEndDate": null,
+      "ratingAvg": 0,
+      "openComplaintCount": 0
+    },
+    {
+      "id": "d2000000-0000-4000-8000-000000000010",
+      "fullName": "Bếp Nhà Mình",
+      "avatar": null,
+      "phone": "0978000010",
+      "email": null,
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-05-24T13:10:25.178Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "stall": null,
+      "contractEndDate": null,
+      "ratingAvg": 0,
+      "openComplaintCount": 0
+    },
+    {
+      "id": "d2000000-0000-4000-8000-000000000014",
+      "fullName": "Ngọc Lan Đặc Sản",
+      "avatar": null,
+      "phone": "0978000014",
+      "email": null,
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-04-26T13:10:25.198Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "stall": {
+        "id": "fb971506-a9db-49a0-a994-fc5acea12417",
+        "code": "D900-09",
+        "name": "Quầy ăn nhanh"
+      },
+      "contractEndDate": "2027-02-27T00:00:00.000Z",
+      "ratingAvg": 4.5,
+      "openComplaintCount": 0
+    },
+    {
+      "id": "d2000000-0000-4000-8000-000000000018",
+      "fullName": "Cô Ba Rau Sạch",
+      "avatar": null,
+      "phone": "0978000018",
+      "email": null,
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-03-29T13:10:25.219Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "stall": {
+        "id": "2a459744-69f1-4a4a-9928-4095250c0320",
+        "code": "D03-09",
+        "name": "Quầy ăn nhanh"
+      },
+      "contractEndDate": "2027-02-27T00:00:00.000Z",
+      "ratingAvg": 4.5,
+      "openComplaintCount": 1
+    },
+    {
+      "id": "d2000000-0000-4000-8000-000000000022",
+      "fullName": "Bếp Nhà Mình",
+      "avatar": null,
+      "phone": "0978000022",
+      "email": null,
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-03-01T13:10:25.239Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "stall": {
+        "id": "0eab3e87-3b06-441f-977a-277a021d3de0",
+        "code": "D04-06",
+        "name": "Gian hàng gia vị"
+      },
+      "contractEndDate": "2027-02-27T00:00:00.000Z",
+      "ratingAvg": 4,
+      "openComplaintCount": 0
+    },
+    {
+      "id": "d2000000-0000-4000-8000-000000000026",
+      "fullName": "Ngọc Lan Đặc Sản",
+      "avatar": null,
+      "phone": "0978000026",
+      "email": null,
+      "merchantStatus": "suspended",
+      "merchantJoinedAt": "2026-02-01T13:10:25.259Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "stall": {
+        "id": "ec74b6b1-5a47-4711-93fd-84f90b2b7bfb",
+        "code": "D902-06",
+        "name": "Gian hàng gia vị"
+      },
+      "contractEndDate": "2027-02-24T00:00:00.000Z",
+      "ratingAvg": 4,
+      "openComplaintCount": 1
+    },
+    {
+      "id": "d2000000-0000-4000-8000-000000000030",
+      "fullName": "Cô Ba Rau Sạch",
+      "avatar": null,
+      "phone": "0978000030",
+      "email": null,
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2026-01-04T13:10:25.279Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "stall": {
+        "id": "4bda649e-da6e-42d4-af85-04884be604b3",
+        "code": "D05-07",
+        "name": "Quầy đặc sản"
+      },
+      "contractEndDate": "2027-02-27T00:00:00.000Z",
+      "ratingAvg": 0,
+      "openComplaintCount": 0
+    },
+    {
+      "id": "d2000000-0000-4000-8000-000000000034",
+      "fullName": "Bếp Nhà Mình",
+      "avatar": null,
+      "phone": "0978000034",
+      "email": null,
+      "merchantStatus": "active",
+      "merchantJoinedAt": "2025-12-07T13:10:25.299Z",
+      "merchantMarketId": "30000000-0000-4000-8000-000000000002",
+      "market": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "category": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "stall": null,
+      "contractEndDate": null,
+      "ratingAvg": 0,
+      "openComplaintCount": 0
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 20,
+    "total": 20,
+    "totalPages": 1
+  }
+}

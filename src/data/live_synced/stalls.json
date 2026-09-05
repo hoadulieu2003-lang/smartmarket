@@ -1,0 +1,1874 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "fb1d443e-5f5c-4a9e-9562-026ace0e1ba6",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "94315111-597e-4260-8e11-49347759825b",
+      "categoryId": null,
+      "code": "D900-03",
+      "name": "Gian hàng gia dụng",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 7,
+      "phone": "0969000008",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 3,
+      "createdAt": "2026-08-22T13:11:18.729Z",
+      "updatedAt": "2026-08-22T13:11:18.729Z",
+      "zones": {
+        "id": "94315111-597e-4260-8e11-49347759825b",
+        "code": "D260802V1-K05",
+        "name": "Khu Thực phẩm tươi 1"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 1,
+      "currentContract": null
+    },
+    {
+      "id": "a12f0b0f-6c69-4f56-88d2-bba38fe496d4",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+      "categoryId": null,
+      "code": "D901-03",
+      "name": "Gian hàng gia dụng",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 7,
+      "phone": "0969000016",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 3,
+      "createdAt": "2026-08-22T13:11:18.782Z",
+      "updatedAt": "2026-08-22T13:11:18.782Z",
+      "zones": {
+        "id": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+        "code": "D260802V1-K06",
+        "name": "Khu Nông sản chọn lọc 2"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 1,
+      "currentContract": null
+    },
+    {
+      "id": "8e1e945c-3637-4b51-85de-03092484afc3",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+      "categoryId": null,
+      "code": "D902-03",
+      "name": "Gian hàng gia dụng",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 7,
+      "phone": "0969000024",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 3,
+      "createdAt": "2026-08-22T13:11:18.833Z",
+      "updatedAt": "2026-08-22T13:11:18.833Z",
+      "zones": {
+        "id": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+        "code": "D260802V1-K07",
+        "name": "Khu Đặc sản địa phương 3"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 1,
+      "currentContract": {
+        "id": "d3000000-0000-4000-8000-000000000024",
+        "startDate": "2026-06-26T00:00:00.000Z",
+        "endDate": "2027-02-21T00:00:00.000Z",
+        "daysLeft": 169,
+        "fee": 1650000,
+        "merchant": {
+          "id": "d2000000-0000-4000-8000-000000000024",
+          "fullName": "Cô Ba Rau Sạch",
+          "phone": "0978000024",
+          "avatar": null,
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "d6d388e4-9817-42f7-8b24-c19820a7f560",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "5d751924-e6d3-425f-b933-fe3081d1c191",
+      "categoryId": null,
+      "code": "D903-03",
+      "name": "Gian hàng gia dụng",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 7,
+      "phone": "0969000032",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 3,
+      "createdAt": "2026-08-22T13:11:18.885Z",
+      "updatedAt": "2026-08-22T13:11:18.885Z",
+      "zones": {
+        "id": "5d751924-e6d3-425f-b933-fe3081d1c191",
+        "code": "D260802V1-K08",
+        "name": "Khu Hàng thiết yếu 4"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "occupied",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "16f85dc7-ca15-4ee1-bc1f-0debd000aec2",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "5d751924-e6d3-425f-b933-fe3081d1c191",
+      "categoryId": null,
+      "code": "D903-04",
+      "name": "Quầy ăn nhanh",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 4,
+      "phone": "0969000033",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 4,
+      "createdAt": "2026-08-22T13:11:18.893Z",
+      "updatedAt": "2026-08-22T13:11:18.893Z",
+      "zones": {
+        "id": "5d751924-e6d3-425f-b933-fe3081d1c191",
+        "code": "D260802V1-K08",
+        "name": "Khu Hàng thiết yếu 4"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "bcb26809-c772-480c-87f6-479070b1dfc3",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "94315111-597e-4260-8e11-49347759825b",
+      "categoryId": null,
+      "code": "D900-04",
+      "name": "Quầy ăn nhanh",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 4,
+      "phone": "0969000009",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 4,
+      "createdAt": "2026-08-22T13:11:18.737Z",
+      "updatedAt": "2026-08-22T13:11:18.737Z",
+      "zones": {
+        "id": "94315111-597e-4260-8e11-49347759825b",
+        "code": "D260802V1-K05",
+        "name": "Khu Thực phẩm tươi 1"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "ca4640a4-59f9-40db-b804-429c53ec78c8",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+      "categoryId": null,
+      "code": "D902-04",
+      "name": "Quầy ăn nhanh",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 4,
+      "phone": "0969000025",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 4,
+      "createdAt": "2026-08-22T13:11:18.842Z",
+      "updatedAt": "2026-08-22T13:11:18.842Z",
+      "zones": {
+        "id": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+        "code": "D260802V1-K07",
+        "name": "Khu Đặc sản địa phương 3"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "4cca7d61-972d-47b1-8a57-5b5e7dc0b844",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+      "categoryId": null,
+      "code": "D901-04",
+      "name": "Quầy ăn nhanh",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 4,
+      "phone": "0969000017",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 4,
+      "createdAt": "2026-08-22T13:11:18.789Z",
+      "updatedAt": "2026-08-22T13:11:18.789Z",
+      "zones": {
+        "id": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+        "code": "D260802V1-K06",
+        "name": "Khu Nông sản chọn lọc 2"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "70397e56-fb6d-44b1-b27d-624dba01818c",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+      "categoryId": null,
+      "code": "D902-05",
+      "name": "Sạp thực phẩm tươi",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 5,
+      "phone": "0969000026",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 5,
+      "createdAt": "2026-08-22T13:11:18.846Z",
+      "updatedAt": "2026-08-22T13:11:18.846Z",
+      "zones": {
+        "id": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+        "code": "D260802V1-K07",
+        "name": "Khu Đặc sản địa phương 3"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "57949abe-6f09-43d4-a8cf-570e6ddfaa7b",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+      "categoryId": "50000000-0000-4000-8000-000000000001",
+      "code": "D04-05",
+      "name": "Sạp thực phẩm tươi",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 5,
+      "phone": "0969000002",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 5,
+      "createdAt": "2026-08-22T13:11:18.682Z",
+      "updatedAt": "2026-08-22T13:11:18.682Z",
+      "zones": {
+        "id": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+        "code": "A",
+        "name": "Khu A - Rau củ quả"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "fc999b7a-c5c2-4999-a3e5-7e9e0e456aa6",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "5d751924-e6d3-425f-b933-fe3081d1c191",
+      "categoryId": null,
+      "code": "D903-05",
+      "name": "Sạp thực phẩm tươi",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 5,
+      "phone": "0969000034",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 5,
+      "createdAt": "2026-08-22T13:11:18.898Z",
+      "updatedAt": "2026-08-22T13:11:18.898Z",
+      "zones": {
+        "id": "5d751924-e6d3-425f-b933-fe3081d1c191",
+        "code": "D260802V1-K08",
+        "name": "Khu Hàng thiết yếu 4"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "e894a23b-9b36-46ef-975a-453040b42f85",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "94315111-597e-4260-8e11-49347759825b",
+      "categoryId": null,
+      "code": "D900-05",
+      "name": "Sạp thực phẩm tươi",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 5,
+      "phone": "0969000010",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 5,
+      "createdAt": "2026-08-22T13:11:18.741Z",
+      "updatedAt": "2026-08-22T13:11:18.741Z",
+      "zones": {
+        "id": "94315111-597e-4260-8e11-49347759825b",
+        "code": "D260802V1-K05",
+        "name": "Khu Thực phẩm tươi 1"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "f849ee01-66d1-461d-93ee-0e8d39a19bf1",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+      "categoryId": null,
+      "code": "D901-05",
+      "name": "Sạp thực phẩm tươi",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 5,
+      "phone": "0969000018",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 5,
+      "createdAt": "2026-08-22T13:11:18.794Z",
+      "updatedAt": "2026-08-22T13:11:18.794Z",
+      "zones": {
+        "id": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+        "code": "D260802V1-K06",
+        "name": "Khu Nông sản chọn lọc 2"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "b09301a7-24a7-4c1c-b8af-a78eedb939b7",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "94315111-597e-4260-8e11-49347759825b",
+      "categoryId": null,
+      "code": "D900-06",
+      "name": "Gian hàng gia vị",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 6,
+      "phone": "0969000011",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 6,
+      "createdAt": "2026-08-22T13:11:18.745Z",
+      "updatedAt": "2026-08-22T13:11:18.745Z",
+      "zones": {
+        "id": "94315111-597e-4260-8e11-49347759825b",
+        "code": "D260802V1-K05",
+        "name": "Khu Thực phẩm tươi 1"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 1,
+      "currentContract": null
+    },
+    {
+      "id": "ec74b6b1-5a47-4711-93fd-84f90b2b7bfb",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+      "categoryId": null,
+      "code": "D902-06",
+      "name": "Gian hàng gia vị",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 6,
+      "phone": "0969000027",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 6,
+      "createdAt": "2026-08-22T13:11:18.850Z",
+      "updatedAt": "2026-08-22T13:11:18.850Z",
+      "zones": {
+        "id": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+        "code": "D260802V1-K07",
+        "name": "Khu Đặc sản địa phương 3"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 1,
+      "currentContract": {
+        "id": "d3000000-0000-4000-8000-000000000027",
+        "startDate": "2026-05-30T00:00:00.000Z",
+        "endDate": "2027-02-24T00:00:00.000Z",
+        "daysLeft": 172,
+        "fee": 1150000,
+        "merchant": {
+          "id": "d2000000-0000-4000-8000-000000000026",
+          "fullName": "Ngọc Lan Đặc Sản",
+          "phone": "0978000026",
+          "avatar": null,
+          "merchantStatus": "suspended"
+        }
+      }
+    },
+    {
+      "id": "2cd56a88-7103-42de-996f-7c3b03481a0f",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+      "categoryId": "50000000-0000-4000-8000-000000000001",
+      "code": "D04-06",
+      "name": "Gian hàng gia vị",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 6,
+      "phone": "0969000003",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 6,
+      "createdAt": "2026-08-22T13:11:18.686Z",
+      "updatedAt": "2026-08-22T13:11:18.686Z",
+      "zones": {
+        "id": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+        "code": "A",
+        "name": "Khu A - Rau củ quả"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 1,
+      "currentContract": null
+    },
+    {
+      "id": "c97222d3-9ab7-4dc7-b302-dc4adc89693f",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "5d751924-e6d3-425f-b933-fe3081d1c191",
+      "categoryId": null,
+      "code": "D903-06",
+      "name": "Gian hàng gia vị",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 6,
+      "phone": "0969000035",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 6,
+      "createdAt": "2026-08-22T13:11:18.902Z",
+      "updatedAt": "2026-08-22T13:11:18.902Z",
+      "zones": {
+        "id": "5d751924-e6d3-425f-b933-fe3081d1c191",
+        "code": "D260802V1-K08",
+        "name": "Khu Hàng thiết yếu 4"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "occupied",
+      "openComplaintCount": 0,
+      "currentContract": {
+        "id": "d3000000-0000-4000-8000-000000000035",
+        "startDate": "2026-05-30T00:00:00.000Z",
+        "endDate": "2027-02-24T00:00:00.000Z",
+        "daysLeft": 172,
+        "fee": 1150000,
+        "merchant": {
+          "id": "d2000000-0000-4000-8000-000000000033",
+          "fullName": "Minh Quân Thực Phẩm",
+          "phone": "0978000033",
+          "avatar": null,
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "9580634d-fb42-44d1-92fe-1b7cf377773f",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+      "categoryId": null,
+      "code": "D901-06",
+      "name": "Gian hàng gia vị",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 6,
+      "phone": "0969000019",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 6,
+      "createdAt": "2026-08-22T13:11:18.798Z",
+      "updatedAt": "2026-08-22T13:11:18.798Z",
+      "zones": {
+        "id": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+        "code": "D260802V1-K06",
+        "name": "Khu Nông sản chọn lọc 2"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 1,
+      "currentContract": {
+        "id": "d3000000-0000-4000-8000-000000000019",
+        "startDate": "2026-05-30T00:00:00.000Z",
+        "endDate": "2027-02-24T00:00:00.000Z",
+        "daysLeft": 172,
+        "fee": 1150000,
+        "merchant": {
+          "id": "d2000000-0000-4000-8000-000000000019",
+          "fullName": "Chú Tư Hải Sản",
+          "phone": "0978000019",
+          "avatar": null,
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "de95bc08-0ce6-457c-95ee-c1ba7f1cb40c",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "94315111-597e-4260-8e11-49347759825b",
+      "categoryId": null,
+      "code": "D900-07",
+      "name": "Quầy đặc sản",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 7,
+      "phone": "0969000012",
+      "openHours": "05:30 - 18:00",
+      "status": "reserved",
+      "displayOrder": 7,
+      "createdAt": "2026-08-22T13:11:18.754Z",
+      "updatedAt": "2026-08-22T13:11:18.754Z",
+      "zones": {
+        "id": "94315111-597e-4260-8e11-49347759825b",
+        "code": "D260802V1-K05",
+        "name": "Khu Thực phẩm tươi 1"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "reserved",
+      "openComplaintCount": 1,
+      "currentContract": {
+        "id": "d3000000-0000-4000-8000-000000000012",
+        "startDate": "2026-05-21T00:00:00.000Z",
+        "endDate": "2027-02-25T00:00:00.000Z",
+        "daysLeft": 173,
+        "fee": 1400000,
+        "merchant": {
+          "id": "d2000000-0000-4000-8000-000000000013",
+          "fullName": "Chú Tư Hải Sản",
+          "phone": "0978000013",
+          "avatar": null,
+          "merchantStatus": "suspended"
+        }
+      }
+    },
+    {
+      "id": "40a0d732-4179-45e6-aab7-d7a3372715a1",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "5d751924-e6d3-425f-b933-fe3081d1c191",
+      "categoryId": null,
+      "code": "D903-07",
+      "name": "Quầy đặc sản",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 7,
+      "phone": "0969000036",
+      "openHours": "05:30 - 18:00",
+      "status": "reserved",
+      "displayOrder": 7,
+      "createdAt": "2026-08-22T13:11:18.911Z",
+      "updatedAt": "2026-08-22T13:11:18.911Z",
+      "zones": {
+        "id": "5d751924-e6d3-425f-b933-fe3081d1c191",
+        "code": "D260802V1-K08",
+        "name": "Khu Hàng thiết yếu 4"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "reserved",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "3a14207d-429d-415d-b44e-156e3faf2bc0",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+      "categoryId": null,
+      "code": "D902-07",
+      "name": "Quầy đặc sản",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 7,
+      "phone": "0969000028",
+      "openHours": "05:30 - 18:00",
+      "status": "reserved",
+      "displayOrder": 7,
+      "createdAt": "2026-08-22T13:11:18.858Z",
+      "updatedAt": "2026-08-22T13:11:18.858Z",
+      "zones": {
+        "id": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+        "code": "D260802V1-K07",
+        "name": "Khu Đặc sản địa phương 3"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "reserved",
+      "openComplaintCount": 1,
+      "currentContract": {
+        "id": "d3000000-0000-4000-8000-000000000028",
+        "startDate": "2026-05-21T00:00:00.000Z",
+        "endDate": "2027-02-25T00:00:00.000Z",
+        "daysLeft": 173,
+        "fee": 1400000,
+        "merchant": {
+          "id": "d2000000-0000-4000-8000-000000000027",
+          "fullName": "Minh Quân Thực Phẩm",
+          "phone": "0978000027",
+          "avatar": null,
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "d9e9e337-7439-4fb2-a4d6-22006258e3ea",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+      "categoryId": null,
+      "code": "D901-07",
+      "name": "Quầy đặc sản",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 7,
+      "phone": "0969000020",
+      "openHours": "05:30 - 18:00",
+      "status": "reserved",
+      "displayOrder": 7,
+      "createdAt": "2026-08-22T13:11:18.807Z",
+      "updatedAt": "2026-08-22T13:11:18.807Z",
+      "zones": {
+        "id": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+        "code": "D260802V1-K06",
+        "name": "Khu Nông sản chọn lọc 2"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "reserved",
+      "openComplaintCount": 1,
+      "currentContract": {
+        "id": "d3000000-0000-4000-8000-000000000020",
+        "startDate": "2026-05-21T00:00:00.000Z",
+        "endDate": "2027-02-25T00:00:00.000Z",
+        "daysLeft": 173,
+        "fee": 1400000,
+        "merchant": {
+          "id": "d2000000-0000-4000-8000-000000000020",
+          "fullName": "Ngọc Lan Đặc Sản",
+          "phone": "0978000020",
+          "avatar": null,
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "8fc74215-d682-4d57-9c39-ea4f0b665946",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+      "categoryId": "50000000-0000-4000-8000-000000000001",
+      "code": "D04-07",
+      "name": "Quầy đặc sản",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 7,
+      "phone": "0969000004",
+      "openHours": "05:30 - 18:00",
+      "status": "reserved",
+      "displayOrder": 7,
+      "createdAt": "2026-08-22T13:11:18.698Z",
+      "updatedAt": "2026-08-22T13:11:18.698Z",
+      "zones": {
+        "id": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+        "code": "A",
+        "name": "Khu A - Rau củ quả"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "displayStatus": "reserved",
+      "openComplaintCount": 1,
+      "currentContract": {
+        "id": "d3000000-0000-4000-8000-000000000004",
+        "startDate": "2026-05-21T00:00:00.000Z",
+        "endDate": "2027-02-25T00:00:00.000Z",
+        "daysLeft": 173,
+        "fee": 1400000,
+        "merchant": {
+          "id": "d2000000-0000-4000-8000-000000000006",
+          "fullName": "Cô Ba Rau Sạch",
+          "phone": "0978000006",
+          "avatar": null,
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "83ac0695-0b9d-49ef-a3a8-79aef5b9b3a9",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+      "categoryId": "50000000-0000-4000-8000-000000000001",
+      "code": "D04-08",
+      "name": "Gian hàng gia dụng",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 4,
+      "phone": "0969000005",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 8,
+      "createdAt": "2026-08-22T13:11:18.708Z",
+      "updatedAt": "2026-08-22T13:11:18.708Z",
+      "zones": {
+        "id": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+        "code": "A",
+        "name": "Khu A - Rau củ quả"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "displayStatus": "vacant",
+      "openComplaintCount": 1,
+      "currentContract": null
+    },
+    {
+      "id": "38888639-4e7d-413f-aa85-312119402e9f",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "94315111-597e-4260-8e11-49347759825b",
+      "categoryId": null,
+      "code": "D900-08",
+      "name": "Gian hàng gia dụng",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 4,
+      "phone": "0969000013",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 8,
+      "createdAt": "2026-08-22T13:11:18.762Z",
+      "updatedAt": "2026-08-22T13:11:18.762Z",
+      "zones": {
+        "id": "94315111-597e-4260-8e11-49347759825b",
+        "code": "D260802V1-K05",
+        "name": "Khu Thực phẩm tươi 1"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 1,
+      "currentContract": null
+    },
+    {
+      "id": "ab60bc99-d86b-419d-a63a-c5357abd9f24",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+      "categoryId": null,
+      "code": "D901-08",
+      "name": "Gian hàng gia dụng",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 4,
+      "phone": "0969000021",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 8,
+      "createdAt": "2026-08-22T13:11:18.815Z",
+      "updatedAt": "2026-08-22T13:11:18.815Z",
+      "zones": {
+        "id": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+        "code": "D260802V1-K06",
+        "name": "Khu Nông sản chọn lọc 2"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 1,
+      "currentContract": null
+    },
+    {
+      "id": "fdeea08f-bb8d-48d0-9d53-576e39d55482",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+      "categoryId": null,
+      "code": "D902-08",
+      "name": "Gian hàng gia dụng",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 4,
+      "phone": "0969000029",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 8,
+      "createdAt": "2026-08-22T13:11:18.866Z",
+      "updatedAt": "2026-08-22T13:11:18.866Z",
+      "zones": {
+        "id": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+        "code": "D260802V1-K07",
+        "name": "Khu Đặc sản địa phương 3"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "7a500a1e-cbb6-4fd8-9a73-5c2fa1f29c63",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "5d751924-e6d3-425f-b933-fe3081d1c191",
+      "categoryId": null,
+      "code": "D903-08",
+      "name": "Gian hàng gia dụng",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 4,
+      "phone": "0969000037",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 8,
+      "createdAt": "2026-08-22T13:11:18.919Z",
+      "updatedAt": "2026-08-22T13:11:18.919Z",
+      "zones": {
+        "id": "5d751924-e6d3-425f-b933-fe3081d1c191",
+        "code": "D260802V1-K08",
+        "name": "Khu Hàng thiết yếu 4"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "195ca42e-dee5-4fbe-9a18-ba41a066bc28",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+      "categoryId": null,
+      "code": "D901-09",
+      "name": "Quầy ăn nhanh",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 5,
+      "phone": "0969000022",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 9,
+      "createdAt": "2026-08-22T13:11:18.819Z",
+      "updatedAt": "2026-08-22T13:11:18.819Z",
+      "zones": {
+        "id": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+        "code": "D260802V1-K06",
+        "name": "Khu Nông sản chọn lọc 2"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "occupied",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "fb971506-a9db-49a0-a994-fc5acea12417",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "94315111-597e-4260-8e11-49347759825b",
+      "categoryId": null,
+      "code": "D900-09",
+      "name": "Quầy ăn nhanh",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 5,
+      "phone": "0969000014",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 9,
+      "createdAt": "2026-08-22T13:11:18.766Z",
+      "updatedAt": "2026-08-22T13:11:18.766Z",
+      "zones": {
+        "id": "94315111-597e-4260-8e11-49347759825b",
+        "code": "D260802V1-K05",
+        "name": "Khu Thực phẩm tươi 1"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "occupied",
+      "openComplaintCount": 0,
+      "currentContract": {
+        "id": "d3000000-0000-4000-8000-000000000014",
+        "startDate": "2026-05-03T00:00:00.000Z",
+        "endDate": "2027-02-27T00:00:00.000Z",
+        "daysLeft": 175,
+        "fee": 1900000,
+        "merchant": {
+          "id": "d2000000-0000-4000-8000-000000000014",
+          "fullName": "Ngọc Lan Đặc Sản",
+          "phone": "0978000014",
+          "avatar": null,
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "d22a25a3-6571-4f19-aa4c-0b6e591825ed",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+      "categoryId": null,
+      "code": "D902-09",
+      "name": "Quầy ăn nhanh",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 5,
+      "phone": "0969000030",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 9,
+      "createdAt": "2026-08-22T13:11:18.870Z",
+      "updatedAt": "2026-08-22T13:11:18.870Z",
+      "zones": {
+        "id": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+        "code": "D260802V1-K07",
+        "name": "Khu Đặc sản địa phương 3"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "occupied",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "473291dc-cf3d-4b80-b1d4-f2cd2bee4fba",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+      "categoryId": "50000000-0000-4000-8000-000000000001",
+      "code": "D04-09",
+      "name": "Quầy ăn nhanh",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 5,
+      "phone": "0969000006",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 9,
+      "createdAt": "2026-08-22T13:11:18.713Z",
+      "updatedAt": "2026-08-22T13:11:18.713Z",
+      "zones": {
+        "id": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+        "code": "A",
+        "name": "Khu A - Rau củ quả"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "displayStatus": "occupied",
+      "openComplaintCount": 0,
+      "currentContract": {
+        "id": "d3000000-0000-4000-8000-000000000006",
+        "startDate": "2026-05-03T00:00:00.000Z",
+        "endDate": "2027-02-27T00:00:00.000Z",
+        "daysLeft": 175,
+        "fee": 1900000,
+        "merchant": {
+          "id": "d2000000-0000-4000-8000-000000000007",
+          "fullName": "Chú Tư Hải Sản",
+          "phone": "0978000007",
+          "avatar": null,
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "50399aa6-f341-4ba6-af81-de976d1c4730",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "5d751924-e6d3-425f-b933-fe3081d1c191",
+      "categoryId": null,
+      "code": "D903-09",
+      "name": "Quầy ăn nhanh",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 5,
+      "phone": "0969000038",
+      "openHours": "05:30 - 18:00",
+      "status": "occupied",
+      "displayOrder": 9,
+      "createdAt": "2026-08-22T13:11:18.923Z",
+      "updatedAt": "2026-08-22T13:11:18.923Z",
+      "zones": {
+        "id": "5d751924-e6d3-425f-b933-fe3081d1c191",
+        "code": "D260802V1-K08",
+        "name": "Khu Hàng thiết yếu 4"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "occupied",
+      "openComplaintCount": 0,
+      "currentContract": {
+        "id": "d3000000-0000-4000-8000-000000000038",
+        "startDate": "2026-05-03T00:00:00.000Z",
+        "endDate": "2027-02-27T00:00:00.000Z",
+        "daysLeft": 175,
+        "fee": 1900000,
+        "merchant": {
+          "id": "d2000000-0000-4000-8000-000000000035",
+          "fullName": "Hoa Tươi An Nhiên",
+          "phone": "0978000035",
+          "avatar": null,
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "4b801872-d533-4e0a-af0a-98b4c712d439",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+      "categoryId": "50000000-0000-4000-8000-000000000001",
+      "code": "D04-10",
+      "name": "Sạp thực phẩm tươi",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 6,
+      "phone": "0969000007",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 10,
+      "createdAt": "2026-08-22T13:11:18.722Z",
+      "updatedAt": "2026-08-22T13:11:18.722Z",
+      "zones": {
+        "id": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+        "code": "A",
+        "name": "Khu A - Rau củ quả"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "eaf4695a-a312-41e6-9983-ed51e020984a",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+      "categoryId": null,
+      "code": "D901-10",
+      "name": "Sạp thực phẩm tươi",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 6,
+      "phone": "0969000023",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 10,
+      "createdAt": "2026-08-22T13:11:18.827Z",
+      "updatedAt": "2026-08-22T13:11:18.827Z",
+      "zones": {
+        "id": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+        "code": "D260802V1-K06",
+        "name": "Khu Nông sản chọn lọc 2"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "b74e0485-9d0a-4df2-8399-5babf6ef96e1",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "94315111-597e-4260-8e11-49347759825b",
+      "categoryId": null,
+      "code": "D900-10",
+      "name": "Sạp thực phẩm tươi",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 6,
+      "phone": "0969000015",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 10,
+      "createdAt": "2026-08-22T13:11:18.775Z",
+      "updatedAt": "2026-08-22T13:11:18.775Z",
+      "zones": {
+        "id": "94315111-597e-4260-8e11-49347759825b",
+        "code": "D260802V1-K05",
+        "name": "Khu Thực phẩm tươi 1"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "7e9b56f5-010d-4ca1-8713-4ceb094c8bf7",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "5d751924-e6d3-425f-b933-fe3081d1c191",
+      "categoryId": null,
+      "code": "D903-10",
+      "name": "Sạp thực phẩm tươi",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 6,
+      "phone": "0969000039",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 10,
+      "createdAt": "2026-08-22T13:11:18.931Z",
+      "updatedAt": "2026-08-22T13:11:18.931Z",
+      "zones": {
+        "id": "5d751924-e6d3-425f-b933-fe3081d1c191",
+        "code": "D260802V1-K08",
+        "name": "Khu Hàng thiết yếu 4"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "1de98f51-a94d-4f7f-8fae-444727155915",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+      "categoryId": null,
+      "code": "D902-10",
+      "name": "Sạp thực phẩm tươi",
+      "description": "Dữ liệu demo để kiểm thử vận hành",
+      "images": [],
+      "acreage": 6,
+      "phone": "0969000031",
+      "openHours": "05:30 - 18:00",
+      "status": "vacant",
+      "displayOrder": 10,
+      "createdAt": "2026-08-22T13:11:18.878Z",
+      "updatedAt": "2026-08-22T13:11:18.878Z",
+      "zones": {
+        "id": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+        "code": "D260802V1-K07",
+        "name": "Khu Đặc sản địa phương 3"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": null,
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "e66b2b58-6bbc-4f9b-98dd-3851d7472d44",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+      "categoryId": "50000000-0000-4000-8000-000000000001",
+      "code": "A-01",
+      "name": null,
+      "description": null,
+      "images": [
+        {
+          "url": "https://ql.chothongminh.top/storage/uploads/seed/stall-cho-dx-hn-a-01/1-80aed481d2998a43.jpg"
+        }
+      ],
+      "acreage": 6,
+      "phone": "0911000001",
+      "openHours": "05:30 - 17:00",
+      "status": "vacant",
+      "displayOrder": 13,
+      "createdAt": "2026-07-11T05:56:38.266Z",
+      "updatedAt": "2026-08-01T09:25:24.550Z",
+      "zones": {
+        "id": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+        "code": "A",
+        "name": "Khu A - Rau củ quả"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "displayStatus": "vacant",
+      "openComplaintCount": 2,
+      "currentContract": null
+    },
+    {
+      "id": "36ee1f1a-b829-4ac0-aa1a-fb8f48569a87",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+      "categoryId": "50000000-0000-4000-8000-000000000002",
+      "code": "A-02",
+      "name": null,
+      "description": null,
+      "images": [],
+      "acreage": 6,
+      "phone": null,
+      "openHours": "05:30 - 17:00",
+      "status": "occupied",
+      "displayOrder": 14,
+      "createdAt": "2026-07-11T05:56:38.297Z",
+      "updatedAt": "2026-07-25T14:57:24.583Z",
+      "zones": {
+        "id": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+        "code": "A",
+        "name": "Khu A - Rau củ quả"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000002",
+        "name": "Thịt"
+      },
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 1,
+      "currentContract": {
+        "id": "f93da93a-f21b-460d-a49b-35d8f8530ddb",
+        "startDate": "2026-07-24T00:00:00.000Z",
+        "endDate": "2028-07-24T00:00:00.000Z",
+        "daysLeft": 688,
+        "fee": 0,
+        "merchant": {
+          "id": "d94ffebf-8eb3-4d79-80be-eec6df1b787f",
+          "fullName": "Bảo Phạm",
+          "phone": "0934433864",
+          "avatar": "https://s240-ava-talk.zadn.vn/b/8/2/b/3/240/670463f296e45558d5bbb193d560b819.jpg",
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+      "categoryId": "50000000-0000-4000-8000-000000000001",
+      "code": "A-03",
+      "name": null,
+      "description": null,
+      "images": [],
+      "acreage": 6,
+      "phone": null,
+      "openHours": "05:30 - 17:00",
+      "status": "occupied",
+      "displayOrder": 15,
+      "createdAt": "2026-07-11T05:56:38.327Z",
+      "updatedAt": "2026-07-25T14:59:10.818Z",
+      "zones": {
+        "id": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+        "code": "A",
+        "name": "Khu A - Rau củ quả"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 1,
+      "currentContract": {
+        "id": "69af9fec-0835-4827-9781-967f28120fee",
+        "startDate": "2026-07-24T00:00:00.000Z",
+        "endDate": "2028-07-24T00:00:00.000Z",
+        "daysLeft": 688,
+        "fee": 0,
+        "merchant": {
+          "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+          "fullName": "Hòa",
+          "phone": "0357634420",
+          "avatar": "https://s240-ava-talk.zadn.vn/4/4/6/f/5/240/50c5c7c0e8c9d2c2394e4820dbf1e058.jpg",
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "8ccb364b-c5d2-46ea-a223-c1521364067c",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+      "categoryId": "50000000-0000-4000-8000-000000000001",
+      "code": "A-04",
+      "name": null,
+      "description": null,
+      "images": [],
+      "acreage": 6,
+      "phone": null,
+      "openHours": "05:30 - 17:00",
+      "status": "vacant",
+      "displayOrder": 16,
+      "createdAt": "2026-07-11T05:56:38.357Z",
+      "updatedAt": "2026-07-11T06:15:43.622Z",
+      "zones": {
+        "id": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+        "code": "A",
+        "name": "Khu A - Rau củ quả"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "displayStatus": "vacant",
+      "openComplaintCount": 0,
+      "currentContract": null
+    },
+    {
+      "id": "8619f232-1e18-462b-ac2c-c8375828ff3f",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "94315111-597e-4260-8e11-49347759825b",
+      "categoryId": "50000000-0000-4000-8000-000000000001",
+      "code": "D260802V1-S09",
+      "name": "Sạp Rau củ quả Thu Hà",
+      "description": "[CHO-DEMO-20260802-V1] Sạp mẫu bán rau củ quả tại Chợ Đồng Xuân (Demo).",
+      "images": [
+        {
+          "url": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/01-leafy-greens.jpeg"
+        }
+      ],
+      "acreage": 12,
+      "phone": "0398260008",
+      "openHours": "05:30 - 18:30",
+      "status": "occupied",
+      "displayOrder": 900,
+      "createdAt": "2026-07-02T02:08:00.000Z",
+      "updatedAt": "2026-08-02T04:04:36.432Z",
+      "zones": {
+        "id": "94315111-597e-4260-8e11-49347759825b",
+        "code": "D260802V1-K05",
+        "name": "Khu Thực phẩm tươi 1"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 2,
+      "currentContract": {
+        "id": "49191edf-0fb4-4e66-99b6-3f8741e8c465",
+        "startDate": "2026-07-01T00:00:00.000Z",
+        "endDate": "2027-06-30T00:00:00.000Z",
+        "daysLeft": 298,
+        "fee": 1500000,
+        "merchant": {
+          "id": "e2051643-3b08-4b4a-abed-39138b537834",
+          "fullName": "Nguyễn Thu Hà",
+          "phone": "0398260008",
+          "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/01-leafy-greens.jpeg",
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "51e9b527-2492-4355-aa68-a622b130161a",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "94315111-597e-4260-8e11-49347759825b",
+      "categoryId": "50000000-0000-4000-8000-000000000002",
+      "code": "D260802V1-S10",
+      "name": "Sạp Thịt Thu Hà",
+      "description": "[CHO-DEMO-20260802-V1] Sạp mẫu bán thịt tại Chợ Đồng Xuân (Demo).",
+      "images": [
+        {
+          "url": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/02-premium-pork.jpeg"
+        }
+      ],
+      "acreage": 14,
+      "phone": "0398260009",
+      "openHours": "05:30 - 18:30",
+      "status": "occupied",
+      "displayOrder": 901,
+      "createdAt": "2026-07-02T02:09:00.000Z",
+      "updatedAt": "2026-08-02T04:04:36.452Z",
+      "zones": {
+        "id": "94315111-597e-4260-8e11-49347759825b",
+        "code": "D260802V1-K05",
+        "name": "Khu Thực phẩm tươi 1"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000002",
+        "name": "Thịt"
+      },
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 1,
+      "currentContract": {
+        "id": "731032a5-0a7e-455c-85f0-d3ce2a90f0d2",
+        "startDate": "2026-07-01T00:00:00.000Z",
+        "endDate": "2027-06-30T00:00:00.000Z",
+        "daysLeft": 298,
+        "fee": 1750000,
+        "merchant": {
+          "id": "7ca7c1d0-376f-4d70-b5de-8166693ed804",
+          "fullName": "Trần Thu Hà",
+          "phone": "0398260009",
+          "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/02-premium-pork.jpeg",
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "79d05346-6f1b-47ad-a934-80335ad33454",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+      "categoryId": "50000000-0000-4000-8000-000000000003",
+      "code": "D260802V1-S11",
+      "name": "Sạp Hải sản Thu Hà",
+      "description": "[CHO-DEMO-20260802-V1] Sạp mẫu bán hải sản tại Chợ Đồng Xuân (Demo).",
+      "images": [
+        {
+          "url": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/03-fresh-fish.jpeg"
+        }
+      ],
+      "acreage": 16,
+      "phone": "0398260010",
+      "openHours": "05:30 - 18:30",
+      "status": "occupied",
+      "displayOrder": 902,
+      "createdAt": "2026-07-02T02:10:00.000Z",
+      "updatedAt": "2026-08-02T04:04:36.472Z",
+      "zones": {
+        "id": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+        "code": "D260802V1-K06",
+        "name": "Khu Nông sản chọn lọc 2"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000003",
+        "name": "Hải sản"
+      },
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 2,
+      "currentContract": {
+        "id": "c3f83667-3d7f-4ae5-9ff5-1b69bc0807df",
+        "startDate": "2026-07-01T00:00:00.000Z",
+        "endDate": "2027-06-30T00:00:00.000Z",
+        "daysLeft": 298,
+        "fee": 2000000,
+        "merchant": {
+          "id": "190b69f8-7d9c-44fd-9f6c-5c4ee780cef1",
+          "fullName": "Lê Thu Hà",
+          "phone": "0398260010",
+          "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/03-fresh-fish.jpeg",
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "b545d89b-b31e-4712-80f8-e8d754f5a630",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+      "categoryId": "50000000-0000-4000-8000-000000000004",
+      "code": "D260802V1-S12",
+      "name": "Sạp Đồ khô Thu Hà",
+      "description": "[CHO-DEMO-20260802-V1] Sạp mẫu bán đồ khô tại Chợ Đồng Xuân (Demo).",
+      "images": [
+        {
+          "url": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/04-rice-grains.jpeg"
+        }
+      ],
+      "acreage": 18,
+      "phone": "0398260011",
+      "openHours": "05:30 - 18:30",
+      "status": "occupied",
+      "displayOrder": 903,
+      "createdAt": "2026-07-02T02:11:00.000Z",
+      "updatedAt": "2026-08-02T04:04:36.492Z",
+      "zones": {
+        "id": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+        "code": "D260802V1-K06",
+        "name": "Khu Nông sản chọn lọc 2"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000004",
+        "name": "Đồ khô"
+      },
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 1,
+      "currentContract": {
+        "id": "1e759edc-3388-42ce-a882-970b7ee18315",
+        "startDate": "2026-07-01T00:00:00.000Z",
+        "endDate": "2027-06-30T00:00:00.000Z",
+        "daysLeft": 298,
+        "fee": 2250000,
+        "merchant": {
+          "id": "d90003aa-c044-4b9f-aece-018828410ec2",
+          "fullName": "Phạm Thu Hà",
+          "phone": "0398260011",
+          "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/04-rice-grains.jpeg",
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "06ee709d-edb0-4d4d-b0e0-2d0cb39a3589",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+      "categoryId": "50000000-0000-4000-8000-000000000005",
+      "code": "D260802V1-S13",
+      "name": "Sạp Gia vị Thu Hà",
+      "description": "[CHO-DEMO-20260802-V1] Sạp mẫu bán gia vị tại Chợ Đồng Xuân (Demo).",
+      "images": [
+        {
+          "url": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/05-fish-sauce-spices.jpeg"
+        }
+      ],
+      "acreage": 12,
+      "phone": "0398260012",
+      "openHours": "05:30 - 18:30",
+      "status": "occupied",
+      "displayOrder": 904,
+      "createdAt": "2026-07-02T02:12:00.000Z",
+      "updatedAt": "2026-08-02T04:04:36.513Z",
+      "zones": {
+        "id": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+        "code": "D260802V1-K07",
+        "name": "Khu Đặc sản địa phương 3"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000005",
+        "name": "Gia vị"
+      },
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 2,
+      "currentContract": {
+        "id": "655fc720-5077-482b-87ae-c0e9d64c081c",
+        "startDate": "2026-07-01T00:00:00.000Z",
+        "endDate": "2027-06-30T00:00:00.000Z",
+        "daysLeft": 298,
+        "fee": 1500000,
+        "merchant": {
+          "id": "291b03b8-a07f-4dca-b7b2-68f909869786",
+          "fullName": "Hoàng Thu Hà",
+          "phone": "0398260012",
+          "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/05-fish-sauce-spices.jpeg",
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "6065983a-5988-4c09-aade-f9b96c47f252",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+      "categoryId": "50000000-0000-4000-8000-000000000006",
+      "code": "D260802V1-S14",
+      "name": "Sạp Ẩm thực Thu Hà",
+      "description": "[CHO-DEMO-20260802-V1] Sạp mẫu bán ẩm thực tại Chợ Đồng Xuân (Demo).",
+      "images": [
+        {
+          "url": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/06-pho-noodle-soup.jpeg"
+        }
+      ],
+      "acreage": 14,
+      "phone": "0398260013",
+      "openHours": "05:30 - 18:30",
+      "status": "occupied",
+      "displayOrder": 905,
+      "createdAt": "2026-07-02T02:13:00.000Z",
+      "updatedAt": "2026-08-02T04:04:36.533Z",
+      "zones": {
+        "id": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+        "code": "D260802V1-K07",
+        "name": "Khu Đặc sản địa phương 3"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000006",
+        "name": "Ẩm thực"
+      },
+      "displayStatus": "has_complaint",
+      "openComplaintCount": 1,
+      "currentContract": {
+        "id": "06390c30-7e79-46b4-8eef-050595b5a4ee",
+        "startDate": "2026-07-01T00:00:00.000Z",
+        "endDate": "2027-06-30T00:00:00.000Z",
+        "daysLeft": 298,
+        "fee": 1750000,
+        "merchant": {
+          "id": "ffbaf108-5e90-4ecc-aba8-d24b81b8ae08",
+          "fullName": "Vũ Thu Hà",
+          "phone": "0398260013",
+          "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/06-pho-noodle-soup.jpeg",
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "327c7c97-7928-4f0e-ae20-7375258059cd",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "5d751924-e6d3-425f-b933-fe3081d1c191",
+      "categoryId": "50000000-0000-4000-8000-000000000007",
+      "code": "D260802V1-S15",
+      "name": "Sạp Quần áo Thu Hà",
+      "description": "[CHO-DEMO-20260802-V1] Sạp mẫu bán quần áo tại Chợ Đồng Xuân (Demo).",
+      "images": [
+        {
+          "url": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/07-market-clothing.jpeg"
+        }
+      ],
+      "acreage": 16,
+      "phone": "0398260014",
+      "openHours": "05:30 - 18:30",
+      "status": "occupied",
+      "displayOrder": 906,
+      "createdAt": "2026-07-02T02:14:00.000Z",
+      "updatedAt": "2026-08-02T04:04:36.554Z",
+      "zones": {
+        "id": "5d751924-e6d3-425f-b933-fe3081d1c191",
+        "code": "D260802V1-K08",
+        "name": "Khu Hàng thiết yếu 4"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000007",
+        "name": "Quần áo"
+      },
+      "displayStatus": "occupied",
+      "openComplaintCount": 0,
+      "currentContract": {
+        "id": "6c4f1026-4642-49ee-8fe9-fdbe1e97eb7c",
+        "startDate": "2026-07-01T00:00:00.000Z",
+        "endDate": "2027-06-30T00:00:00.000Z",
+        "daysLeft": 298,
+        "fee": 2000000,
+        "merchant": {
+          "id": "601e5fd0-aeef-44cb-9898-69ef228de595",
+          "fullName": "Đặng Thu Hà",
+          "phone": "0398260014",
+          "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/07-market-clothing.jpeg",
+          "merchantStatus": "active"
+        }
+      }
+    },
+    {
+      "id": "51171698-690d-4bda-bb08-cbbee9113f0f",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "zoneId": "5d751924-e6d3-425f-b933-fe3081d1c191",
+      "categoryId": "50000000-0000-4000-8000-000000000008",
+      "code": "D260802V1-S16",
+      "name": "Sạp Gia dụng Thu Hà",
+      "description": "[CHO-DEMO-20260802-V1] Sạp mẫu bán gia dụng tại Chợ Đồng Xuân (Demo).",
+      "images": [
+        {
+          "url": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/08-kitchenware.jpeg"
+        }
+      ],
+      "acreage": 18,
+      "phone": "0398260015",
+      "openHours": "05:30 - 18:30",
+      "status": "occupied",
+      "displayOrder": 907,
+      "createdAt": "2026-07-02T02:15:00.000Z",
+      "updatedAt": "2026-08-02T04:04:36.576Z",
+      "zones": {
+        "id": "5d751924-e6d3-425f-b933-fe3081d1c191",
+        "code": "D260802V1-K08",
+        "name": "Khu Hàng thiết yếu 4"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000008",
+        "name": "Gia dụng"
+      },
+      "displayStatus": "occupied",
+      "openComplaintCount": 0,
+      "currentContract": {
+        "id": "dc7219e6-5326-42c3-bba4-c574f8d48423",
+        "startDate": "2026-07-01T00:00:00.000Z",
+        "endDate": "2027-06-30T00:00:00.000Z",
+        "daysLeft": 298,
+        "fee": 2250000,
+        "merchant": {
+          "id": "1892d7fb-be15-472e-b4d5-0a7cbd418fd8",
+          "fullName": "Bùi Thu Hà",
+          "phone": "0398260015",
+          "avatar": "https://ql.chothongminh.top/storage/uploads/demo-batches/cho-demo-20260802-v1/fooocus/08-kitchenware.jpeg",
+          "merchantStatus": "active"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 100,
+    "total": 50,
+    "totalPages": 1
+  }
+}

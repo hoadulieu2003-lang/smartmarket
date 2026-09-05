@@ -55,13 +55,24 @@ export interface StallVisualDescriptor {
   accessibleStatus: string;
   priority?: OperationalPriority;
   unifiedBadge?: UnifiedBadgeCluster | null;
+  dutyBadge?: DutyBadgeInfo | null;
   isDimmed?: boolean;
+}
+
+export type DutyView = 'all' | 'sanitation' | 'security_fire' | 'finance';
+
+export interface DutyBadgeInfo {
+  duty: DutyView;
+  label: string;
+  iconName: string;
+  color: string;
 }
 
 export interface StallAdapterOptions {
   isSelected?: boolean;
   isHovered?: boolean;
   operationalFilter?: OperationalFilter;
+  dutyView?: DutyView;
 }
 
 export type OperationalPriority = 'urgent' | 'attention' | 'maintenance' | 'normal';
@@ -76,4 +87,71 @@ export interface UnifiedBadgeCluster {
   badgeBg: string;
   badgeText: string;
   isPulsing?: boolean;
+}
+
+/**
+ * Kiểm tra xem sạp có khớp với góc nhìn ca trực đang chọn hay không
+ */
+export function isStallMatchingDuty(stall: Partial<StallEntity>, duty: DutyView): boolean {
+  if (duty === 'all') return true;
+  const state = (stall.state || {}) as any;
+  const issues: any[] = state.issues || [];
+  const code = stall.code || '';
+
+  if (duty === 'sanitation') {
+    return (
+      code === 'A12' ||
+      state.specificType === 'water' ||
+      (typeof state.taskLabel === 'string' && state.taskLabel.includes('dọn rác')) ||
+      issues.some(
+        (i: any) =>
+          i.specificType === 'water' ||
+          i.title?.toLowerCase().includes('nước') ||
+          i.title?.toLowerCase().includes('rác') ||
+          i.title?.toLowerCase().includes('mùi') ||
+          i.title?.toLowerCase().includes('vệ sinh')
+      )
+    );
+  }
+
+  if (duty === 'security_fire') {
+    return (
+      code === 'E08' ||
+      code === 'B14' ||
+      state.specificType === 'fire_safety' ||
+      state.specificType === 'encroachment' ||
+      issues.some(
+        (i: any) =>
+          i.specificType === 'fire_safety' ||
+          i.specificType === 'encroachment' ||
+          i.title?.toLowerCase().includes('gas') ||
+          i.title?.toLowerCase().includes('lấn chiếm') ||
+          i.title?.toLowerCase().includes('thoát hiểm') ||
+          i.title?.toLowerCase().includes('cháy')
+      )
+    );
+  }
+
+  if (duty === 'finance') {
+    const contractDaysLeft = (stall as any).daysLeftContract ?? state.contractDaysLeft;
+    const feeStatus = state.feeStatus;
+    return (
+      code === 'C08' ||
+      code === 'B03' ||
+      feeStatus === 'overdue' ||
+      (contractDaysLeft !== undefined && contractDaysLeft > 0 && contractDaysLeft <= 30) ||
+      state.specificType === 'contract_expiry' ||
+      state.specificType === 'fee_overdue' ||
+      issues.some(
+        (i: any) =>
+          i.type === 'fee_overdue' ||
+          i.type === 'contract_expiry' ||
+          i.specificType === 'contract_expiry' ||
+          i.title?.toLowerCase().includes('thu phí') ||
+          i.title?.toLowerCase().includes('gia hạn')
+      )
+    );
+  }
+
+  return false;
 }

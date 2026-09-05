@@ -1,0 +1,831 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "d4000000-0000-4000-8000-000000000102",
+      "stallId": "50399aa6-f341-4ba6-af81-de976d1c4730",
+      "categoryId": "08fba318-73d1-443c-b392-c796bfd3b8f8",
+      "name": "Cam xoàn miền Tây · D903-09",
+      "description": "Cam xoàn miền Tây tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 52000,
+      "unit": "kg",
+      "quantity": 0,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.952Z",
+      "updatedAt": "2026-08-22T13:11:21.661Z",
+      "ownerMerchantId": "d2000000-0000-4000-8000-000000000035",
+      "contractId": "d3000000-0000-4000-8000-000000000038",
+      "stalls": {
+        "id": "50399aa6-f341-4ba6-af81-de976d1c4730",
+        "code": "D903-09",
+        "name": "Quầy ăn nhanh",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "08fba318-73d1-443c-b392-c796bfd3b8f8",
+        "name": "Thịt heo"
+      },
+      "finalPrice": 52000,
+      "isOnSale": false,
+      "stockStatus": "out_of_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000101",
+      "stallId": "50399aa6-f341-4ba6-af81-de976d1c4730",
+      "categoryId": "01c86479-a114-44bf-88f0-b33ab5f75306",
+      "name": "Xoài cát Hòa Lộc · D903-09",
+      "description": "Xoài cát Hòa Lộc tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 68000,
+      "unit": "kg",
+      "quantity": 21,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 4,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.948Z",
+      "updatedAt": "2026-08-22T13:11:21.655Z",
+      "ownerMerchantId": "d2000000-0000-4000-8000-000000000035",
+      "contractId": "d3000000-0000-4000-8000-000000000038",
+      "stalls": {
+        "id": "50399aa6-f341-4ba6-af81-de976d1c4730",
+        "code": "D903-09",
+        "name": "Quầy ăn nhanh",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "01c86479-a114-44bf-88f0-b33ab5f75306",
+        "name": "Hải sản tươi"
+      },
+      "finalPrice": 68000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000100",
+      "stallId": "c97222d3-9ab7-4dc7-b302-dc4adc89693f",
+      "categoryId": "c742e8f0-3613-4960-9346-87e9bb96d194",
+      "name": "Dưa leo baby · D903-06",
+      "description": "Dưa leo baby tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 24000,
+      "unit": "kg",
+      "quantity": 20,
+      "origin": "Đà Lạt, Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 3,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.943Z",
+      "updatedAt": "2026-08-22T13:11:21.650Z",
+      "ownerMerchantId": "d2000000-0000-4000-8000-000000000033",
+      "contractId": "d3000000-0000-4000-8000-000000000035",
+      "stalls": {
+        "id": "c97222d3-9ab7-4dc7-b302-dc4adc89693f",
+        "code": "D903-06",
+        "name": "Gian hàng gia vị",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "c742e8f0-3613-4960-9346-87e9bb96d194",
+        "name": "Cá nước ngọt"
+      },
+      "finalPrice": 24000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000099",
+      "stallId": "c97222d3-9ab7-4dc7-b302-dc4adc89693f",
+      "categoryId": "c1382991-0fdb-4b5f-935f-ddd95b4c5a68",
+      "name": "Bí đỏ hồ lô · D903-06",
+      "description": "Bí đỏ hồ lô tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 16000,
+      "unit": "kg",
+      "quantity": 19,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.939Z",
+      "updatedAt": "2026-08-22T13:11:21.644Z",
+      "ownerMerchantId": "d2000000-0000-4000-8000-000000000033",
+      "contractId": "d3000000-0000-4000-8000-000000000035",
+      "stalls": {
+        "id": "c97222d3-9ab7-4dc7-b302-dc4adc89693f",
+        "code": "D903-06",
+        "name": "Gian hàng gia vị",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "c1382991-0fdb-4b5f-935f-ddd95b4c5a68",
+        "name": "Trái cây theo mùa"
+      },
+      "finalPrice": 16000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000098",
+      "stallId": "d6d388e4-9817-42f7-8b24-c19820a7f560",
+      "categoryId": "782df6b3-ccfb-4ca3-bf2d-7b5c3a884c20",
+      "name": "Cà rốt Đà Lạt · D903-03",
+      "description": "Cà rốt Đà Lạt tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 22000,
+      "unit": "kg",
+      "quantity": 18,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.935Z",
+      "updatedAt": "2026-08-22T13:11:21.638Z",
+      "ownerMerchantId": null,
+      "contractId": null,
+      "stalls": {
+        "id": "d6d388e4-9817-42f7-8b24-c19820a7f560",
+        "code": "D903-03",
+        "name": "Gian hàng gia dụng",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "782df6b3-ccfb-4ca3-bf2d-7b5c3a884c20",
+        "name": "Củ quả"
+      },
+      "finalPrice": 22000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000097",
+      "stallId": "d6d388e4-9817-42f7-8b24-c19820a7f560",
+      "categoryId": "eabaf1e2-8bd4-4b64-bf20-efd360ea5475",
+      "name": "Rau cải xanh VietGAP · D903-03",
+      "description": "Rau cải xanh VietGAP tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 18000,
+      "unit": "kg",
+      "quantity": 17,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.931Z",
+      "updatedAt": "2026-08-22T13:11:21.632Z",
+      "ownerMerchantId": null,
+      "contractId": null,
+      "stalls": {
+        "id": "d6d388e4-9817-42f7-8b24-c19820a7f560",
+        "code": "D903-03",
+        "name": "Gian hàng gia dụng",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "eabaf1e2-8bd4-4b64-bf20-efd360ea5475",
+        "name": "Rau lá"
+      },
+      "finalPrice": 18000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000096",
+      "stallId": "51171698-690d-4bda-bb08-cbbee9113f0f",
+      "categoryId": "96ff212e-c655-4f4d-a9a1-12fd1f69184a",
+      "name": "Chè đậu xanh · D260802V1-S16",
+      "description": "Chè đậu xanh tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 25000,
+      "unit": "ly",
+      "quantity": 16,
+      "origin": "Đà Lạt, Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 4,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.926Z",
+      "updatedAt": "2026-08-22T13:11:21.627Z",
+      "ownerMerchantId": "1892d7fb-be15-472e-b4d5-0a7cbd418fd8",
+      "contractId": "dc7219e6-5326-42c3-bba4-c574f8d48423",
+      "stalls": {
+        "id": "51171698-690d-4bda-bb08-cbbee9113f0f",
+        "code": "D260802V1-S16",
+        "name": "Sạp Gia dụng Thu Hà",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "96ff212e-c655-4f4d-a9a1-12fd1f69184a",
+        "name": "Thịt"
+      },
+      "finalPrice": 25000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000095",
+      "stallId": "51171698-690d-4bda-bb08-cbbee9113f0f",
+      "categoryId": "47784915-3481-4aea-a39b-43f63820ae1c",
+      "name": "Bún bò Huế · D260802V1-S16",
+      "description": "Bún bò Huế tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 55000,
+      "unit": "tô",
+      "quantity": 15,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.922Z",
+      "updatedAt": "2026-08-22T13:11:21.622Z",
+      "ownerMerchantId": "1892d7fb-be15-472e-b4d5-0a7cbd418fd8",
+      "contractId": "dc7219e6-5326-42c3-bba4-c574f8d48423",
+      "stalls": {
+        "id": "51171698-690d-4bda-bb08-cbbee9113f0f",
+        "code": "D260802V1-S16",
+        "name": "Sạp Gia dụng Thu Hà",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "47784915-3481-4aea-a39b-43f63820ae1c",
+        "name": "Rau"
+      },
+      "finalPrice": 55000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000094",
+      "stallId": "327c7c97-7928-4f0e-ae20-7375258059cd",
+      "categoryId": "27fc7bc3-926b-4de6-bb30-3f6cad4fd3d6",
+      "name": "Bánh cuốn nóng · D260802V1-S15",
+      "description": "Bánh cuốn nóng tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 35000,
+      "unit": "suất",
+      "quantity": 14,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.918Z",
+      "updatedAt": "2026-08-22T13:11:21.616Z",
+      "ownerMerchantId": "601e5fd0-aeef-44cb-9898-69ef228de595",
+      "contractId": "6c4f1026-4642-49ee-8fe9-fdbe1e97eb7c",
+      "stalls": {
+        "id": "327c7c97-7928-4f0e-ae20-7375258059cd",
+        "code": "D260802V1-S15",
+        "name": "Sạp Quần áo Thu Hà",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "27fc7bc3-926b-4de6-bb30-3f6cad4fd3d6",
+        "name": "Cua"
+      },
+      "finalPrice": 35000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000093",
+      "stallId": "327c7c97-7928-4f0e-ae20-7375258059cd",
+      "categoryId": "d27cd9ce-5b17-42dd-af99-2e04d78bae48",
+      "name": "Hoa cúc Đà Lạt · D260802V1-S15",
+      "description": "Hoa cúc Đà Lạt tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 45000,
+      "unit": "bó",
+      "quantity": 13,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.913Z",
+      "updatedAt": "2026-08-22T13:11:21.611Z",
+      "ownerMerchantId": "601e5fd0-aeef-44cb-9898-69ef228de595",
+      "contractId": "6c4f1026-4642-49ee-8fe9-fdbe1e97eb7c",
+      "stalls": {
+        "id": "327c7c97-7928-4f0e-ae20-7375258059cd",
+        "code": "D260802V1-S15",
+        "name": "Sạp Quần áo Thu Hà",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "d27cd9ce-5b17-42dd-af99-2e04d78bae48",
+        "name": "Thịt"
+      },
+      "finalPrice": 45000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000092",
+      "stallId": "d22a25a3-6571-4f19-aa4c-0b6e591825ed",
+      "categoryId": "3dc2a67b-fcdf-4681-9d46-ebd58cd7d47d",
+      "name": "Khăn lau đa năng · D902-09",
+      "description": "Khăn lau đa năng tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 35000,
+      "unit": "gói",
+      "quantity": 12,
+      "origin": "Đà Lạt, Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.909Z",
+      "updatedAt": "2026-08-22T13:11:21.606Z",
+      "ownerMerchantId": null,
+      "contractId": null,
+      "stalls": {
+        "id": "d22a25a3-6571-4f19-aa4c-0b6e591825ed",
+        "code": "D902-09",
+        "name": "Quầy ăn nhanh",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "3dc2a67b-fcdf-4681-9d46-ebd58cd7d47d",
+        "name": "Gia dụng đặc sản vùng miền"
+      },
+      "finalPrice": 35000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000091",
+      "stallId": "d22a25a3-6571-4f19-aa4c-0b6e591825ed",
+      "categoryId": "eb6aadec-06ea-4cd5-9c5b-36cbdefa8f36",
+      "name": "Áo sơ mi linen · D902-09",
+      "description": "Áo sơ mi linen tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 185000,
+      "unit": "cái",
+      "quantity": 11,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 4,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.905Z",
+      "updatedAt": "2026-08-22T13:11:21.602Z",
+      "ownerMerchantId": null,
+      "contractId": null,
+      "stalls": {
+        "id": "d22a25a3-6571-4f19-aa4c-0b6e591825ed",
+        "code": "D902-09",
+        "name": "Quầy ăn nhanh",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "eb6aadec-06ea-4cd5-9c5b-36cbdefa8f36",
+        "name": "Gia vị đặc sản vùng miền"
+      },
+      "finalPrice": 185000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000090",
+      "stallId": "ec74b6b1-5a47-4711-93fd-84f90b2b7bfb",
+      "categoryId": "88c3510a-b0ff-4683-b350-1d8b847292e4",
+      "name": "Trà sen túi lọc · D902-06",
+      "description": "Trà sen túi lọc tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 85000,
+      "unit": "hộp",
+      "quantity": 10,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.901Z",
+      "updatedAt": "2026-08-22T13:11:21.596Z",
+      "ownerMerchantId": "d2000000-0000-4000-8000-000000000026",
+      "contractId": "d3000000-0000-4000-8000-000000000027",
+      "stalls": {
+        "id": "ec74b6b1-5a47-4711-93fd-84f90b2b7bfb",
+        "code": "D902-06",
+        "name": "Gian hàng gia vị",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "88c3510a-b0ff-4683-b350-1d8b847292e4",
+        "name": "Thịt đặc sản vùng miền"
+      },
+      "finalPrice": 85000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000089",
+      "stallId": "ec74b6b1-5a47-4711-93fd-84f90b2b7bfb",
+      "categoryId": "66f09c18-29b1-40e6-b7ed-c511b8469e96",
+      "name": "Bún khô gạo lứt · D902-06",
+      "description": "Bún khô gạo lứt tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 28000,
+      "unit": "gói",
+      "quantity": 99,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 3,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.897Z",
+      "updatedAt": "2026-08-22T13:11:21.591Z",
+      "ownerMerchantId": "d2000000-0000-4000-8000-000000000026",
+      "contractId": "d3000000-0000-4000-8000-000000000027",
+      "stalls": {
+        "id": "ec74b6b1-5a47-4711-93fd-84f90b2b7bfb",
+        "code": "D902-06",
+        "name": "Gian hàng gia vị",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "66f09c18-29b1-40e6-b7ed-c511b8469e96",
+        "name": "Quần áo đặc sản vùng miền"
+      },
+      "finalPrice": 28000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000088",
+      "stallId": "8e1e945c-3637-4b51-85de-03092484afc3",
+      "categoryId": "ef5bd0b9-0ddf-4fe2-a720-16a6dedecb2c",
+      "name": "Nước mắm nhĩ · D902-03",
+      "description": "Nước mắm nhĩ tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 78000,
+      "unit": "chai",
+      "quantity": 98,
+      "origin": "Đà Lạt, Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.893Z",
+      "updatedAt": "2026-08-22T13:11:21.586Z",
+      "ownerMerchantId": "d2000000-0000-4000-8000-000000000024",
+      "contractId": "d3000000-0000-4000-8000-000000000024",
+      "stalls": {
+        "id": "8e1e945c-3637-4b51-85de-03092484afc3",
+        "code": "D902-03",
+        "name": "Gian hàng gia dụng",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "ef5bd0b9-0ddf-4fe2-a720-16a6dedecb2c",
+        "name": "Đồ khô đặc sản vùng miền"
+      },
+      "finalPrice": 78000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000087",
+      "stallId": "8e1e945c-3637-4b51-85de-03092484afc3",
+      "categoryId": "a9e0702d-0492-4f4f-ab5c-bb037eef52ed",
+      "name": "Gạo ST25 · D902-03",
+      "description": "Gạo ST25 tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 32000,
+      "unit": "kg",
+      "quantity": 97,
+      "origin": "Việt Nam",
+      "isHidden": true,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.889Z",
+      "updatedAt": "2026-08-22T13:11:21.581Z",
+      "ownerMerchantId": "d2000000-0000-4000-8000-000000000024",
+      "contractId": "d3000000-0000-4000-8000-000000000024",
+      "stalls": {
+        "id": "8e1e945c-3637-4b51-85de-03092484afc3",
+        "code": "D902-03",
+        "name": "Gian hàng gia dụng",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "a9e0702d-0492-4f4f-ab5c-bb037eef52ed",
+        "name": "Rau củ quả đặc sản vùng miền"
+      },
+      "finalPrice": 32000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000086",
+      "stallId": "6065983a-5988-4c09-aade-f9b96c47f252",
+      "categoryId": "53c10947-2b70-4daa-a3b0-70136fae4ca5",
+      "name": "Mực ống tươi · D260802V1-S14",
+      "description": "Mực ống tươi tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 235000,
+      "unit": "kg",
+      "quantity": 96,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 4,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.884Z",
+      "updatedAt": "2026-08-22T13:11:21.576Z",
+      "ownerMerchantId": "ffbaf108-5e90-4ecc-aba8-d24b81b8ae08",
+      "contractId": "06390c30-7e79-46b4-8eef-050595b5a4ee",
+      "stalls": {
+        "id": "6065983a-5988-4c09-aade-f9b96c47f252",
+        "code": "D260802V1-S14",
+        "name": "Sạp Ẩm thực Thu Hà",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "53c10947-2b70-4daa-a3b0-70136fae4ca5",
+        "name": "Ẩm thực đặc sản vùng miền"
+      },
+      "finalPrice": 235000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000085",
+      "stallId": "6065983a-5988-4c09-aade-f9b96c47f252",
+      "categoryId": "b91c8694-ddc8-44b4-954c-709611bdeb96",
+      "name": "Cá basa phi lê · D260802V1-S14",
+      "description": "Cá basa phi lê tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 92000,
+      "unit": "kg",
+      "quantity": 0,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.880Z",
+      "updatedAt": "2026-08-22T13:11:21.571Z",
+      "ownerMerchantId": "ffbaf108-5e90-4ecc-aba8-d24b81b8ae08",
+      "contractId": "06390c30-7e79-46b4-8eef-050595b5a4ee",
+      "stalls": {
+        "id": "6065983a-5988-4c09-aade-f9b96c47f252",
+        "code": "D260802V1-S14",
+        "name": "Sạp Ẩm thực Thu Hà",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "b91c8694-ddc8-44b4-954c-709611bdeb96",
+        "name": "Hải sản đặc sản vùng miền"
+      },
+      "finalPrice": 92000,
+      "isOnSale": false,
+      "stockStatus": "out_of_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000084",
+      "stallId": "06ee709d-edb0-4d4d-b0e0-2d0cb39a3589",
+      "categoryId": "3dcbea54-cf7b-4c3c-b189-393d12a07e62",
+      "name": "Cua biển sống · D260802V1-S13",
+      "description": "Cua biển sống tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 360000,
+      "unit": "kg",
+      "quantity": 94,
+      "origin": "Đà Lạt, Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.876Z",
+      "updatedAt": "2026-08-22T13:11:21.566Z",
+      "ownerMerchantId": "291b03b8-a07f-4dca-b7b2-68f909869786",
+      "contractId": "655fc720-5077-482b-87ae-c0e9d64c081c",
+      "stalls": {
+        "id": "06ee709d-edb0-4d4d-b0e0-2d0cb39a3589",
+        "code": "D260802V1-S13",
+        "name": "Sạp Gia vị Thu Hà",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "3dcbea54-cf7b-4c3c-b189-393d12a07e62",
+        "name": "Hải sản chọn lọc"
+      },
+      "finalPrice": 360000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    },
+    {
+      "id": "d4000000-0000-4000-8000-000000000083",
+      "stallId": "06ee709d-edb0-4d4d-b0e0-2d0cb39a3589",
+      "categoryId": "67344768-c545-49e6-90c7-e0ff3e1b3736",
+      "name": "Tôm thẻ loại 30 · D260802V1-S13",
+      "description": "Tôm thẻ loại 30 tuyển chọn, cập nhật theo ngày",
+      "images": [],
+      "price": 198000,
+      "unit": "kg",
+      "quantity": 93,
+      "origin": "Việt Nam",
+      "isHidden": false,
+      "discountType": null,
+      "discountValue": null,
+      "discountStartAt": null,
+      "discountEndAt": null,
+      "ratingAvg": 5,
+      "reviewCount": 1,
+      "deletedAt": null,
+      "createdAt": "2026-08-22T13:11:19.872Z",
+      "updatedAt": "2026-08-22T13:11:21.561Z",
+      "ownerMerchantId": "291b03b8-a07f-4dca-b7b2-68f909869786",
+      "contractId": "655fc720-5077-482b-87ae-c0e9d64c081c",
+      "stalls": {
+        "id": "06ee709d-edb0-4d4d-b0e0-2d0cb39a3589",
+        "code": "D260802V1-S13",
+        "name": "Sạp Gia vị Thu Hà",
+        "marketId": "30000000-0000-4000-8000-000000000002",
+        "markets": {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "name": "Chợ Đồng Xuân (Demo)"
+        }
+      },
+      "categories": {
+        "id": "67344768-c545-49e6-90c7-e0ff3e1b3736",
+        "name": "Quần áo chọn lọc"
+      },
+      "finalPrice": 198000,
+      "isOnSale": false,
+      "stockStatus": "in_stock"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 20,
+    "total": 84,
+    "totalPages": 5
+  }
+}

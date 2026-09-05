@@ -1,0 +1,95 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "50000000-0000-4000-8000-000000000001",
+      "name": "Rau củ quả",
+      "description": "Ngành hàng Rau củ quả",
+      "displayOrder": 1,
+      "parentId": null,
+      "createdAt": "2026-07-11T05:56:34.891Z",
+      "updatedAt": "2026-07-11T06:15:40.044Z"
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000002",
+      "name": "Thịt",
+      "description": "Ngành hàng Thịt",
+      "displayOrder": 2,
+      "parentId": null,
+      "createdAt": "2026-07-11T05:56:34.951Z",
+      "updatedAt": "2026-07-11T06:15:40.106Z"
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000003",
+      "name": "Hải sản",
+      "description": "Ngành hàng Hải sản",
+      "displayOrder": 3,
+      "parentId": null,
+      "createdAt": "2026-07-11T05:56:34.982Z",
+      "updatedAt": "2026-07-11T06:15:40.136Z"
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000004",
+      "name": "Đồ khô",
+      "description": "Ngành hàng Đồ khô",
+      "displayOrder": 4,
+      "parentId": null,
+      "createdAt": "2026-07-11T05:56:35.012Z",
+      "updatedAt": "2026-07-11T06:15:40.166Z"
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000005",
+      "name": "Gia vị",
+      "description": "Ngành hàng Gia vị",
+      "displayOrder": 5,
+      "parentId": null,
+      "createdAt": "2026-07-11T05:56:35.042Z",
+      "updatedAt": "2026-07-11T06:15:40.198Z"
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000006",
+      "name": "Ẩm thực",
+      "description": "Ngành hàng Ẩm thực",
+      "displayOrder": 6,
+      "parentId": null,
+      "createdAt": "2026-07-11T05:56:35.072Z",
+      "updatedAt": "2026-07-11T06:15:40.228Z"
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000007",
+      "name": "Quần áo",
+      "description": "Ngành hàng Quần áo",
+      "displayOrder": 7,
+      "parentId": null,
+      "createdAt": "2026-07-11T05:56:35.102Z",
+      "updatedAt": "2026-07-11T06:15:40.259Z"
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000008",
+      "name": "Gia dụng",
+      "description": "Ngành hàng Gia dụng",
+      "displayOrder": 8,
+      "parentId": null,
+      "createdAt": "2026-07-11T05:56:35.131Z",
+      "updatedAt": "2026-07-11T06:15:40.290Z"
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000009",
+      "name": "Hoa tươi",
+      "description": "Ngành hàng Hoa tươi",
+      "displayOrder": 9,
+      "parentId": null,
+      "createdAt": "2026-07-11T05:56:35.161Z",
+      "updatedAt": "2026-07-11T06:15:40.321Z"
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000010",
+      "name": "Khác",
+      "description": "Ngành hàng Khác",
+      "displayOrder": 10,
+      "parentId": null,
+      "createdAt": "2026-07-11T05:56:35.190Z",
+      "updatedAt": "2026-07-11T06:15:40.353Z"
+    }
+  ]
+}

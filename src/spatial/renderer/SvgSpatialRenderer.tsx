@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useLayoutEffect, useMemo, useSyncExternalStore } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useMemo, useSyncExternalStore } from 'react';
 import { RotateCcw } from 'lucide-react';
 import type { FloorEntity, StallEntity, SpatialGeometry } from '../model/types';
 import { 
@@ -34,6 +34,7 @@ export interface SvgSpatialRendererProps {
   onSelectZone?: (zoneId: string) => void;
   selectedZone?: string | null;
   operationalFilter?: 'all' | 'p0' | 'warning' | 'maintenance' | 'empty';
+  dutyView?: 'all' | 'sanitation' | 'security_fire' | 'finance';
 }
 
 function geometryBounds(geometry: SpatialGeometry) {
@@ -112,6 +113,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
   onSelectZone,
   selectedZone = null,
   operationalFilter = 'all',
+  dutyView = 'all',
   showLayers = {
     boundary: true,
     zones: true,
@@ -160,6 +162,47 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
     const x = clamp(centerX - focusWidth / 2, 0, coordWidth - focusWidth);
     return `${Math.round(x)} 0 ${Math.round(focusWidth)} ${coordHeight}`;
   }, [coordHeight, coordWidth, floor.stalls, isNarrowViewport, layout]);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerSize, setContainerSize] = useState<{ width: number; height: number } | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const updateSize = () => {
+      if (containerRef.current) {
+        const { width, height } = containerRef.current.getBoundingClientRect();
+        if (width > 0 && height > 0) {
+          setContainerSize({ width, height });
+        }
+      }
+    };
+    updateSize();
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(updateSize);
+      ro.observe(containerRef.current);
+      return () => ro.disconnect();
+    }
+  }, []);
+
+  const dynamicViewBox = useMemo(() => {
+    if (isNarrowViewport) return mobileViewBox;
+    if (!containerSize || containerSize.height <= 0 || containerSize.width <= 0) {
+      return `0 0 ${coordWidth} ${coordHeight}`;
+    }
+
+    const containerAspect = containerSize.width / containerSize.height;
+    const contentAspect = coordWidth / coordHeight;
+
+    if (containerAspect > contentAspect) {
+      const targetWidth = Math.round(coordHeight * containerAspect);
+      const deltaX = Math.round((targetWidth - coordWidth) / 2);
+      return `${-deltaX} 0 ${targetWidth} ${coordHeight}`;
+    } else {
+      const targetHeight = Math.round(coordWidth / containerAspect);
+      const deltaY = Math.round((targetHeight - coordHeight) / 2);
+      return `0 ${-deltaY} ${coordWidth} ${targetHeight}`;
+    }
+  }, [containerSize, coordHeight, coordWidth, isNarrowViewport, mobileViewBox]);
 
   // Auto-center camera onto selectedZone when entering ZONE_FOCUS
   useLayoutEffect(() => {
@@ -258,6 +301,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
 
   return (
     <div 
+      ref={containerRef}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -273,7 +317,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
     >
       <svg
         suppressHydrationWarning
-        viewBox={mobileViewBox}
+        viewBox={dynamicViewBox}
         preserveAspectRatio={isNarrowViewport ? 'xMidYMid slice' : 'xMidYMid meet'}
         className="w-full h-full drop-shadow-sm font-sans block"
       >
@@ -301,31 +345,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
             <stop offset="100%" stopColor="#93c5fd" stopOpacity="0" />
           </radialGradient>
 
-          {/* Beacon & Radar Sonar Pulsing Animation Keyframes */}
-          <style>{`
-            @keyframes spatial-pulse {
-              0% { transform: scale(0.95); opacity: 0.8; }
-              50% { transform: scale(1.15); opacity: 0.3; }
-              100% { transform: scale(0.95); opacity: 0.8; }
-            }
-            .spatial-pulsing-node, .spatial-pulsing-beacon {
-              animation: spatial-pulse 1.8s infinite ease-in-out;
-              transform-origin: center;
-            }
-            @keyframes spatial-sonar {
-              0% { r: 25px; opacity: 0.9; stroke-width: 2.5px; }
-              70% { r: 55px; opacity: 0.15; stroke-width: 1px; }
-              100% { r: 65px; opacity: 0; stroke-width: 0.5px; }
-            }
-            .spatial-sonar-wave {
-              animation: spatial-sonar 2.2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
-              transform-origin: center;
-            }
-            .spatial-sonar-wave-delayed {
-              animation: spatial-sonar 2.2s cubic-bezier(0.1, 0.8, 0.3, 1) 0.9s infinite;
-              transform-origin: center;
-            }
-          `}</style>
+
         </defs>
 
         {/* ============================================================= */}
@@ -345,6 +365,18 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
                 stroke="#cbd5e1"
                 strokeWidth="2.5"
                 strokeLinejoin="round"
+              />
+            )}
+            {(floor as any).backgroundImage && (
+              <image
+                href={(floor as any).backgroundImage}
+                x="0"
+                y="0"
+                width={floor.coordinateSystem.width}
+                height={floor.coordinateSystem.height}
+                opacity="0.32"
+                preserveAspectRatio="none"
+                style={{ pointerEvents: 'none' }}
               />
             )}
           </g>
@@ -438,7 +470,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
                               textAnchor="middle"
                               className="font-sans font-bold"
                             >
-                              {hasP0InZone ? `P0 • ${zoneIssuesCount} sự cố khẩn cấp` : `! • ${zoneIssuesCount} việc chú ý`}
+                              {hasP0InZone ? `● ${zoneIssuesCount} sự cố khẩn cấp` : `▲ ${zoneIssuesCount} việc chú ý`}
                             </text>
                           </g>
                         )}
@@ -715,7 +747,6 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
           return (
             <g 
               key={stall.id} 
-              opacity={isHighlighted ? 1.0 : 0.22}
               className="transition-opacity duration-200"
             >
               <StallGlyph
@@ -726,6 +757,7 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
                 isMacroView={zoomLevel !== undefined && zoomLevel < 0.85}
                 isDimmed={!isHighlighted}
                 operationalFilter={operationalFilter}
+                dutyView={dutyView}
                 onSelect={handleClick}
                 onHover={handleHover}
               />
@@ -753,7 +785,6 @@ export const SvgSpatialRenderer: React.FC<SvgSpatialRendererProps> = ({
               transform={`translate(${coords[0]}, ${coords[1]})`}
               onClick={() => handleClick({ ...incident, entityType: 'incident' })}
             >
-              <circle r="16" fill={style.fill} opacity="0.35" className="spatial-pulsing-node" />
               <circle r="9" fill={style.fill} stroke={isSelected ? '#076C31' : '#ffffff'} strokeWidth={isSelected ? 3 : 2} />
               <text y="3.5" textAnchor="middle" fontSize="10" fontWeight="extrabold" fill={style.textColor}>!</text>
             </g>

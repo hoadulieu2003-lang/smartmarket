@@ -77,7 +77,7 @@ export function getStallSvgStyle(
   let strokeWidth = 1;
   let strokeDasharray: string | undefined = undefined;
   let textColor = '#0f172a';
-  let subTextColor = '#64748b';
+  let subTextColor = '#334155';
 
   switch (tokens.theme) {
     case 'complaint':
@@ -109,8 +109,8 @@ export function getStallSvgStyle(
       stroke = isHovered ? '#64748b' : '#94a3b8'; // Slate-400
       strokeWidth = 1;
       strokeDasharray = '4,3';
-      textColor = '#94a3b8';
-      subTextColor = '#cbd5e1';
+      textColor = '#64748b';
+      subTextColor = '#64748b';
       break;
 
     case 'normal':
@@ -119,7 +119,7 @@ export function getStallSvgStyle(
       stroke = isHovered ? '#64748b' : '#e2e8f0';
       strokeWidth = 1;
       textColor = '#1e293b';
-      subTextColor = '#64748b';
+      subTextColor = '#334155';
       break;
   }
 

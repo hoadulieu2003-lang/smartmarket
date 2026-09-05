@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "data": {
+    "qrCount": 0,
+    "scans": 0,
+    "covered": 0,
+    "missing": 0
+  }
+}

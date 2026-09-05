@@ -129,9 +129,13 @@ export const URGENT_ACTIONS: UrgentActionsData = {
     totalPending: 7,
     overdue: 2,
     items: [
-      { id: 'pf-01', stallId: 'A06', applicant: 'Ngô Thanh Tùng', type: 'Đăng ký thuê mới sạp A06 (Hải sản đông lạnh)', submitted: '4 ngày trước', status: 'overdue' },
-      { id: 'pf-02', stallId: 'B10', applicant: 'Lê Thu Hương', type: 'Chuyển nhượng quyền thuê B10 (Trái cây hữu cơ)', submitted: '3 ngày trước', status: 'overdue' },
-      { id: 'pf-03', stallId: 'C05', applicant: 'Đặng Ngọc Anh', type: 'Bổ sung giấy chứng nhận ATTP', submitted: '1 ngày trước', status: 'pending' }
+      { id: 'HS-2026-081', stallId: 'A06', applicant: 'Ngô Thanh Tùng', type: 'Đăng ký thuê mới sạp A06 (Hải sản đông lạnh)', submitted: '4 ngày trước', status: 'overdue' },
+      { id: 'HS-2026-079', stallId: 'B10', applicant: 'Lê Thu Hương', type: 'Chuyển nhượng quyền thuê B10 (Trái cây hữu cơ)', submitted: '3 ngày trước', status: 'overdue' },
+      { id: 'HS-2026-084', stallId: 'C05', applicant: 'Đặng Ngọc Anh', type: 'Bổ sung giấy chứng nhận ATTP', submitted: '2 ngày trước', status: 'pending' },
+      { id: 'HS-2026-085', stallId: 'B07', applicant: 'Trần Văn Tuấn', type: 'Gia hạn hợp đồng thuê sạp (2 năm)', submitted: '1 ngày trước', status: 'pending' },
+      { id: 'HS-2026-088', stallId: 'D900-04', applicant: 'Hoàng Minh Trí', type: 'Thuê mới sạp D900-04 (Thịt lợn sinh học)', submitted: 'Hôm nay', status: 'pending' },
+      { id: 'HS-2026-090', stallId: 'D04-02', applicant: 'Nguyễn Thị Mai', type: 'Cập nhật người đại diện hộ kinh doanh', submitted: 'Hôm nay', status: 'pending' },
+      { id: 'HS-2026-092', stallId: 'A15', applicant: 'Phan Thanh Hà', type: 'Bổ sung cam kết nguồn gốc xuất xứ', submitted: 'Hôm nay', status: 'pending' }
     ]
   }
 };

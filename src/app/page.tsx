@@ -3,18 +3,17 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import UrgentActionCards from '@/components/UrgentActionCards';
-import InlineOverviewBar from '@/components/InlineOverviewBar';
 import MapToolbar from '@/components/MapToolbar';
 import StallDetailDrawer from '@/components/StallDetailDrawer';
 import PendingProfilesView from '@/components/PendingProfilesView';
-import MarketFeeCollectionSection from '@/components/MarketFeeCollectionSection';
+import LiveDashboardOverview from '@/components/LiveDashboardOverview';
 import InMapQuickActionCard from '@/components/InMapQuickActionCard';
 
 import {
   FIXTURE_A_DONG_XUAN,
   FIXTURE_B_L_SHAPED_MARKET,
   FIXTURE_C_TWO_BLOCK_BRIDGE_MARKET,
+  LIVE_FLOOR_DONG_XUAN,
   MEGA_FLOOR_DONG_XUAN_STANDARD,
   REALISTIC_FLOOR_DATA,
   type MapDensityMode,
@@ -25,6 +24,7 @@ import ThreeSpatialRenderer from '@/components/ThreeSpatialRenderer';
 import { StallGlyph } from '@/spatial/renderer/StallGlyph';
 import type { StallEntity, MapLodState } from '@/spatial/model/types';
 import { deriveStallVisual } from '@/spatial/presentation/stallVisualAdapter';
+import { isStallMatchingDuty } from '@/types/stallVisual';
 import { URGENT_ACTIONS, STALLS_DATA, AREA_ALERTS_DATA } from '@/data/mockMarketData';
 
 import {
@@ -36,6 +36,7 @@ import {
   Layers,
   Phone,
   User,
+  Users,
   Store,
   MapPin,
   AlertTriangle,
@@ -46,18 +47,97 @@ import {
   ArrowUp,
   ZoomIn,
   ZoomOut,
-  RotateCcw
+  RotateCcw,
+  Star,
+  QrCode,
+  Receipt
 } from 'lucide-react';
+
+const LIVE_URGENT_ACTIONS = {
+  complaints: {
+    total: 15,
+    critical: 15,
+    items: [
+      {
+        id: 'c1',
+        stallId: 'D900-06',
+        title: 'Gian hàng gia vị: Nhân viên phục vụ chưa hướng dẫn rõ cho khách (PAKN #075)',
+        severity: 'critical' as const,
+        time: '15 phút trước',
+        reporter: 'Phạm Khánh Linh'
+      },
+      {
+        id: 'c2',
+        stallId: 'D900-03',
+        title: 'Thực phẩm tươi: Phản ánh mùi hôi khu vực sạp D900-03',
+        severity: 'critical' as const,
+        time: '30 phút trước',
+        reporter: 'Nguyễn Văn Minh'
+      },
+      {
+        id: 'c3',
+        stallId: 'A-02',
+        title: 'Khu A Rau củ: Nước tràn lối đi trước sạp A-02',
+        severity: 'critical' as const,
+        time: '45 phút trước',
+        reporter: 'Ban Kiểm Tra'
+      },
+      {
+        id: 'c4',
+        stallId: 'D260802V1-S10',
+        title: 'Thực phẩm tươi: Sắp xếp hàng hóa lấn chiếm lối đi chung',
+        severity: 'critical' as const,
+        time: '1 giờ trước',
+        reporter: 'Tổ Trật Tự'
+      }
+    ]
+  },
+  areaAlerts: {
+    total: 3,
+    critical: 1,
+    locations: [
+      { id: 'al_1', name: 'Cổng Bắc Phố Hàng Khoai', count: 4, detail: 'Khu vực bốc dỡ hàng tập trung đông giờ cao điểm', status: 'urgent' as const },
+      { id: 'al_2', name: 'Khu gom rác Khu A', count: 2, detail: 'Cần vệ sinh định kỳ ca sáng', status: 'warning' as const },
+      { id: 'al_3', name: 'Lối đi Phân khu 1 - 2', count: 1, detail: 'Nước đọng sau ca rửa sàn', status: 'warning' as const },
+    ]
+  },
+  expiringContracts: {
+    totalUnder30: 5,
+    criticalUnder7: 2,
+    items: [
+      { stallId: 'D903-03', merchant: 'Tiểu thương D903-03', business: 'Thiết yếu 4', daysLeft: 5, expiryDate: '10/09/2026' },
+      { stallId: 'D902-05', merchant: 'Tiểu thương D902-05', business: 'Đặc sản 3', daysLeft: 6, expiryDate: '11/09/2026' },
+    ]
+  },
+  pendingProfiles: {
+    totalPending: 5,
+    overdue: 1,
+    items: [
+      { id: 'p1', stallId: 'A-01', applicant: 'Hộ KD Nguyễn Văn A', type: 'Đăng ký thuê mới', submitted: '01/09/2026', status: 'overdue' as const },
+      { id: 'p2', stallId: 'D901-04', applicant: 'Hộ KD Trần Thị B', type: 'Gia hạn hợp đồng', submitted: '03/09/2026', status: 'pending' as const },
+    ]
+  }
+};
 
 export default function SmartMarketHome() {
   // Navigation & Shell
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
-  const [currentView, setCurrentView] = useState<'market_map' | 'pending_profiles'>('market_map');
+  const [currentView, setCurrentView] = useState<'overview' | 'market_map' | 'pending_profiles'>('market_map');
   const [selectedFloor, setSelectedFloor] = useState('1');
   const [viewEngine, setViewEngine] = useState<'2d_svg' | '3d_three'>('2d_svg');
-  const [activeFixtureKey, setActiveFixtureKey] = useState<'A' | 'B' | 'C'>('A');
+  const [activeFixtureKey, setActiveFixtureKey] = useState<'LIVE' | 'A' | 'B' | 'C'>('LIVE');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const f = params.get('fixture');
+      if (f === 'A' || f === 'B' || f === 'C' || f === 'LIVE') {
+        setActiveFixtureKey(f as any);
+      }
+    }
+  }, []);
 
   // Search & Filtering
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,6 +176,27 @@ export default function SmartMarketHome() {
       setZoomLevel(1.0);
     }
   };
+
+  const availableZones = useMemo(() => {
+    if (activeFixtureKey === 'LIVE') {
+      return [
+        { key: null, label: 'Toàn chợ' },
+        { key: '26c02053-ffb4-4d33-81d8-d5077bb5c74b', label: 'Khu A' },
+        { key: '94315111-597e-4260-8e11-49347759825b', label: 'TP Tươi 1' },
+        { key: 'a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282', label: 'Nông Sản 2' },
+        { key: '5c0e4bf1-f033-46ea-9d6a-cb1b4ae50893', label: 'Đặc Sản 3' },
+        { key: '4a6b297b-b82b-4fc4-bb9e-108bb68b321a', label: 'Thiết Yếu 4' },
+      ];
+    }
+    return [
+      { key: null, label: 'Toàn chợ' },
+      { key: 'zone_A', label: 'Khu A' },
+      { key: 'zone_B', label: 'Khu B' },
+      { key: 'zone_C', label: 'Khu C' },
+      { key: 'zone_D', label: 'Khu D' },
+      { key: 'zone_E', label: 'Khu E' },
+    ];
+  }, [activeFixtureKey]);
 
   // Bi-directional sync: Chọn sạp từ danh sách sự cố trên đầu (Work Package D)
   const handleSelectStallCode = (code: string) => {
@@ -142,6 +243,8 @@ export default function SmartMarketHome() {
   const currentFloor = useMemo(() => {
     const rawFloor = (() => {
       switch (activeFixtureKey) {
+        case 'LIVE':
+          return LIVE_FLOOR_DONG_XUAN;
         case 'B':
           return FIXTURE_B_L_SHAPED_MARKET;
         case 'C':
@@ -251,15 +354,8 @@ export default function SmartMarketHome() {
       }
 
       // 0. Duty View Filter
-      if (dutyView === 'sanitation') {
-        const hasWater = stall.code === 'A12' || (stall.state.issues && stall.state.issues.some((i: any) => i.title?.includes('Nước') || i.specificType === 'water'));
-        if (!hasWater) return false;
-      } else if (dutyView === 'security_fire') {
-        const hasSecurity = stall.code === 'E08' || stall.code === 'B14' || (stall.state.issues && stall.state.issues.some((i: any) => i.title?.includes('gas') || i.title?.includes('Lấn chiếm') || i.specificType === 'fire_safety' || i.specificType === 'encroachment'));
-        if (!hasSecurity) return false;
-      } else if (dutyView === 'finance') {
-        const hasFinance = stall.code === 'C08' || stall.code === 'B03' || (stall.state.contractDaysLeft <= 30 && stall.state.contractDaysLeft > 0) || stall.state.feeStatus === 'overdue';
-        if (!hasFinance) return false;
+      if (dutyView !== 'all' && !isStallMatchingDuty(stall, dutyView)) {
+        return false;
       }
 
       // 1. Quick Status Filter
@@ -368,41 +464,23 @@ export default function SmartMarketHome() {
           {/* VIEW A: HỒ SƠ TIỂU THƯƠNG */}
           {currentView === 'pending_profiles' ? (
             <PendingProfilesView onBackToMap={() => setCurrentView('market_map')} />
+          ) : currentView === 'overview' ? (
+            /* VIEW C: TỔNG QUAN VẬN HÀNH (ĐỒNG BỘ 100% GIAO DIỆN LIVE CMS QL.CHOTHONGMINH.TOP) */
+            <LiveDashboardOverview
+              onNavigateToMap={() => setCurrentView('market_map')}
+              onNavigateToProfiles={() => setCurrentView('pending_profiles')}
+            />
           ) : (
-            /* VIEW B: MẶT BẰNG ĐIỀU HÀNH & TÁC CHIẾN CHỢ */
-            <>
-              {/* Continuous 4-Level Priority Strip */}
-              <UrgentActionCards
-                urgentData={URGENT_ACTIONS}
-                onSelectFilter={(f) => setActiveFilter(f)}
-                onNavigateToProfiles={() => setCurrentView('pending_profiles')}
-                onSelectStallCode={handleSelectStallCode}
-              />
-
-              {/* Quick Operational 1-Touch Filter Bar */}
-              <InlineOverviewBar
-                activeFilter={activeFilter}
-                onFilterChange={setActiveFilter}
-                selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
-                counts={counts}
-              />
-
-              {/* ========================================================================= */}
-              {/* KHU VỰC SƠ ĐỒ KHÔNG GIAN (2D SVG vs 2.5D/3D THREE.JS) */}
-              {/* ========================================================================= */}
-              {/* ========================================================================= */}
-              {/* KHU VỰC SƠ ĐỒ KHÔNG GIAN (2D SVG vs 2.5D/3D THREE.JS) */}
-              {/* ========================================================================= */}
+            /* VIEW B: MẶT BẰNG ĐIỀU HÀNH & TÁC CHIẾN CHỢ (IMMERSIVE SPATIAL MAP) */
+            <div className="w-full flex-1 flex flex-col min-h-0">
               <section
                 id="market-map-section"
-                className={`bg-white transition-all duration-200 overflow-hidden ${
+                className={`bg-white transition-all duration-200 overflow-hidden flex flex-col ${
                   isFullscreen
                     ? 'fixed inset-0 z-50 w-screen h-screen flex flex-col bg-slate-50 border-none rounded-none shadow-2xl m-0 p-0'
-                    : 'border border-slate-300 rounded shadow-xs w-full'
+                    : 'border border-slate-200 rounded-xl shadow-xs w-full flex-1 h-[calc(100vh-4.25rem)] min-h-[640px]'
                 }`}
               >
-
                 {/* Map Control Toolbar */}
                 <MapToolbar
                   selectedFloor={selectedFloor}
@@ -426,11 +504,18 @@ export default function SmartMarketHome() {
                   onSearchChange={setSearchQuery}
                   densityMode={densityMode}
                   onToggleDensityMode={() => setDensityMode((prev) => prev === 'optimized' ? 'standard' : 'optimized')}
+                  activeFixtureKey={activeFixtureKey}
+                  onSelectFixture={(f) => {
+                    setActiveFixtureKey(f);
+                    setSelectedZone(null);
+                    setSelectedStall(null);
+                  }}
+                  availableZones={availableZones}
                 />
 
-                {/* MÀN 2: THANH ĐIỀU HƯỚNG BREADCRUMB & BỘ LỌC RIÊNG TRONG KHU */}
+                {/* THANH ĐIỀU HƯỚNG BREADCRUMB & BỘ LỌC RIÊNG TRONG KHU */}
                 {selectedZone && (
-                  <div className="bg-emerald-50/95 border-b border-emerald-300 px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs font-sans shadow-xs">
+                  <div className="bg-emerald-50/95 border-b border-emerald-300 px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs font-sans shadow-xs shrink-0">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleSelectZone(null)}
@@ -478,7 +563,7 @@ export default function SmartMarketHome() {
 
                 {/* Real-time In-Map Dispatch Notification Toast */}
                 {dispatchToast && (
-                  <div className="bg-emerald-700 text-white px-4 py-2 font-sans font-bold text-xs flex items-center justify-between shadow-md transition-all">
+                  <div className="bg-emerald-700 text-white px-4 py-2 font-sans font-bold text-xs flex items-center justify-between shadow-md transition-all shrink-0">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-100" aria-hidden="true" />
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 motion-safe:animate-ping" aria-hidden="true" />
@@ -495,117 +580,121 @@ export default function SmartMarketHome() {
                   </div>
                 )}
 
-                {/* Fixture Selector (Sub-toolbar) */}
-                <div className="bg-slate-50 px-3.5 py-1.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs font-sans">
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-500 font-bold uppercase text-[10px]">Mặt bằng đối chiếu:</span>
-                    <div className="inline-flex rounded bg-white p-0.5 border border-slate-300 text-xs">
-                      {([
-                        { key: 'A', label: 'Chợ Đồng Xuân' },
-                        { key: 'B', label: 'Chợ Bến Thành chữ L' },
-                        { key: 'C', label: 'Chợ An Đông 2 Block' },
-                      ] as const).map((fix) => (
-                        <button
-                          key={fix.key}
-                          type="button"
-                          onClick={() => setActiveFixtureKey(fix.key)}
-                          aria-pressed={activeFixtureKey === fix.key}
-                          className={`min-h-11 rounded px-2.5 py-2 font-medium transition-colors cursor-pointer ${
-                            activeFixtureKey === fix.key
-                              ? 'bg-[#076C31] text-white font-bold shadow-xs'
-                              : 'text-slate-600 hover:text-slate-900'
-                          }`}
-                        >
-                          {fix.label}
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Operational Priority Legend */}
-                    <div className="hidden xl:flex items-center gap-2 px-2.5 py-0.5 bg-white border border-slate-200 rounded text-[11px] font-sans">
-                      <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Ưu tiên:</span>
-                      <span className="flex items-center gap-1 font-bold text-rose-700">
-                        <span className="w-2 h-2 rounded-full bg-rose-600 motion-safe:animate-ping" aria-hidden="true"></span>
-                        <span>P0 Khẩn cấp</span>
-                      </span>
-                      <span className="text-slate-300">•</span>
-                      <span className="flex items-center gap-1 font-bold text-amber-800">
-                        <span className="h-0 w-0 border-x-[5px] border-b-[9px] border-x-transparent border-b-amber-500" aria-hidden="true"></span>
-                        <span>Chú ý</span>
-                      </span>
-                      <span className="text-slate-300">•</span>
-                      <span className="flex items-center gap-1 font-bold text-yellow-800">
-                        <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>Bảo trì</span>
-                      </span>
-                      <span className="text-slate-300">•</span>
-                      <span className="flex items-center gap-1 text-slate-500 font-medium">
-                        <span className="w-2 h-2 rounded-xs border border-slate-300 bg-white"></span>
-                        <span>Bình thường</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="text-[11px] text-slate-500 font-mono">
-                      Hiển thị: <strong className="text-slate-900">{filteredStalls.length}</strong> / {currentFloor.stalls.length} sạp
-                    </div>
-                    {isFullscreen && (
-                      <button
-                        type="button"
-                        onClick={() => setIsFullscreen(false)}
-                        className="px-2.5 py-0.5 rounded bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs cursor-pointer flex items-center gap-1"
-                        aria-label="Thoát toàn màn hình"
-                      >
-                        <X className="h-3.5 w-3.5" aria-hidden="true" /> Thoát toàn màn hình (ESC)
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* THANH ĐỊNH HƯỚNG BẢN ĐỒ THEO BỐ CỤC KIẾN TRÚC GỐC CHỢ THÔNG MINH UIUX */}
-                <div className="bg-slate-50 px-3.5 py-2 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs font-sans">
-                  <div className="flex items-center gap-2">
-                    <Navigation className="w-3.5 h-3.5 text-[#076C31]" />
-                    <span className="font-bold text-slate-900 tracking-tight">
-                      Mặt bằng tổng thể {activeFixtureKey === 'A' ? 'Chợ Đồng Xuân' : activeFixtureKey === 'B' ? 'Chợ Bến Thành' : 'Chợ An Đông'} • Tầng {selectedFloor}
-                    </span>
-                    <span className="text-slate-400 font-mono text-[11px] hidden md:inline">
-                      [Tỷ lệ 1:100 • {currentFloor.stalls.length} sạp hoạt động]
-                    </span>
-                  </div>
-
-                  {/* Hướng chỉ đường */}
-                  <div className="flex items-center gap-3 text-xs text-slate-600 font-sans">
-                    <span className="text-slate-700 font-medium">▲ Hướng Bắc: Phố Hàng Khoai</span>
-                    <span className="text-slate-300">|</span>
-                    <span className="text-slate-700 font-medium">▼ Hướng Nam: Phố Đồng Xuân</span>
-                  </div>
-                </div>
-
-                {/* CỔNG BẮC: XUẤT NHẬP HÀNG HÓA */}
-                <div className="flex items-center justify-center py-1.5 bg-slate-100 border-b border-slate-200">
-                  <div className="bg-slate-900 text-white font-sans text-xs font-bold px-3 py-1 rounded-xs flex items-center gap-1.5 uppercase tracking-wide shadow-xs">
-                    <ArrowDown className="w-3 h-3 text-emerald-400 motion-safe:animate-bounce" />
-                    <span>CỔNG BẮC • PHỐ HÀNG KHOAI • CỬA XUẤT NHẬP HÀNG HÓA</span>
-                  </div>
-                </div>
-
                 {/* VIEW ENGINE: 2D VECTOR BLUEPRINT SVG / 3D SPATIAL THREE.JS */}
                 <div
                   data-testid="map-canvas"
-                  className={`map-canvas relative p-0 bg-slate-50 border-t border-slate-200 overflow-hidden flex items-center justify-center ${
+                  className={`map-canvas relative p-0 bg-slate-50 overflow-hidden flex items-center justify-center ${
                     isFullscreen
                       ? 'flex-1 w-full h-full min-h-0'
-                      : 'w-full min-h-[560px] h-[min(78dvh,900px)] sm:min-h-[600px] lg:min-h-[720px]'
+                      : 'w-full flex-1 min-h-[560px] sm:min-h-[600px] lg:min-h-[620px]'
                   }`}
                 >
+                  {/* CỔNG BẮC ARCHITECTURAL RIBBON (Mép trên Canvas) */}
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                    <div className="bg-slate-900/90 text-white backdrop-blur-md px-3.5 py-1 rounded-full text-[11px] font-bold shadow-md border border-slate-700/50 flex items-center gap-2 uppercase tracking-wide">
+                      <ArrowDown className="w-3 h-3 text-emerald-400 motion-safe:animate-bounce" />
+                      <span>CỔNG BẮC • PHỐ HÀNG KHOAI • XUẤT NHẬP HÀNG</span>
+                    </div>
+                  </div>
+
+                  {/* CAD COMPASS ROSE INDICATOR (Góc trên bên phải Canvas) */}
+                  <div className="absolute top-3 right-3 z-20 hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-md rounded-xl border border-slate-200/80 shadow-xs text-slate-700 text-[11px] font-mono font-bold pointer-events-none">
+                    <Compass className="w-3.5 h-3.5 text-[#076C31]" />
+                    <span>BẮC (N)</span>
+                  </div>
+
+                  {/* CỔNG NAM ARCHITECTURAL RIBBON & CỤM TIỆN ÍCH (Mép dưới Canvas) */}
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex flex-col sm:flex-row items-center gap-2 pointer-events-none">
+                    <div className="bg-slate-900/90 text-white backdrop-blur-md px-3.5 py-1 rounded-full text-[11px] font-bold shadow-md border border-slate-700/50 flex items-center gap-2 uppercase tracking-wide">
+                      <ArrowUp className="w-3 h-3 text-emerald-400 motion-safe:animate-bounce" />
+                      <span>CỔNG NAM • PHỐ ĐỒNG XUÂN • CỔNG CHÍNH</span>
+                    </div>
+                    <div className="hidden lg:flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-semibold text-slate-700 border border-slate-200/80 shadow-xs">
+                      <span>🚻 WC T1</span>
+                      <span>•</span>
+                      <span>🏢 BQL P.102</span>
+                      <span>•</span>
+                      <span className="text-rose-600 font-bold">🧯 PCCC #04</span>
+                      <span>•</span>
+                      <span className="text-blue-600 font-bold">📹 CCTV A-B</span>
+                    </div>
+                  </div>
+
+                  {/* FLOATING TACTICAL PRIORITY LEGEND (Góc dưới bên trái Canvas - Pure Vietnamese, Không dùng P0/P1) */}
+                  <div className="absolute bottom-3 left-3 z-20 hidden md:flex items-center gap-2.5 px-3 py-1.5 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl shadow-xs text-[11px] font-sans">
+                    <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Trạng thái:</span>
+                    <span className="flex items-center gap-1 font-bold text-rose-700">
+                      <span className="w-2 h-2 rounded-full bg-rose-600 motion-safe:animate-pulse inline-block" aria-hidden="true"></span>
+                      <span>Khẩn cấp</span>
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="flex items-center gap-1 font-bold text-amber-700">
+                      <span className="h-2 w-2 rounded-full bg-amber-500 inline-block" aria-hidden="true"></span>
+                      <span>Cần chú ý</span>
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="flex items-center gap-1 font-bold text-yellow-700">
+                      <Wrench className="h-3 w-3" aria-hidden="true" />
+                      <span>Bảo trì</span>
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="flex items-center gap-1 text-slate-600 font-medium">
+                      <span className="w-2 h-2 rounded-xs border border-slate-300 bg-white"></span>
+                      <span>Bình thường</span>
+                    </span>
+                  </div>
+
+                  {/* Floating Duty Operational HUD Banner */}
+                  {dutyView !== 'all' && (
+                    <div 
+                      data-testid="duty-operational-hud"
+                      className="absolute top-3 left-3 z-30 flex flex-wrap items-center gap-2.5 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-200 shadow-lg text-xs font-sans"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2.5 h-2.5 rounded-full ${dutyView === 'sanitation' ? 'bg-sky-500' : dutyView === 'security_fire' ? 'bg-rose-600' : 'bg-amber-500'} motion-safe:animate-pulse`} />
+                        <span className="font-bold text-slate-900">
+                          {dutyView === 'sanitation' ? 'Ca Vệ Sinh & Nước' : dutyView === 'security_fire' ? 'Ca An Ninh & PCCC' : 'Ca Thu Phí & Hợp Đồng'}
+                        </span>
+                        <span className="text-slate-300">|</span>
+                        <span className="font-semibold text-slate-600">
+                          {filteredStalls.length} vị trí trọng yếu
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        {filteredStalls.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const firstStall = filteredStalls[0];
+                              if (firstStall) {
+                                handleSelectStall(firstStall);
+                              }
+                            }}
+                            className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-[#076C31] font-bold rounded-lg border border-emerald-200 text-[11px] transition-colors cursor-pointer flex items-center gap-1"
+                          >
+                            <span>Lia tới sạp {filteredStalls[0].code}</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setDutyView('all')}
+                          className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-[11px] transition-colors cursor-pointer"
+                        >
+                          Quay lại Toàn cảnh
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {viewEngine === '3d_three' && activeFixtureKey === 'A' ? (
                     <ThreeSpatialRenderer
                       stalls={currentFloor.stalls}
                       selectedStall={selectedStall}
                       onSelectStall={handleSelectStall}
                       zoomLevel={zoomLevel}
+                      dutyView={dutyView}
+                      highlightedEntityIds={new Set(filteredStalls.map((s) => s.id))}
                       className={isFullscreen ? 'flex-1 w-full h-full min-h-0' : 'h-[640px]'}
                     />
                   ) : (
@@ -620,6 +709,7 @@ export default function SmartMarketHome() {
                         zoomLevel={zoomLevel}
                         selectedZone={selectedZone}
                         operationalFilter={activeFilter === 'complaint' || zoneFilter === 'p0' ? 'p0' : 'all'}
+                        dutyView={dutyView}
                         className="w-full h-full rounded-none"
                         onSelectZone={handleSelectZone}
                         onSelectEntity={(entity) => {
@@ -645,10 +735,10 @@ export default function SmartMarketHome() {
                     />
                   )}
 
-                  {/* Cụm Nút Điều Khiển Nổi Hiện Trường (Floating Field Navigation Hub) */}
+                  {/* Cụm Nút Điều Khiển Nổi Hiện Trường (Floating Field Navigation Hub - Mobile/Tablet Only) */}
                   <div 
                     data-testid="floating-field-hub"
-                    className="absolute right-3 bottom-3 z-30 flex flex-col gap-1.5 shadow-lg rounded-xl bg-white/95 backdrop-blur-md p-1.5 border border-slate-200"
+                    className="absolute right-3 bottom-3 z-30 lg:hidden flex flex-col gap-1.5 shadow-lg rounded-xl bg-white/95 backdrop-blur-md p-1.5 border border-slate-200"
                   >
                     {/* Nút Căn giữa sạp đang chọn (nếu có) */}
                     {selectedStall && (
@@ -697,30 +787,8 @@ export default function SmartMarketHome() {
                     </button>
                   </div>
                 </div>
-
-                {/* CỔNG NAM & CỤM TIỆN ÍCH HẠ TẦNG THEO CHỢ THÔNG MINH UIUX */}
-                <div className="py-2 px-3.5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs font-sans">
-                  <div className="flex items-center gap-3 text-[11px] text-slate-600 font-medium">
-                    <span>🚻 Khu vệ sinh T1</span>
-                    <span>•</span>
-                    <span>🏢 Văn phòng BQL P.102</span>
-                    <span>•</span>
-                    <span className="text-rose-700 font-semibold">🧯 Trụ PCCC #04</span>
-                    <span>•</span>
-                    <span className="text-blue-700 font-semibold">📹 Camera CCTV Vùng A-B</span>
-                  </div>
-                  <div className="bg-slate-900 text-white font-sans text-xs font-bold px-3 py-1 rounded-xs flex items-center gap-1.5 uppercase tracking-wide shadow-xs">
-                    <ArrowUp className="w-3 h-3 text-emerald-400 motion-safe:animate-bounce" />
-                    <span>CỔNG NAM • PHỐ ĐỒNG XUÂN • CỔNG CHÍNH ĐIỀU HÀNH</span>
-                  </div>
-                </div>
               </section>
-
-              {/* ========================================================================= */}
-              {/* BẢNG THU PHÍ QUẢN LÝ DỊCH VỤ THỊ TRƯỜNG */}
-              {/* ========================================================================= */}
-              <MarketFeeCollectionSection />
-            </>
+            </div>
           )}
 
         </main>

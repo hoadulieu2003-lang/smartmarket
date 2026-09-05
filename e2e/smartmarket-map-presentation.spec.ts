@@ -18,7 +18,7 @@ test.describe('curated responsive market map', () => {
   for (const viewport of viewports) {
     test(`keeps the curated map readable and interactive on ${viewport.name}`, async ({ page }) => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
-      await page.goto('/');
+      await page.goto('/?fixture=A');
 
       const mapCanvas = page.getByTestId('map-canvas');
       await expect(mapCanvas).toBeVisible();

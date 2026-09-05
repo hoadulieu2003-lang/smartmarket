@@ -1,0 +1,17 @@
+{
+  "success": true,
+  "data": {
+    "marketCount": 1,
+    "stallCount": 50,
+    "occupiedStallCount": 24,
+    "vacantStallCount": 21,
+    "traderCount": 19,
+    "pendingApplicationCount": 4,
+    "revenueThisMonth": 0,
+    "orderCountThisMonth": 0,
+    "newComplaintCount": 10,
+    "expiringContractCount": 0,
+    "avgRating": 4.3,
+    "qrTransactionCount": 0
+  }
+}

@@ -13,6 +13,7 @@ export interface StallGlyphProps {
   isMacroView?: boolean;
   isDimmed?: boolean;
   operationalFilter?: 'all' | 'p0' | 'warning' | 'maintenance' | 'empty';
+  dutyView?: 'all' | 'sanitation' | 'security_fire' | 'finance';
   onSelect?: (stall: StallEntity) => void;
   onHover?: (stall: StallEntity, isHovered: boolean) => void;
 }
@@ -25,12 +26,14 @@ export const StallGlyph: React.FC<StallGlyphProps> = ({
   isMacroView = false,
   isDimmed: propDimmed,
   operationalFilter = 'all',
+  dutyView = 'all',
   onSelect,
   onHover,
 }) => {
   const style = getStallSvgStyle(stall, { isSelected, isHovered });
-  const descriptor = deriveStallVisual(stall, { selected: isSelected, operationalFilter });
+  const descriptor = deriveStallVisual(stall, { selected: isSelected, operationalFilter, dutyView });
   const unifiedBadge = descriptor.unifiedBadge;
+  const dutyBadge = descriptor.dutyBadge;
   const isDimmed = propDimmed ?? descriptor.isDimmed ?? false;
   const renderGeometry = presentationGeometry ?? stall.geometry;
 
@@ -84,9 +87,9 @@ export const StallGlyph: React.FC<StallGlyphProps> = ({
   const isMediumStall = width >= 54;
   const codeFontSize = isMacroView ? "12" : isLargeStall ? "16" : isMediumStall ? "14.5" : "12.5";
   const nameFontSize = isLargeStall ? "11.5" : isMediumStall ? "10.5" : "9";
-  const badgeWidth = Math.max(28, Math.min(width - 6, isLargeStall ? 68 : isMediumStall ? 54 : 44));
-  const badgeHeight = isLargeStall ? 13.5 : 12;
-  const badgeFontSize = isLargeStall ? "8" : "7.2";
+  const badgeWidth = Math.max(28, Math.min(width - 6, isLargeStall ? 70 : isMediumStall ? 56 : 46));
+  const badgeHeight = isLargeStall ? 14.5 : 13;
+  const badgeFontSize = isLargeStall ? "8.5" : "7.8";
 
   // Check if stall has P0 urgent issue for pulsing sonar beacon
   const complaintsCount = (stall.state?.complaintsCount ?? (stall as any).complaintsCount ?? 0);
@@ -107,8 +110,8 @@ export const StallGlyph: React.FC<StallGlyphProps> = ({
       data-priority={descriptor.priority || 'normal'}
       data-dimmed={isDimmed}
       data-selected={isSelected}
-      opacity={isDimmed ? 0.22 : 1.0}
-      filter={isDimmed ? 'grayscale(80%)' : undefined}
+      opacity={isDimmed ? 0.30 : 1.0}
+      filter={isDimmed ? 'grayscale(70%)' : undefined}
       className={`${isInteractive ? 'cursor-pointer' : 'cursor-default'} select-none transition-all duration-200 outline-none`}
       transform={transformAttr}
       tabIndex={isInteractive ? 0 : undefined}
@@ -122,33 +125,6 @@ export const StallGlyph: React.FC<StallGlyphProps> = ({
       onMouseEnter={() => onHover?.(stall, true)}
       onMouseLeave={() => onHover?.(stall, false)}
     >
-      {/* ------------------------------------------------------------- */}
-      {/* LAYER 0: P0 PULSING RADAR SONAR WAVES (TÂM ĐIỂM SỰ CỐ KHẨN CẤP) */}
-      {/* ------------------------------------------------------------- */}
-      {isP0 && isPendingDispatch && (
-        <g pointerEvents="none">
-          <circle
-            cx={centerX}
-            cy={centerY}
-            r={Math.max(width, height) / 2 + 10}
-            fill="none"
-            stroke="#e11d48"
-            strokeWidth="2"
-            opacity="0.8"
-            className="spatial-sonar-wave"
-          />
-          <circle
-            cx={centerX}
-            cy={centerY}
-            r={Math.max(width, height) / 2 + 18}
-            fill="none"
-            stroke="#e11d48"
-            strokeWidth="1.5"
-            opacity="0.4"
-            className="spatial-sonar-wave-delay"
-          />
-        </g>
-      )}
 
       {/* ------------------------------------------------------------- */}
       {/* LAYER 1: BASE GEOMETRY (RECTANGLE / POLYGON) */}
@@ -293,30 +269,49 @@ export const StallGlyph: React.FC<StallGlyphProps> = ({
           className="tracking-normal font-sans"
           pointerEvents="none"
         >
-          {stall.metadata?.name ? (
-            stall.metadata.name.length > (isLargeStall ? 16 : 13)
-              ? `${stall.metadata.name.slice(0, isLargeStall ? 15 : 12)}…`
-              : stall.metadata.name
-          ) : (
-            stall.metadata?.category || ''
-          )}
+          {stall.state?.occupancyStatus === 'empty' ? '(Trống)' : (() => {
+            const rawName = stall.metadata?.name;
+            const category = stall.metadata?.category;
+            const isSynthetic = rawName && stall.code && (
+              rawName.trim() === `${category} ${stall.code}` ||
+              rawName.trim() === `${category} ${stall.code.slice(1)}`
+            );
+            const displayName = (isSynthetic ? category : rawName) || category || '';
+            return displayName.length > (isLargeStall ? 16 : 13)
+              ? `${displayName.slice(0, isLargeStall ? 15 : 12)}…`
+              : displayName;
+          })()}
         </text>
       )}
 
+      {/* HUY HIỆU CA TRỰC KHI ĐANG TRỰC CA (DUTY BADGE) */}
+      {dutyBadge && !isDimmed && (
+        <g pointerEvents="none" transform={`translate(${centerX}, ${unifiedBadge ? centerY + (height > 65 ? 18 : 14) : centerY + 3})`}>
+          <rect
+            x={-badgeWidth / 2}
+            y={-badgeHeight / 2}
+            width={badgeWidth}
+            height={badgeHeight}
+            rx="3"
+            fill={dutyBadge.color}
+            filter="drop-shadow(0 1px 2px rgba(0,0,0,0.18))"
+          />
+          <text
+            y="2.5"
+            textAnchor="middle"
+            fontSize={badgeFontSize}
+            fontWeight="800"
+            fill="#ffffff"
+            className="tracking-tight"
+          >
+            {dutyBadge.label}
+          </text>
+        </g>
+      )}
+
       {/* CỤM BADGE THỐNG NHẤT KHI CÓ SỰ CỐ / CẢNH BÁO */}
-      {unifiedBadge && (
+      {unifiedBadge && !dutyBadge && (
         <g pointerEvents="none">
-          {/* Pulsing Sonar Beacon if P0 Urgent */}
-          {unifiedBadge.isPulsing && (
-            <circle
-              cx={centerX}
-              cy={centerY + 3}
-              r={isLargeStall ? "16" : "13"}
-              fill={unifiedBadge.badgeBg}
-              opacity="0.25"
-              className="spatial-pulsing-beacon"
-            />
-          )}
 
           {/* Dòng 2: Badge Mức Ưu Tiên + Icon Hình Học (● P0 / ▲ Chú ý / 🔧 Bảo trì) */}
           <g transform={`translate(${centerX}, ${centerY + 3})`}>

@@ -1,41 +1,44 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
+  --background: #F5FAF8;
   --surface: #ffffff;
-  --foreground: #0f172a;
-  --foreground-muted: #64748b;
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
-  --smart-market-green: #076C31;
-  --smart-market-green-light: #ecfdf5;
-  --smart-market-green-hover: #055225;
+  --foreground: #1D385F;
+  --foreground-muted: #7185A1;
+  --border: #DCE8F1;
+  --border-strong: #C4D5E3;
+  --smart-market-green: #0B7A3A;
+  --smart-market-green-dark: #075A2B;
+  --smart-market-green-light: #55C477;
+  --smart-market-green-hover: #075A2B;
+  --smart-market-green-bg: #E8F8EF;
 
-  /* Semantic visual contract for Calm Spatial Operations. */
+  /* Semantic visual contract for Smartmarket Live UI */
   --color-brand-green: var(--smart-market-green);
   --color-slate-surface: var(--surface);
-  --color-slate-surface-muted: #f1f5f9;
+  --color-slate-surface-muted: #F5FAF8;
   --color-slate-text: var(--foreground);
   --color-slate-text-muted: var(--foreground-muted);
   --color-slate-border: var(--border);
   --color-slate-border-strong: var(--border-strong);
-  --color-danger: #be123c;
-  --color-danger-surface: #fff1f2;
-  --color-warning: #b45309;
-  --color-warning-surface: #fffbeb;
-  --color-info: #1d4ed8;
-  --color-info-surface: #eff6ff;
-  --color-selected-surface: #ecfdf5;
-  --color-focus-ring: #2563eb;
+  --color-danger: #EE565D;
+  --color-danger-surface: #FFF1F2;
+  --color-warning: #F5A623;
+  --color-warning-surface: #FFFBEB;
+  --color-info: #4F90D9;
+  --color-info-surface: #EFF6FF;
+  --color-selected-surface: #E8F8EF;
+  --color-focus-ring: #0B7A3A;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
   --motion-fast: 120ms;
   --motion-normal: 200ms;
   --motion-slow: 320ms;
@@ -46,13 +49,15 @@
   --color-surface: var(--surface);
   --color-foreground: var(--foreground);
   --color-smart-green: var(--smart-market-green);
-  --color-danger: #be123c;
-  --color-warning: #b45309;
-  --color-info: #1d4ed8;
+  --color-smart-green-dark: var(--smart-market-green-dark);
+  --color-smart-green-light: var(--smart-market-green-light);
+  --color-danger: #EE565D;
+  --color-warning: #F5A623;
+  --color-info: #4F90D9;
   --color-selected: var(--color-selected-surface);
   --color-focus: var(--color-focus-ring);
-  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-geist-mono), monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-mono), monospace;
 }
 
 html,
@@ -89,16 +94,6 @@ body {
   background: #94a3b8;
 }
 
-@keyframes spatial-pulse {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.18); opacity: 0.25; }
-  100% { transform: scale(0.95); opacity: 0.8; }
-}
-
-.spatial-pulsing-beacon {
-  animation: spatial-pulse 1.8s infinite ease-in-out;
-  transform-origin: center;
-}
 
 .map-canvas {
   isolation: isolate;

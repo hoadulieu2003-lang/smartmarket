@@ -1,0 +1,342 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "d6000000-0000-4000-8000-000000000075",
+      "userId": "d1000000-0000-4000-8000-000000000003",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "b09301a7-24a7-4c1c-b8af-a78eedb939b7",
+      "productId": "d4000000-0000-4000-8000-000000000075",
+      "type": "service_attitude",
+      "content": "Nhân viên phục vụ chưa hướng dẫn rõ cho khách. Mã hồ sơ demo #075.",
+      "images": [],
+      "status": "new",
+      "resolutionNote": null,
+      "resolutionImages": [],
+      "resolvedAt": null,
+      "createdAt": "2026-08-22T13:11:22.655Z",
+      "updatedAt": "2026-08-22T13:11:22.656Z",
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "stalls": {
+        "id": "b09301a7-24a7-4c1c-b8af-a78eedb939b7",
+        "code": "D900-06",
+        "name": "Gian hàng gia vị"
+      },
+      "products": {
+        "id": "d4000000-0000-4000-8000-000000000075",
+        "name": "Bí đỏ hồ lô · D260802V1-S12"
+      },
+      "reporter": {
+        "id": "d1000000-0000-4000-8000-000000000003",
+        "fullName": "Phạm Khánh Linh"
+      }
+    },
+    {
+      "id": "d6000000-0000-4000-8000-000000000080",
+      "userId": "d1000000-0000-4000-8000-000000000008",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "79d05346-6f1b-47ad-a934-80335ad33454",
+      "productId": "d4000000-0000-4000-8000-000000000080",
+      "type": "product_quality",
+      "content": "Đề nghị kiểm tra lại chất lượng hàng hóa tại quầy. Mã hồ sơ demo #080.",
+      "images": [],
+      "status": "new",
+      "resolutionNote": null,
+      "resolutionImages": [],
+      "resolvedAt": null,
+      "createdAt": "2026-08-17T13:11:22.677Z",
+      "updatedAt": "2026-08-22T13:11:22.678Z",
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "stalls": {
+        "id": "79d05346-6f1b-47ad-a934-80335ad33454",
+        "code": "D260802V1-S11",
+        "name": "Sạp Hải sản Thu Hà"
+      },
+      "products": {
+        "id": "d4000000-0000-4000-8000-000000000080",
+        "name": "Sườn non heo · D901-06"
+      },
+      "reporter": {
+        "id": "d1000000-0000-4000-8000-000000000008",
+        "fullName": "Lê Hoàng Yến"
+      }
+    },
+    {
+      "id": "d6000000-0000-4000-8000-000000000085",
+      "userId": "d1000000-0000-4000-8000-000000000013",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "9580634d-fb42-44d1-92fe-1b7cf377773f",
+      "productId": "d4000000-0000-4000-8000-000000000085",
+      "type": "infrastructure",
+      "content": "Lối đi khu vực này bị trơn khi trời mưa. Mã hồ sơ demo #085.",
+      "images": [],
+      "status": "new",
+      "resolutionNote": null,
+      "resolutionImages": [],
+      "resolvedAt": null,
+      "createdAt": "2026-08-12T13:11:22.701Z",
+      "updatedAt": "2026-08-22T13:11:22.702Z",
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "stalls": {
+        "id": "9580634d-fb42-44d1-92fe-1b7cf377773f",
+        "code": "D901-06",
+        "name": "Gian hàng gia vị"
+      },
+      "products": {
+        "id": "d4000000-0000-4000-8000-000000000085",
+        "name": "Cá basa phi lê · D260802V1-S14"
+      },
+      "reporter": {
+        "id": "d1000000-0000-4000-8000-000000000013",
+        "fullName": "Trần Gia Bảo"
+      }
+    },
+    {
+      "id": "d6000000-0000-4000-8000-000000000090",
+      "userId": "d1000000-0000-4000-8000-000000000018",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "06ee709d-edb0-4d4d-b0e0-2d0cb39a3589",
+      "productId": "d4000000-0000-4000-8000-000000000090",
+      "type": "food_safety",
+      "content": "Khu vực chế biến cần bổ sung găng tay và che chắn. Mã hồ sơ demo #090.",
+      "images": [],
+      "status": "new",
+      "resolutionNote": null,
+      "resolutionImages": [],
+      "resolvedAt": null,
+      "createdAt": "2026-08-07T13:11:22.722Z",
+      "updatedAt": "2026-08-22T13:11:22.723Z",
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "stalls": {
+        "id": "06ee709d-edb0-4d4d-b0e0-2d0cb39a3589",
+        "code": "D260802V1-S13",
+        "name": "Sạp Gia vị Thu Hà"
+      },
+      "products": {
+        "id": "d4000000-0000-4000-8000-000000000090",
+        "name": "Trà sen túi lọc · D902-06"
+      },
+      "reporter": {
+        "id": "d1000000-0000-4000-8000-000000000018",
+        "fullName": "Nguyễn Minh Anh"
+      }
+    },
+    {
+      "id": "d6000000-0000-4000-8000-000000000095",
+      "userId": "d1000000-0000-4000-8000-000000000023",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "ec74b6b1-5a47-4711-93fd-84f90b2b7bfb",
+      "productId": "d4000000-0000-4000-8000-000000000095",
+      "type": "other",
+      "content": "Đề nghị BQL kiểm tra và phản hồi trong ngày. Mã hồ sơ demo #095.",
+      "images": [],
+      "status": "new",
+      "resolutionNote": null,
+      "resolutionImages": [],
+      "resolvedAt": null,
+      "createdAt": "2026-08-02T13:11:22.742Z",
+      "updatedAt": "2026-08-22T13:11:22.745Z",
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "stalls": {
+        "id": "ec74b6b1-5a47-4711-93fd-84f90b2b7bfb",
+        "code": "D902-06",
+        "name": "Gian hàng gia vị"
+      },
+      "products": {
+        "id": "d4000000-0000-4000-8000-000000000095",
+        "name": "Bún bò Huế · D260802V1-S16"
+      },
+      "reporter": {
+        "id": "d1000000-0000-4000-8000-000000000023",
+        "fullName": "Võ Thanh Hà"
+      }
+    },
+    {
+      "id": "fc4b22c2-10ae-4a83-8c92-09eab37f841a",
+      "userId": "bad474b5-7c7e-4e64-90dd-d06a5718f041",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "79d05346-6f1b-47ad-a934-80335ad33454",
+      "productId": "1e531647-b6c3-4d46-9fbc-7fe162fcc47d",
+      "type": "infrastructure",
+      "content": "[CHO-DEMO-20260802-V1] Phản ánh mẫu số 6: đề nghị kiểm tra và phản hồi rõ ràng.",
+      "images": [],
+      "status": "new",
+      "resolutionNote": null,
+      "resolutionImages": [],
+      "resolvedAt": null,
+      "createdAt": "2026-07-23T02:05:00.000Z",
+      "updatedAt": "2026-08-02T04:04:39.727Z",
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "stalls": {
+        "id": "79d05346-6f1b-47ad-a934-80335ad33454",
+        "code": "D260802V1-S11",
+        "name": "Sạp Hải sản Thu Hà"
+      },
+      "products": {
+        "id": "1e531647-b6c3-4d46-9fbc-7fe162fcc47d",
+        "name": "Hải sản loại ngon"
+      },
+      "reporter": {
+        "id": "bad474b5-7c7e-4e64-90dd-d06a5718f041",
+        "fullName": "Võ Bình"
+      }
+    },
+    {
+      "id": "82513521-47e1-4fc3-90db-1a6b441c8ca9",
+      "userId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "e66b2b58-6bbc-4f9b-98dd-3851d7472d44",
+      "productId": null,
+      "type": "price_issue",
+      "content": "Ngon",
+      "images": [
+        {
+          "url": "https://ql.chothongminh.top/storage/uploads/2026/07/5f0f7920-9af2-46bf-8d58-9e386e945d08.png"
+        }
+      ],
+      "status": "new",
+      "resolutionNote": null,
+      "resolutionImages": [],
+      "resolvedAt": null,
+      "createdAt": "2026-07-15T03:25:54.299Z",
+      "updatedAt": "2026-07-15T03:25:54.299Z",
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "stalls": {
+        "id": "e66b2b58-6bbc-4f9b-98dd-3851d7472d44",
+        "code": "A-01",
+        "name": null
+      },
+      "products": null,
+      "reporter": {
+        "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+        "fullName": "Hòa"
+      }
+    },
+    {
+      "id": "d6000000-0000-4000-8000-000000000060",
+      "userId": "d1000000-0000-4000-8000-000000000012",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "e66b2b58-6bbc-4f9b-98dd-3851d7472d44",
+      "productId": "d4000000-0000-4000-8000-000000000060",
+      "type": "weighing_fraud",
+      "content": "Đề nghị kiểm tra lại cân và tem kiểm định. Mã hồ sơ demo #060.",
+      "images": [],
+      "status": "new",
+      "resolutionNote": null,
+      "resolutionImages": [],
+      "resolvedAt": null,
+      "createdAt": "2026-06-23T13:11:22.593Z",
+      "updatedAt": "2026-08-22T13:11:22.594Z",
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "stalls": {
+        "id": "e66b2b58-6bbc-4f9b-98dd-3851d7472d44",
+        "code": "A-01",
+        "name": null
+      },
+      "products": {
+        "id": "d4000000-0000-4000-8000-000000000060",
+        "name": "Cua biển sống · D04-06"
+      },
+      "reporter": {
+        "id": "d1000000-0000-4000-8000-000000000012",
+        "fullName": "Nguyễn Minh Anh"
+      }
+    },
+    {
+      "id": "d6000000-0000-4000-8000-000000000065",
+      "userId": "d1000000-0000-4000-8000-000000000017",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "2cd56a88-7103-42de-996f-7c3b03481a0f",
+      "productId": "d4000000-0000-4000-8000-000000000065",
+      "type": "price_issue",
+      "content": "Giá niêm yết và giá bán thực tế chưa đồng nhất. Mã hồ sơ demo #065.",
+      "images": [],
+      "status": "new",
+      "resolutionNote": null,
+      "resolutionImages": [],
+      "resolvedAt": null,
+      "createdAt": "2026-06-18T13:11:22.613Z",
+      "updatedAt": "2026-08-22T13:11:22.615Z",
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "stalls": {
+        "id": "2cd56a88-7103-42de-996f-7c3b03481a0f",
+        "code": "D04-06",
+        "name": "Gian hàng gia vị"
+      },
+      "products": {
+        "id": "d4000000-0000-4000-8000-000000000065",
+        "name": "Bún khô gạo lứt · D260802V1-S10"
+      },
+      "reporter": {
+        "id": "d1000000-0000-4000-8000-000000000017",
+        "fullName": "Võ Thanh Hà"
+      }
+    },
+    {
+      "id": "d6000000-0000-4000-8000-000000000070",
+      "userId": "d1000000-0000-4000-8000-000000000022",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "8619f232-1e18-462b-ac2c-c8375828ff3f",
+      "productId": "d4000000-0000-4000-8000-000000000070",
+      "type": "order_issue",
+      "content": "Đơn hàng giao thiếu sản phẩm so với xác nhận. Mã hồ sơ demo #070.",
+      "images": [],
+      "status": "new",
+      "resolutionNote": null,
+      "resolutionImages": [],
+      "resolvedAt": null,
+      "createdAt": "2026-06-13T13:11:22.634Z",
+      "updatedAt": "2026-08-22T13:11:22.635Z",
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "stalls": {
+        "id": "8619f232-1e18-462b-ac2c-c8375828ff3f",
+        "code": "D260802V1-S09",
+        "name": "Sạp Rau củ quả Thu Hà"
+      },
+      "products": {
+        "id": "d4000000-0000-4000-8000-000000000070",
+        "name": "Bánh cuốn nóng · D900-06"
+      },
+      "reporter": {
+        "id": "d1000000-0000-4000-8000-000000000022",
+        "fullName": "Đỗ Quốc Huy"
+      }
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 20,
+    "total": 10,
+    "totalPages": 1
+  }
+}

@@ -458,5 +458,66 @@ describe('PHASE 4 — OPERATIONAL PRIORITY LAYER: 6 MANDATORY TEST CASES', () =>
     expect(normalVisual.isDimmed).toBe(true);
     expect(p0Visual.isDimmed).toBe(false);
   });
+
+  it('Duty View (Góc nhìn ca trực): Xác định sạp khớp và làm mờ các sạp ngoài ca', () => {
+    const waterStall: StallEntity = {
+      ...baseStall,
+      id: 'stall_water',
+      code: 'A12',
+      state: {
+        ...baseStall.state,
+        issues: [{ id: 'iss_w', type: 'complaint', specificType: 'water', title: 'Rò rỉ nước', status: 'open' } as any],
+      },
+    };
+
+    const fireStall: StallEntity = {
+      ...baseStall,
+      id: 'stall_fire',
+      code: 'E08',
+      state: {
+        ...baseStall.state,
+        issues: [{ id: 'iss_f', type: 'complaint', specificType: 'fire_safety', title: 'Bình gas rò rỉ', status: 'open' } as any],
+      },
+    };
+
+    const financeStall: StallEntity = {
+      ...baseStall,
+      id: 'stall_finance',
+      code: 'C08',
+      state: {
+        ...baseStall.state,
+        feeStatus: 'overdue',
+        contractDaysLeft: 10,
+        issues: [],
+      },
+    };
+
+    // 1. Ca Vệ Sinh
+    const waterSanitationVisual = deriveStallVisual(waterStall, { dutyView: 'sanitation' });
+    const fireSanitationVisual = deriveStallVisual(fireStall, { dutyView: 'sanitation' });
+    expect(waterSanitationVisual.isDimmed).toBe(false);
+    expect(waterSanitationVisual.dutyBadge?.duty).toBe('sanitation');
+    expect(waterSanitationVisual.dutyBadge?.iconName).toBe('Droplets');
+    expect(fireSanitationVisual.isDimmed).toBe(true);
+
+    // 2. Ca An Ninh / PCCC
+    const fireSecurityVisual = deriveStallVisual(fireStall, { dutyView: 'security_fire' });
+    const financeSecurityVisual = deriveStallVisual(financeStall, { dutyView: 'security_fire' });
+    expect(fireSecurityVisual.isDimmed).toBe(false);
+    expect(fireSecurityVisual.dutyBadge?.duty).toBe('security_fire');
+    expect(fireSecurityVisual.dutyBadge?.iconName).toBe('Flame');
+    expect(financeSecurityVisual.isDimmed).toBe(true);
+
+    // 3. Ca Thu Phí
+    const financeViewVisual = deriveStallVisual(financeStall, { dutyView: 'finance' });
+    expect(financeViewVisual.isDimmed).toBe(false);
+    expect(financeViewVisual.dutyBadge?.duty).toBe('finance');
+    expect(financeViewVisual.dutyBadge?.iconName).toBe('ReceiptText');
+
+    // 4. Toàn cảnh ('all'): không làm mờ sạp nào
+    const allVisual = deriveStallVisual(fireStall, { dutyView: 'all' });
+    expect(allVisual.isDimmed).toBe(false);
+    expect(allVisual.dutyBadge).toBeFalsy();
+  });
 });
 

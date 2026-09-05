@@ -3,6 +3,8 @@ import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('next/font/google', () => ({
+  Inter: () => ({ variable: '--font-inter' }),
+  Roboto_Mono: () => ({ variable: '--font-mono' }),
   Geist: () => ({ variable: '--font-geist-sans' }),
   Geist_Mono: () => ({ variable: '--font-geist-mono' }),
 }));

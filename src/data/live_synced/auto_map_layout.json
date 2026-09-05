@@ -1,0 +1,459 @@
+{
+  "success": true,
+  "data": {
+    "positions": [
+      {
+        "id": "dbb6f769-05de-4047-9ac9-0f00f7af7923",
+        "stallId": "57949abe-6f09-43d4-a8cf-570e6ddfaa7b",
+        "x": 5.84,
+        "y": 9.933,
+        "width": 8.61,
+        "height": 5.6,
+        "rotation": 0
+      },
+      {
+        "id": "1afbc32f-6a7d-44dd-9383-5d140f1fd53c",
+        "stallId": "2cd56a88-7103-42de-996f-7c3b03481a0f",
+        "x": 16.34,
+        "y": 9.933,
+        "width": 8.61,
+        "height": 5.6,
+        "rotation": 0
+      },
+      {
+        "id": "b6ba0e11-2647-449f-a8af-d9731c2b0919",
+        "stallId": "8fc74215-d682-4d57-9c39-ea4f0b665946",
+        "x": 26.84,
+        "y": 9.933,
+        "width": 8.61,
+        "height": 5.6,
+        "rotation": 0
+      },
+      {
+        "id": "1f89ef34-2b72-4197-ab51-3d06ba5c2982",
+        "stallId": "83ac0695-0b9d-49ef-a3a8-79aef5b9b3a9",
+        "x": 37.34,
+        "y": 9.933,
+        "width": 8.61,
+        "height": 5.6,
+        "rotation": 0
+      },
+      {
+        "id": "493f31fd-9e0b-4972-9a88-4e6b0951ecba",
+        "stallId": "473291dc-cf3d-4b80-b1d4-f2cd2bee4fba",
+        "x": 5.84,
+        "y": 17.711,
+        "width": 8.61,
+        "height": 5.6,
+        "rotation": 0
+      },
+      {
+        "id": "28fbaf87-68a8-4c84-addd-831aaecbda96",
+        "stallId": "4b801872-d533-4e0a-af0a-98b4c712d439",
+        "x": 16.34,
+        "y": 17.711,
+        "width": 8.61,
+        "height": 5.6,
+        "rotation": 0
+      },
+      {
+        "id": "f51fdc33-a26c-4c92-8521-8ece6671f8e1",
+        "stallId": "e66b2b58-6bbc-4f9b-98dd-3851d7472d44",
+        "x": 26.84,
+        "y": 17.711,
+        "width": 8.61,
+        "height": 5.6,
+        "rotation": 0
+      },
+      {
+        "id": "162911e8-3431-4bb3-859f-df133685dc43",
+        "stallId": "36ee1f1a-b829-4ac0-aa1a-fb8f48569a87",
+        "x": 37.34,
+        "y": 17.711,
+        "width": 8.61,
+        "height": 5.6,
+        "rotation": 0
+      },
+      {
+        "id": "42ddc959-3464-4ec9-a1e6-127a121f2bf1",
+        "stallId": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+        "x": 5.84,
+        "y": 25.489,
+        "width": 8.61,
+        "height": 5.6,
+        "rotation": 0
+      },
+      {
+        "id": "73ecb1da-0755-468f-a75b-3c05e8e63730",
+        "stallId": "8ccb364b-c5d2-46ea-a223-c1521364067c",
+        "x": 16.34,
+        "y": 25.489,
+        "width": 8.61,
+        "height": 5.6,
+        "rotation": 0
+      },
+      {
+        "id": "20c2c462-eca6-433d-9ced-f5f0f3b9e3fb",
+        "stallId": "fb1d443e-5f5c-4a9e-9562-026ace0e1ba6",
+        "x": 54.68,
+        "y": 9.56,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "eac1dc7f-a1cd-4941-b2bf-c6ce2bf81e29",
+        "stallId": "bcb26809-c772-480c-87f6-479070b1dfc3",
+        "x": 75,
+        "y": 9.56,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "9e64da99-59a2-4ece-a25f-f12143e2e362",
+        "stallId": "e894a23b-9b36-46ef-975a-453040b42f85",
+        "x": 54.68,
+        "y": 14.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "dcc3d7ec-8e6b-402f-ae09-46746b39eb10",
+        "stallId": "b09301a7-24a7-4c1c-b8af-a78eedb939b7",
+        "x": 75,
+        "y": 14.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "2130cc30-c186-494c-9f7f-f1db1d6b945b",
+        "stallId": "de95bc08-0ce6-457c-95ee-c1ba7f1cb40c",
+        "x": 54.68,
+        "y": 18.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "ff2c11be-45dc-492b-abe2-a66086904060",
+        "stallId": "38888639-4e7d-413f-aa85-312119402e9f",
+        "x": 75,
+        "y": 18.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "0d12ec05-8919-4497-93d5-dbb3b42e4d29",
+        "stallId": "fb971506-a9db-49a0-a994-fc5acea12417",
+        "x": 54.68,
+        "y": 23.56,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "99e50086-944f-4e28-ad5b-84e7dcb701ef",
+        "stallId": "b74e0485-9d0a-4df2-8399-5babf6ef96e1",
+        "x": 75,
+        "y": 23.56,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "d2c22960-36e7-4a30-b867-f2ec5cfaa7b9",
+        "stallId": "8619f232-1e18-462b-ac2c-c8375828ff3f",
+        "x": 54.68,
+        "y": 28.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "310148be-af41-444a-87ee-3e22f21bc6ac",
+        "stallId": "51e9b527-2492-4355-aa68-a622b130161a",
+        "x": 75,
+        "y": 28.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "bf4b5b9d-975f-4765-9d5d-73ec54e94c54",
+        "stallId": "a12f0b0f-6c69-4f56-88d2-bba38fe496d4",
+        "x": 6.68,
+        "y": 40.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "bacc76a1-34f1-4ecc-afad-68ebf98a1136",
+        "stallId": "4cca7d61-972d-47b1-8a57-5b5e7dc0b844",
+        "x": 27.68,
+        "y": 40.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "f518b20b-7e4d-4b09-878c-0b774055dbdd",
+        "stallId": "f849ee01-66d1-461d-93ee-0e8d39a19bf1",
+        "x": 6.68,
+        "y": 44.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "6e3da1a6-7eef-477a-86da-840d7a53d7b8",
+        "stallId": "9580634d-fb42-44d1-92fe-1b7cf377773f",
+        "x": 27.68,
+        "y": 44.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "986a1419-d0f8-4c8e-ba4b-1e1cde29615d",
+        "stallId": "d9e9e337-7439-4fb2-a4d6-22006258e3ea",
+        "x": 6.68,
+        "y": 49.56,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "240a3a81-d1a2-411b-bf97-5ce43575bf90",
+        "stallId": "ab60bc99-d86b-419d-a63a-c5357abd9f24",
+        "x": 27.68,
+        "y": 49.56,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "e5013901-c96d-4ad2-aefd-e36170a4a7eb",
+        "stallId": "195ca42e-dee5-4fbe-9a18-ba41a066bc28",
+        "x": 6.68,
+        "y": 54.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "aadd1f6b-cc6c-4475-8e78-1c4f8779ea7c",
+        "stallId": "eaf4695a-a312-41e6-9983-ed51e020984a",
+        "x": 27.68,
+        "y": 54.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "870267c0-1ba7-4fbc-abe7-61f4f8201c58",
+        "stallId": "79d05346-6f1b-47ad-a934-80335ad33454",
+        "x": 6.68,
+        "y": 58.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "950db009-4085-4c7b-93bc-3a3c13d47c31",
+        "stallId": "b545d89b-b31e-4712-80f8-e8d754f5a630",
+        "x": 27.68,
+        "y": 58.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "686019e3-b6d4-4de6-a19e-cac9bd1ca378",
+        "stallId": "8e1e945c-3637-4b51-85de-03092484afc3",
+        "x": 54.68,
+        "y": 40.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "f54ae3f1-5632-4f3c-97cc-f1dfd37ceea6",
+        "stallId": "ca4640a4-59f9-40db-b804-429c53ec78c8",
+        "x": 75,
+        "y": 40.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "e1dddf3a-522f-4a8a-b7db-114e3b26ae6e",
+        "stallId": "70397e56-fb6d-44b1-b27d-624dba01818c",
+        "x": 54.68,
+        "y": 44.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "4af9db00-e25d-4d30-892e-8e763d2931d6",
+        "stallId": "ec74b6b1-5a47-4711-93fd-84f90b2b7bfb",
+        "x": 75,
+        "y": 44.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "60b57bc1-5e16-4654-87b5-8b4d0dbf3db4",
+        "stallId": "3a14207d-429d-415d-b44e-156e3faf2bc0",
+        "x": 54.68,
+        "y": 49.56,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "f2f9a8a5-8c95-457b-8c2f-eb9aadbb11fa",
+        "stallId": "fdeea08f-bb8d-48d0-9d53-576e39d55482",
+        "x": 75,
+        "y": 49.56,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "f3d59b30-49fe-4ad8-87f3-83a5a59d93bb",
+        "stallId": "d22a25a3-6571-4f19-aa4c-0b6e591825ed",
+        "x": 54.68,
+        "y": 54.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "fe1ef45b-dc5f-42f9-aa6c-a312c2e4bc49",
+        "stallId": "1de98f51-a94d-4f7f-8fae-444727155915",
+        "x": 75,
+        "y": 54.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "e27c70d8-7d08-4cab-9b2d-5eb20ed48223",
+        "stallId": "06ee709d-edb0-4d4d-b0e0-2d0cb39a3589",
+        "x": 54.68,
+        "y": 58.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "59a1309d-b5fd-49ca-a721-992421c3bd99",
+        "stallId": "6065983a-5988-4c09-aade-f9b96c47f252",
+        "x": 75,
+        "y": 58.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "147d14a1-0591-45ba-9a17-d2356b3b5860",
+        "stallId": "d6d388e4-9817-42f7-8b24-c19820a7f560",
+        "x": 6.68,
+        "y": 70.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "e17e2c9c-bbd2-4413-a0cb-064eccb1b5d4",
+        "stallId": "16f85dc7-ca15-4ee1-bc1f-0debd000aec2",
+        "x": 27.68,
+        "y": 70.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "c04a0b78-a7c8-4a17-9360-dfe914bb6f66",
+        "stallId": "fc999b7a-c5c2-4999-a3e5-7e9e0e456aa6",
+        "x": 6.68,
+        "y": 75.56,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "a5695460-5b57-411c-a078-9210ec237bd4",
+        "stallId": "c97222d3-9ab7-4dc7-b302-dc4adc89693f",
+        "x": 27.68,
+        "y": 75.56,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "6c878dcf-0f99-4574-93cb-430ae4b374b1",
+        "stallId": "40a0d732-4179-45e6-aab7-d7a3372715a1",
+        "x": 6.68,
+        "y": 80.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "3f2ca052-d8ad-46c5-8238-00cc69d1362f",
+        "stallId": "7a500a1e-cbb6-4fd8-9a73-5c2fa1f29c63",
+        "x": 27.68,
+        "y": 80.227,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "ed6230a8-3dce-4313-9ddd-639f88818c84",
+        "stallId": "50399aa6-f341-4ba6-af81-de976d1c4730",
+        "x": 6.68,
+        "y": 84.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "c8996653-3d0e-480b-bda9-5cd782f7dc72",
+        "stallId": "7e9b56f5-010d-4ca1-8713-4ceb094c8bf7",
+        "x": 27.68,
+        "y": 84.893,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "12b8fc55-f8dc-4707-9401-e6f21f0c97ea",
+        "stallId": "327c7c97-7928-4f0e-ae20-7375258059cd",
+        "x": 6.68,
+        "y": 89.56,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      },
+      {
+        "id": "73b5fe0b-2b7a-4700-a01b-c810b465ee4b",
+        "stallId": "51171698-690d-4bda-bb08-cbbee9113f0f",
+        "x": 27.68,
+        "y": 89.56,
+        "width": 17.22,
+        "height": 3.36,
+        "rotation": 0
+      }
+    ],
+    "drawings": [],
+    "generated": true
+  }
+}

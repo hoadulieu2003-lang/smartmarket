@@ -1,0 +1,57 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "30000000-0000-4000-8000-000000000002",
+      "provinceId": "20000000-0000-4000-8000-000000000002",
+      "code": "CHO-DX-HN",
+      "name": "Chợ Đồng Xuân (Demo)",
+      "address": "Đồng Xuân, Hoàn Kiếm, Hà Nội",
+      "latitude": 21.0378,
+      "longitude": 105.8492,
+      "phone": null,
+      "email": null,
+      "description": null,
+      "images": [
+        {
+          "url": "https://ql.chothongminh.top/storage/uploads/seed/market-cho-dx-hn/1-be6f5a261e4d1287.jpg"
+        }
+      ],
+      "openHours": "06:00 - 18:00",
+      "mapLink": "https://ql.chothongminh.top/storage/uploads/seed/market-cho-dx-hn-map/1-d5c402fbfda30e60.svg",
+      "googleMapsUrl": null,
+      "mapLayoutDraft": null,
+      "mapLayoutDraftVersion": 0,
+      "mapLayoutPublished": null,
+      "mapLayoutRevisions": [],
+      "status": "active",
+      "createdAt": "2026-07-11T05:56:36.990Z",
+      "updatedAt": "2026-07-14T14:42:28.895Z",
+      "provinces": {
+        "id": "20000000-0000-4000-8000-000000000002",
+        "name": "Hà Nội"
+      },
+      "stallCount": 50,
+      "occupiedStallCount": 24,
+      "vacantStallCount": 21,
+      "traderCount": 19,
+      "ratingAvg": 4.3,
+      "managers": [
+        {
+          "id": "10000000-0000-4000-8000-000000000004",
+          "fullName": "Quản lý Chợ Đồng Xuân"
+        },
+        {
+          "id": "69a56b48-871e-4a01-823e-368f93259ab5",
+          "fullName": "Admin Chợ Đồng Xuân (Demo)"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 100,
+    "total": 1,
+    "totalPages": 1
+  }
+}

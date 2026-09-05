@@ -1,0 +1,82 @@
+{
+  "markets": {
+    "status": 200,
+    "items": 1,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\markets.json"
+  },
+  "zones": {
+    "status": 200,
+    "items": 5,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\zones.json"
+  },
+  "stalls": {
+    "status": 200,
+    "items": 50,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\stalls.json"
+  },
+  "complaints_metrics": {
+    "status": 200,
+    "items": 4,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\complaints_metrics.json"
+  },
+  "complaints_list": {
+    "status": 200,
+    "items": 10,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\complaints_list.json"
+  },
+  "traders": {
+    "status": 200,
+    "items": 20,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\traders.json"
+  },
+  "merchant_profiles_summary": {
+    "status": 200,
+    "items": 4,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\merchant_profiles_summary.json"
+  },
+  "products": {
+    "status": 200,
+    "items": 20,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\products.json"
+  },
+  "orders": {
+    "status": 200,
+    "items": 20,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\orders.json"
+  },
+  "billing_summary": {
+    "status": 200,
+    "items": 3,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\billing_summary.json"
+  },
+  "payments": {
+    "status": 200,
+    "items": 1,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\payments.json"
+  },
+  "traceability_summary": {
+    "status": 200,
+    "items": 4,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\traceability_summary.json"
+  },
+  "dashboard_overview": {
+    "status": 200,
+    "items": 12,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\dashboard_overview.json"
+  },
+  "dashboard_charts": {
+    "status": 200,
+    "items": 7,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\dashboard_charts.json"
+  },
+  "categories": {
+    "status": 200,
+    "items": 10,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\categories.json"
+  },
+  "map_layout": {
+    "status": 200,
+    "items": 2,
+    "file": "c:\\Users\\game\\Documents\\app\\Smartmarket.worktrees\\ui-refresh\\src\\data\\live_synced\\map_layout.json"
+  }
+}

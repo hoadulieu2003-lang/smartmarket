@@ -366,6 +366,7 @@ export interface FloorEntity {
   
   coordinateSystem: LocalCoordinateSystem;
   boundary: PolygonGeometry;
+  backgroundImage?: string;
 
   // Quan hệ không gian phân cấp
   zones: ZoneEntity[];

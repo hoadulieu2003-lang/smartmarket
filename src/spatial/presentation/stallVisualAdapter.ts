@@ -16,7 +16,10 @@ import type {
   OperationalPriority,
   OperationalFilter,
   UnifiedBadgeCluster,
+  DutyBadgeInfo,
+  DutyView,
 } from './stallVisual.types';
+import { isStallMatchingDuty } from './stallVisual.types';
 
 export const SMART_MARKET_BRAND_GREEN = '#076C31';
 
@@ -215,7 +218,7 @@ export function getStallVisualTokens(
  */
 export function deriveStallVisual(
   stall: any,
-  interaction: { selected?: boolean; focused?: boolean; operationalFilter?: OperationalFilter } = {}
+  interaction: { selected?: boolean; focused?: boolean; operationalFilter?: OperationalFilter; dutyView?: DutyView } = {}
 ): StallVisualDescriptor {
   const tokens = getStallVisualTokens(stall, { isSelected: interaction.selected });
 
@@ -281,7 +284,41 @@ export function deriveStallVisual(
     };
   }
 
-  const isDimmed = interaction.operationalFilter ? shouldDimStall(priority, interaction.operationalFilter) : false;
+  // 3.5. Duty View Badge & Dimming
+  let dutyBadge: DutyBadgeInfo | null = null;
+  let isDutyDimmed = false;
+
+  if (interaction.dutyView && interaction.dutyView !== 'all') {
+    const isMatching = isStallMatchingDuty(stall, interaction.dutyView);
+    if (isMatching) {
+      if (interaction.dutyView === 'sanitation') {
+        dutyBadge = {
+          duty: 'sanitation',
+          label: 'Vệ sinh / Nước',
+          iconName: 'Droplets',
+          color: '#0284c7',
+        };
+      } else if (interaction.dutyView === 'security_fire') {
+        dutyBadge = {
+          duty: 'security_fire',
+          label: 'PCCC / An ninh',
+          iconName: 'Flame',
+          color: '#e11d48',
+        };
+      } else if (interaction.dutyView === 'finance') {
+        dutyBadge = {
+          duty: 'finance',
+          label: 'Hạn nợ / Hợp đồng',
+          iconName: 'ReceiptText',
+          color: '#d97706',
+        };
+      }
+    } else {
+      isDutyDimmed = true;
+    }
+  }
+
+  const isDimmed = isDutyDimmed || (interaction.operationalFilter ? shouldDimStall(priority, interaction.operationalFilter) : false);
 
   let accessibleStatus = 'Hoạt động bình thường';
   if (priority === 'urgent') {
@@ -310,6 +347,7 @@ export function deriveStallVisual(
     accessibleStatus,
     priority,
     unifiedBadge,
+    dutyBadge,
     isDimmed,
   };
 }

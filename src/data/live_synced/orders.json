@@ -1,0 +1,771 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "074c625a-c478-44c9-92e6-671177c2cb06",
+      "code": "SM260813-LHMBU",
+      "customerId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "79d05346-6f1b-47ad-a934-80335ad33454",
+      "checkoutGroupId": "3e2e2036-9782-499c-9d51-fc6455ab102b",
+      "status": "pending",
+      "receiveType": "pickup",
+      "receiverName": "Hòa",
+      "receiverPhone": "0357634420",
+      "note": null,
+      "totalAmount": 121500,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": null,
+      "preparingAt": null,
+      "readyAt": null,
+      "completedAt": null,
+      "cancelledAt": null,
+      "createdAt": "2026-08-13T03:47:11.192Z",
+      "updatedAt": "2026-08-13T03:47:11.192Z",
+      "merchantId": "190b69f8-7d9c-44fd-9f6c-5c4ee780cef1",
+      "contractId": "c3f83667-3d7f-4ae5-9ff5-1b69bc0807df",
+      "stalls": {
+        "id": "79d05346-6f1b-47ad-a934-80335ad33454",
+        "code": "D260802V1-S11",
+        "name": "Sạp Hải sản Thu Hà"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+        "fullName": "Hòa"
+      }
+    },
+    {
+      "id": "e03f1e9c-7413-4a14-aef8-dd32e84d2e55",
+      "code": "SM260813-7C0C0",
+      "customerId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+      "checkoutGroupId": "3e2e2036-9782-499c-9d51-fc6455ab102b",
+      "status": "completed",
+      "receiveType": "pickup",
+      "receiverName": "Hòa",
+      "receiverPhone": "0357634420",
+      "note": null,
+      "totalAmount": 288000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-08-13T03:48:50.999Z",
+      "preparingAt": "2026-08-13T03:48:54.973Z",
+      "readyAt": "2026-08-13T03:48:57.155Z",
+      "completedAt": "2026-08-13T03:48:58.949Z",
+      "cancelledAt": null,
+      "createdAt": "2026-08-13T03:47:11.111Z",
+      "updatedAt": "2026-08-13T03:48:58.950Z",
+      "merchantId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "contractId": "69af9fec-0835-4827-9781-967f28120fee",
+      "stalls": {
+        "id": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+        "code": "A-03",
+        "name": null
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+        "fullName": "Hòa"
+      }
+    },
+    {
+      "id": "1c0fa879-c32e-49b6-849b-f4b282a86b4d",
+      "code": "SM260813-H8YND",
+      "customerId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+      "checkoutGroupId": "ace2bd42-91b0-4743-b385-a761842313b3",
+      "status": "completed",
+      "receiveType": "pickup",
+      "receiverName": "Hòa",
+      "receiverPhone": "0357634420",
+      "note": "Bọc kĩ hàng",
+      "totalAmount": 288000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-08-13T03:41:36.058Z",
+      "preparingAt": "2026-08-13T03:41:38.323Z",
+      "readyAt": "2026-08-13T03:41:40.972Z",
+      "completedAt": "2026-08-13T03:41:42.537Z",
+      "cancelledAt": null,
+      "createdAt": "2026-08-13T03:39:56.618Z",
+      "updatedAt": "2026-08-13T03:41:42.538Z",
+      "merchantId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "contractId": "69af9fec-0835-4827-9781-967f28120fee",
+      "stalls": {
+        "id": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+        "code": "A-03",
+        "name": null
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+        "fullName": "Hòa"
+      }
+    },
+    {
+      "id": "836926ae-8f5d-4009-a148-dd03dc89127d",
+      "code": "SM260813-8LN50",
+      "customerId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+      "checkoutGroupId": "62b9ded3-3a36-494e-9076-3051c8cd4276",
+      "status": "completed",
+      "receiveType": "pickup",
+      "receiverName": "Hòa",
+      "receiverPhone": "0357634420",
+      "note": "Nhớ bọc thật kĩ",
+      "totalAmount": 288000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-08-13T03:33:39.065Z",
+      "preparingAt": "2026-08-13T03:33:45.326Z",
+      "readyAt": "2026-08-13T03:33:46.706Z",
+      "completedAt": "2026-08-13T03:33:47.614Z",
+      "cancelledAt": null,
+      "createdAt": "2026-08-13T03:31:42.752Z",
+      "updatedAt": "2026-08-13T03:33:47.615Z",
+      "merchantId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "contractId": "69af9fec-0835-4827-9781-967f28120fee",
+      "stalls": {
+        "id": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+        "code": "A-03",
+        "name": null
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+        "fullName": "Hòa"
+      }
+    },
+    {
+      "id": "aaebe529-bb5d-42de-952f-aaa595ab14e3",
+      "code": "SM260802-A7S27",
+      "customerId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+      "checkoutGroupId": "3cfc7ebc-4817-4975-ae00-f15dd2cbc6bf",
+      "status": "completed",
+      "receiveType": "pickup",
+      "receiverName": "Hòa",
+      "receiverPhone": "0357634420",
+      "note": "Phải bọc thật kĩ",
+      "totalAmount": 720000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-08-02T03:33:10.953Z",
+      "preparingAt": "2026-08-02T03:33:11.791Z",
+      "readyAt": "2026-08-02T03:33:12.724Z",
+      "completedAt": "2026-08-02T03:33:13.515Z",
+      "cancelledAt": null,
+      "createdAt": "2026-08-02T03:32:56.641Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "contractId": "69af9fec-0835-4827-9781-967f28120fee",
+      "stalls": {
+        "id": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+        "code": "A-03",
+        "name": null
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+        "fullName": "Hòa"
+      }
+    },
+    {
+      "id": "343fd244-a650-43cc-8811-54dac3b622cb",
+      "code": "SM260802-8X5AY",
+      "customerId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+      "checkoutGroupId": "fbfdade6-ad2c-43bc-abd6-38c29e882717",
+      "status": "completed",
+      "receiveType": "pickup",
+      "receiverName": "Hòa",
+      "receiverPhone": "0357634420",
+      "note": null,
+      "totalAmount": 600000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-08-02T03:31:41.659Z",
+      "preparingAt": "2026-08-02T03:31:43.366Z",
+      "readyAt": "2026-08-02T03:31:44.408Z",
+      "completedAt": "2026-08-02T03:31:46.410Z",
+      "cancelledAt": null,
+      "createdAt": "2026-08-02T03:31:28.886Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "contractId": "69af9fec-0835-4827-9781-967f28120fee",
+      "stalls": {
+        "id": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+        "code": "A-03",
+        "name": null
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+        "fullName": "Hòa"
+      }
+    },
+    {
+      "id": "8afc1aaf-6368-44b6-b19b-ee0302e9529a",
+      "code": "SM260802-0Q9ES",
+      "customerId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+      "checkoutGroupId": "3f8b70eb-cbdb-424b-b821-84572dbce193",
+      "status": "completed",
+      "receiveType": "pickup",
+      "receiverName": "Hòa",
+      "receiverPhone": "0357634420",
+      "note": "Bọc thật kĩ",
+      "totalAmount": 720000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-08-02T03:26:38.345Z",
+      "preparingAt": "2026-08-02T03:26:40.246Z",
+      "readyAt": "2026-08-02T03:26:41.048Z",
+      "completedAt": "2026-08-02T03:26:41.784Z",
+      "cancelledAt": null,
+      "createdAt": "2026-08-02T03:26:17.080Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "contractId": "69af9fec-0835-4827-9781-967f28120fee",
+      "stalls": {
+        "id": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+        "code": "A-03",
+        "name": null
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+        "fullName": "Hòa"
+      }
+    },
+    {
+      "id": "94adda63-cd06-494e-8c6e-3be011590599",
+      "code": "SM260802-C1HEY",
+      "customerId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+      "checkoutGroupId": "5c8bd4fc-f79a-47d4-9550-17142334eec3",
+      "status": "completed",
+      "receiveType": "pickup",
+      "receiverName": "Hòa",
+      "receiverPhone": "0357634420",
+      "note": "Bọc kĩ",
+      "totalAmount": 1080000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-08-02T03:22:37.290Z",
+      "preparingAt": "2026-08-02T03:22:38.997Z",
+      "readyAt": "2026-08-02T03:22:40.184Z",
+      "completedAt": "2026-08-02T03:22:41.124Z",
+      "cancelledAt": null,
+      "createdAt": "2026-08-02T03:22:21.450Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "contractId": "69af9fec-0835-4827-9781-967f28120fee",
+      "stalls": {
+        "id": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+        "code": "A-03",
+        "name": null
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+        "fullName": "Hòa"
+      }
+    },
+    {
+      "id": "16005b21-881c-4a25-994d-6db1230ab4da",
+      "code": "SM260728-AD90P",
+      "customerId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+      "checkoutGroupId": "affea7cb-fb43-4237-b46c-b15aa88855c7",
+      "status": "completed",
+      "receiveType": "pickup",
+      "receiverName": "Hòa",
+      "receiverPhone": "0357634420",
+      "note": null,
+      "totalAmount": 7720000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-07-28T03:21:19.593Z",
+      "preparingAt": "2026-07-28T03:21:21.097Z",
+      "readyAt": "2026-07-28T03:21:21.967Z",
+      "completedAt": "2026-07-28T03:21:23.347Z",
+      "cancelledAt": null,
+      "createdAt": "2026-07-28T03:21:09.721Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "contractId": "69af9fec-0835-4827-9781-967f28120fee",
+      "stalls": {
+        "id": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+        "code": "A-03",
+        "name": null
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+        "fullName": "Hòa"
+      }
+    },
+    {
+      "id": "061504db-fc22-469c-ba66-49c429d7b810",
+      "code": "SM260725-E5L5H",
+      "customerId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+      "checkoutGroupId": "e12e417d-00bb-4fb6-82c1-d2a464e39231",
+      "status": "completed",
+      "receiveType": "pickup",
+      "receiverName": "Hòa",
+      "receiverPhone": "0357634420",
+      "note": null,
+      "totalAmount": 3620000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-07-25T15:02:25.540Z",
+      "preparingAt": "2026-07-25T15:02:29.133Z",
+      "readyAt": "2026-07-25T15:02:31.671Z",
+      "completedAt": "2026-07-25T15:02:36.397Z",
+      "cancelledAt": null,
+      "createdAt": "2026-07-25T15:02:11.515Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "contractId": "69af9fec-0835-4827-9781-967f28120fee",
+      "stalls": {
+        "id": "f66a478e-7a63-49b7-a7d3-bbc6f3709718",
+        "code": "A-03",
+        "name": null
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+        "fullName": "Hòa"
+      }
+    },
+    {
+      "id": "0807226c-0edc-4e7f-a3c1-a6963288643e",
+      "code": "SM260725-EVFHD",
+      "customerId": "602ed46f-f1b9-4310-8def-595f0062d509",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "e66b2b58-6bbc-4f9b-98dd-3851d7472d44",
+      "checkoutGroupId": "12c8a94e-63c1-4f1b-8785-d4c45662ee10",
+      "status": "pending",
+      "receiveType": "pickup",
+      "receiverName": "Hòa",
+      "receiverPhone": "0357634420",
+      "note": null,
+      "totalAmount": 430000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": null,
+      "preparingAt": null,
+      "readyAt": null,
+      "completedAt": null,
+      "cancelledAt": null,
+      "createdAt": "2026-07-25T14:40:46.464Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": null,
+      "contractId": null,
+      "stalls": {
+        "id": "e66b2b58-6bbc-4f9b-98dd-3851d7472d44",
+        "code": "A-01",
+        "name": null
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "602ed46f-f1b9-4310-8def-595f0062d509",
+        "fullName": "Hòa"
+      }
+    },
+    {
+      "id": "327ea632-f467-428c-8887-f7e0a9e4527f",
+      "code": "D260802V1-DH021",
+      "customerId": "710db4a2-b966-4946-b94e-7f0d45c9a6c4",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "79d05346-6f1b-47ad-a934-80335ad33454",
+      "checkoutGroupId": "c69a5d6d-423f-4ca8-9324-e8629eef592f",
+      "status": "completed",
+      "receiveType": "pickup",
+      "receiverName": "Hoàng Chi",
+      "receiverPhone": "0398260120",
+      "note": "[CHO-DEMO-20260802-V1] Đơn mua thử tại chợ, nhận trực tiếp tại sạp.",
+      "totalAmount": 210000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-07-23T02:20:00.000Z",
+      "preparingAt": "2026-07-23T02:55:00.000Z",
+      "readyAt": "2026-07-23T03:50:00.000Z",
+      "completedAt": "2026-07-23T04:40:00.000Z",
+      "cancelledAt": null,
+      "createdAt": "2026-07-23T02:00:00.000Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "190b69f8-7d9c-44fd-9f6c-5c4ee780cef1",
+      "contractId": "c3f83667-3d7f-4ae5-9ff5-1b69bc0807df",
+      "stalls": {
+        "id": "79d05346-6f1b-47ad-a934-80335ad33454",
+        "code": "D260802V1-S11",
+        "name": "Sạp Hải sản Thu Hà"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "710db4a2-b966-4946-b94e-7f0d45c9a6c4",
+        "fullName": "Hoàng Chi"
+      }
+    },
+    {
+      "id": "b518f6d2-ed89-4ec7-9f0f-9727af81a6d8",
+      "code": "D260802V1-DH063",
+      "customerId": "9a2591ee-a40a-4bc4-a27a-914480001439",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "327c7c97-7928-4f0e-ae20-7375258059cd",
+      "checkoutGroupId": "324cff44-212f-4f2c-9e07-8dd68715ce9b",
+      "status": "cancelled",
+      "receiveType": "pickup",
+      "receiverName": "Lê Chi",
+      "receiverPhone": "0398260118",
+      "note": "[CHO-DEMO-20260802-V1] Đơn mua thử tại chợ, nhận trực tiếp tại sạp.",
+      "totalAmount": 310000,
+      "cancelReason": "[CHO-DEMO-20260802-V1] Người mua thay đổi kế hoạch.",
+      "cancelledBy": "buyer",
+      "confirmedAt": null,
+      "preparingAt": null,
+      "readyAt": null,
+      "completedAt": null,
+      "cancelledAt": "2026-07-23T02:35:00.000Z",
+      "createdAt": "2026-07-23T02:00:00.000Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "601e5fd0-aeef-44cb-9898-69ef228de595",
+      "contractId": "6c4f1026-4642-49ee-8fe9-fdbe1e97eb7c",
+      "stalls": {
+        "id": "327c7c97-7928-4f0e-ae20-7375258059cd",
+        "code": "D260802V1-S15",
+        "name": "Sạp Quần áo Thu Hà"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "9a2591ee-a40a-4bc4-a27a-914480001439",
+        "fullName": "Lê Chi"
+      }
+    },
+    {
+      "id": "facf0c08-ef61-405c-ba69-b08af716734a",
+      "code": "D260802V1-DH062",
+      "customerId": "232f64bd-3b6a-47be-a5da-350552dfebe2",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "6065983a-5988-4c09-aade-f9b96c47f252",
+      "checkoutGroupId": "07d685f9-968d-44a9-b477-7ef11c86dfba",
+      "status": "ready",
+      "receiveType": "pickup",
+      "receiverName": "Phạm Bình",
+      "receiverPhone": "0398260111",
+      "note": "[CHO-DEMO-20260802-V1] Đơn mua thử tại chợ, nhận trực tiếp tại sạp.",
+      "totalAmount": 210000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-07-22T02:20:00.000Z",
+      "preparingAt": "2026-07-22T02:55:00.000Z",
+      "readyAt": "2026-07-22T03:50:00.000Z",
+      "completedAt": null,
+      "cancelledAt": null,
+      "createdAt": "2026-07-22T02:00:00.000Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "ffbaf108-5e90-4ecc-aba8-d24b81b8ae08",
+      "contractId": "06390c30-7e79-46b4-8eef-050595b5a4ee",
+      "stalls": {
+        "id": "6065983a-5988-4c09-aade-f9b96c47f252",
+        "code": "D260802V1-S14",
+        "name": "Sạp Ẩm thực Thu Hà"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "232f64bd-3b6a-47be-a5da-350552dfebe2",
+        "fullName": "Phạm Bình"
+      }
+    },
+    {
+      "id": "462cecec-fb6c-4698-93c7-cab8f16458c8",
+      "code": "D260802V1-DH020",
+      "customerId": "11e025d9-c00e-44e4-8c17-490c7ddc87d3",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "51e9b527-2492-4355-aa68-a622b130161a",
+      "checkoutGroupId": "43eb83a8-fce7-4386-bfb3-7a2b148d7b3d",
+      "status": "completed",
+      "receiveType": "pickup",
+      "receiverName": "Phạm Chi",
+      "receiverPhone": "0398260119",
+      "note": "[CHO-DEMO-20260802-V1] Đơn mua thử tại chợ, nhận trực tiếp tại sạp.",
+      "totalAmount": 130000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-07-22T02:20:00.000Z",
+      "preparingAt": "2026-07-22T02:55:00.000Z",
+      "readyAt": "2026-07-22T03:50:00.000Z",
+      "completedAt": "2026-07-22T04:40:00.000Z",
+      "cancelledAt": null,
+      "createdAt": "2026-07-22T02:00:00.000Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "7ca7c1d0-376f-4d70-b5de-8166693ed804",
+      "contractId": "731032a5-0a7e-455c-85f0-d3ce2a90f0d2",
+      "stalls": {
+        "id": "51e9b527-2492-4355-aa68-a622b130161a",
+        "code": "D260802V1-S10",
+        "name": "Sạp Thịt Thu Hà"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "11e025d9-c00e-44e4-8c17-490c7ddc87d3",
+        "fullName": "Phạm Chi"
+      }
+    },
+    {
+      "id": "9d7fad2e-e0d3-47a7-9050-8a47462e0328",
+      "code": "D260802V1-DH061",
+      "customerId": "31edc658-de3c-4c33-9965-122b24373f08",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "06ee709d-edb0-4d4d-b0e0-2d0cb39a3589",
+      "checkoutGroupId": "7907cfca-d443-430d-8515-b77ae080052a",
+      "status": "ready",
+      "receiveType": "pickup",
+      "receiverName": "Hoàng An",
+      "receiverPhone": "0398260104",
+      "note": "[CHO-DEMO-20260802-V1] Đơn mua thử tại chợ, nhận trực tiếp tại sạp.",
+      "totalAmount": 110000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-07-21T02:20:00.000Z",
+      "preparingAt": "2026-07-21T02:55:00.000Z",
+      "readyAt": "2026-07-21T03:50:00.000Z",
+      "completedAt": null,
+      "cancelledAt": null,
+      "createdAt": "2026-07-21T02:00:00.000Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "291b03b8-a07f-4dca-b7b2-68f909869786",
+      "contractId": "655fc720-5077-482b-87ae-c0e9d64c081c",
+      "stalls": {
+        "id": "06ee709d-edb0-4d4d-b0e0-2d0cb39a3589",
+        "code": "D260802V1-S13",
+        "name": "Sạp Gia vị Thu Hà"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "31edc658-de3c-4c33-9965-122b24373f08",
+        "fullName": "Hoàng An"
+      }
+    },
+    {
+      "id": "b0d61baf-4ba1-4382-bf17-82a77e3feb6c",
+      "code": "D260802V1-DH019",
+      "customerId": "9a2591ee-a40a-4bc4-a27a-914480001439",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "51e9b527-2492-4355-aa68-a622b130161a",
+      "checkoutGroupId": "99113ebf-5ff8-41f7-bace-0c8ddff7df64",
+      "status": "completed",
+      "receiveType": "pickup",
+      "receiverName": "Lê Chi",
+      "receiverPhone": "0398260118",
+      "note": "[CHO-DEMO-20260802-V1] Đơn mua thử tại chợ, nhận trực tiếp tại sạp.",
+      "totalAmount": 130000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-07-21T02:20:00.000Z",
+      "preparingAt": "2026-07-21T02:55:00.000Z",
+      "readyAt": "2026-07-21T03:50:00.000Z",
+      "completedAt": "2026-07-21T04:40:00.000Z",
+      "cancelledAt": null,
+      "createdAt": "2026-07-21T02:00:00.000Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "7ca7c1d0-376f-4d70-b5de-8166693ed804",
+      "contractId": "731032a5-0a7e-455c-85f0-d3ce2a90f0d2",
+      "stalls": {
+        "id": "51e9b527-2492-4355-aa68-a622b130161a",
+        "code": "D260802V1-S10",
+        "name": "Sạp Thịt Thu Hà"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "9a2591ee-a40a-4bc4-a27a-914480001439",
+        "fullName": "Lê Chi"
+      }
+    },
+    {
+      "id": "68bbc030-f956-44e1-a445-29f7eeabaa52",
+      "code": "D260802V1-DH060",
+      "customerId": "08b1e033-0f67-4b93-899c-67f3e3f19ee3",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "b545d89b-b31e-4712-80f8-e8d754f5a630",
+      "checkoutGroupId": "fb50e1fc-ada5-401c-8874-e99982602cfa",
+      "status": "ready",
+      "receiveType": "pickup",
+      "receiverName": "Huỳnh Dũng",
+      "receiverPhone": "0398260129",
+      "note": "[CHO-DEMO-20260802-V1] Đơn mua thử tại chợ, nhận trực tiếp tại sạp.",
+      "totalAmount": 290000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-07-20T02:20:00.000Z",
+      "preparingAt": "2026-07-20T02:55:00.000Z",
+      "readyAt": "2026-07-20T03:50:00.000Z",
+      "completedAt": null,
+      "cancelledAt": null,
+      "createdAt": "2026-07-20T02:00:00.000Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "d90003aa-c044-4b9f-aece-018828410ec2",
+      "contractId": "1e759edc-3388-42ce-a882-970b7ee18315",
+      "stalls": {
+        "id": "b545d89b-b31e-4712-80f8-e8d754f5a630",
+        "code": "D260802V1-S12",
+        "name": "Sạp Đồ khô Thu Hà"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "08b1e033-0f67-4b93-899c-67f3e3f19ee3",
+        "fullName": "Huỳnh Dũng"
+      }
+    },
+    {
+      "id": "79bb104e-d579-4bf2-a484-83400820b9d9",
+      "code": "D260802V1-DH018",
+      "customerId": "cdb520cf-702d-4bab-b958-2b3c11fce008",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "8619f232-1e18-462b-ac2c-c8375828ff3f",
+      "checkoutGroupId": "e29f49d9-bcdf-4a98-9c53-8b10524c7f22",
+      "status": "completed",
+      "receiveType": "pickup",
+      "receiverName": "Trần Chi",
+      "receiverPhone": "0398260117",
+      "note": "[CHO-DEMO-20260802-V1] Đơn mua thử tại chợ, nhận trực tiếp tại sạp.",
+      "totalAmount": 290000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-07-20T02:20:00.000Z",
+      "preparingAt": "2026-07-20T02:55:00.000Z",
+      "readyAt": "2026-07-20T03:50:00.000Z",
+      "completedAt": "2026-07-20T04:40:00.000Z",
+      "cancelledAt": null,
+      "createdAt": "2026-07-20T02:00:00.000Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "e2051643-3b08-4b4a-abed-39138b537834",
+      "contractId": "49191edf-0fb4-4e66-99b6-3f8741e8c465",
+      "stalls": {
+        "id": "8619f232-1e18-462b-ac2c-c8375828ff3f",
+        "code": "D260802V1-S09",
+        "name": "Sạp Rau củ quả Thu Hà"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "cdb520cf-702d-4bab-b958-2b3c11fce008",
+        "fullName": "Trần Chi"
+      }
+    },
+    {
+      "id": "4696e1ee-647e-4961-99e7-65fa5120b0b1",
+      "code": "D260802V1-DH059",
+      "customerId": "df662afb-a69e-4518-88c2-2e285e048865",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "stallId": "79d05346-6f1b-47ad-a934-80335ad33454",
+      "checkoutGroupId": "fccae3c6-d86d-4843-bc03-feb0446e571f",
+      "status": "preparing",
+      "receiveType": "pickup",
+      "receiverName": "Phan Chi",
+      "receiverPhone": "0398260122",
+      "note": "[CHO-DEMO-20260802-V1] Đơn mua thử tại chợ, nhận trực tiếp tại sạp.",
+      "totalAmount": 230000,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "confirmedAt": "2026-07-19T02:20:00.000Z",
+      "preparingAt": "2026-07-19T02:55:00.000Z",
+      "readyAt": null,
+      "completedAt": null,
+      "cancelledAt": null,
+      "createdAt": "2026-07-19T02:00:00.000Z",
+      "updatedAt": "2026-08-07T05:22:30.962Z",
+      "merchantId": "190b69f8-7d9c-44fd-9f6c-5c4ee780cef1",
+      "contractId": "c3f83667-3d7f-4ae5-9ff5-1b69bc0807df",
+      "stalls": {
+        "id": "79d05346-6f1b-47ad-a934-80335ad33454",
+        "code": "D260802V1-S11",
+        "name": "Sạp Hải sản Thu Hà"
+      },
+      "markets": {
+        "id": "30000000-0000-4000-8000-000000000002",
+        "name": "Chợ Đồng Xuân (Demo)"
+      },
+      "customer": {
+        "id": "df662afb-a69e-4518-88c2-2e285e048865",
+        "fullName": "Phan Chi"
+      }
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 20,
+    "total": 36,
+    "totalPages": 2
+  }
+}

@@ -151,11 +151,10 @@ describe('Operational responsive contract', () => {
   it('uses operational summary counts as the profile source of truth', () => {
     render(<PendingProfilesView onBackToMap={vi.fn()} />);
 
-    expect(screen.getByText(/Tổng cộng có/i).textContent).toContain(String(URGENT_ACTIONS.pendingProfiles.totalPending));
     expect(screen.getByRole('button', { name: new RegExp(`Tất cả \\(${URGENT_ACTIONS.pendingProfiles.totalPending}\\)`) })).toBeDefined();
     expect(screen.getByRole('button', { name: new RegExp(`Quá hạn \\(${URGENT_ACTIONS.pendingProfiles.overdue}\\)`) })).toBeDefined();
     expect(screen.getByRole('button', { name: new RegExp(`Đang xử lý \\(${URGENT_ACTIONS.pendingProfiles.totalPending - URGENT_ACTIONS.pendingProfiles.overdue}\\)`) })).toBeDefined();
-    expect(screen.getByText(/Đang hiển thị 4 hồ sơ mẫu/i)).toBeDefined();
+    expect(screen.getByTestId('pending-profile-grid').children.length).toBe(URGENT_ACTIONS.pendingProfiles.totalPending);
   });
 
   it('labels uncollected fees without treating the same amount as overdue debt', () => {

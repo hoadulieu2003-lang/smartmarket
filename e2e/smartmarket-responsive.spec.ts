@@ -24,7 +24,7 @@ test.describe('Smartmarket responsive drawer behavior', () => {
   for (const viewport of viewports) {
     test(`keeps the operations screen and stall drawer within the ${viewport.name} viewport`, async ({ page }) => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
-      await page.goto('/');
+      await page.goto('/?fixture=A');
 
       await expect(page.getByTestId('map-toolbar')).toBeVisible();
       await expectNoPageOverflow(page);

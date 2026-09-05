@@ -1,0 +1,93 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "26c02053-ffb4-4d33-81d8-d5077bb5c74b",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "categoryId": "50000000-0000-4000-8000-000000000001",
+      "code": "A",
+      "name": "Khu A - Rau củ quả",
+      "description": null,
+      "displayOrder": 4,
+      "gridColumns": 4,
+      "isActive": true,
+      "createdAt": "2026-07-11T05:56:37.841Z",
+      "updatedAt": "2026-07-11T06:15:43.085Z",
+      "categories": {
+        "id": "50000000-0000-4000-8000-000000000001",
+        "name": "Rau củ quả"
+      },
+      "stallCount": 10,
+      "occupiedCount": 4,
+      "vacantCount": 5
+    },
+    {
+      "id": "94315111-597e-4260-8e11-49347759825b",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "categoryId": null,
+      "code": "D260802V1-K05",
+      "name": "Khu Thực phẩm tươi 1",
+      "description": "[CHO-DEMO-20260802-V1] Khu mua sắm mẫu phục vụ trình diễn tại Chợ Đồng Xuân (Demo).",
+      "displayOrder": 900,
+      "gridColumns": 2,
+      "isActive": true,
+      "createdAt": "2026-06-28T02:04:00.000Z",
+      "updatedAt": "2026-06-28T02:04:00.000Z",
+      "categories": null,
+      "stallCount": 10,
+      "occupiedCount": 5,
+      "vacantCount": 4
+    },
+    {
+      "id": "a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "categoryId": null,
+      "code": "D260802V1-K06",
+      "name": "Khu Nông sản chọn lọc 2",
+      "description": "[CHO-DEMO-20260802-V1] Khu mua sắm mẫu phục vụ trình diễn tại Chợ Đồng Xuân (Demo).",
+      "displayOrder": 901,
+      "gridColumns": 2,
+      "isActive": true,
+      "createdAt": "2026-06-28T02:05:00.000Z",
+      "updatedAt": "2026-06-28T02:05:00.000Z",
+      "categories": null,
+      "stallCount": 10,
+      "occupiedCount": 5,
+      "vacantCount": 4
+    },
+    {
+      "id": "d1c487a2-46e5-42a8-bfc8-afe642bfe2a2",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "categoryId": null,
+      "code": "D260802V1-K07",
+      "name": "Khu Đặc sản địa phương 3",
+      "description": "[CHO-DEMO-20260802-V1] Khu mua sắm mẫu phục vụ trình diễn tại Chợ Đồng Xuân (Demo).",
+      "displayOrder": 902,
+      "gridColumns": 2,
+      "isActive": true,
+      "createdAt": "2026-06-28T02:06:00.000Z",
+      "updatedAt": "2026-06-28T02:06:00.000Z",
+      "categories": null,
+      "stallCount": 10,
+      "occupiedCount": 5,
+      "vacantCount": 4
+    },
+    {
+      "id": "5d751924-e6d3-425f-b933-fe3081d1c191",
+      "marketId": "30000000-0000-4000-8000-000000000002",
+      "categoryId": null,
+      "code": "D260802V1-K08",
+      "name": "Khu Hàng thiết yếu 4",
+      "description": "[CHO-DEMO-20260802-V1] Khu mua sắm mẫu phục vụ trình diễn tại Chợ Đồng Xuân (Demo).",
+      "displayOrder": 903,
+      "gridColumns": 2,
+      "isActive": true,
+      "createdAt": "2026-06-28T02:07:00.000Z",
+      "updatedAt": "2026-06-28T02:07:00.000Z",
+      "categories": null,
+      "stallCount": 10,
+      "occupiedCount": 5,
+      "vacantCount": 4
+    }
+  ]
+}

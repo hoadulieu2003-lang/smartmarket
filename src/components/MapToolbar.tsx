@@ -25,8 +25,8 @@ import {
 interface MapToolbarProps {
   selectedFloor: string;
   onSelectFloor: (floor: string) => void;
-  viewEngine: '2d_svg' | '3d_three';
-  onToggleViewEngine: (engine: '2d_svg' | '3d_three') => void;
+  viewEngine?: string;
+  onToggleViewEngine?: (engine: any) => void;
   layers: {
     cctv: boolean;
     sensors: boolean;
@@ -48,6 +48,9 @@ interface MapToolbarProps {
   onSearchChange?: (query: string) => void;
   densityMode?: 'optimized' | 'standard';
   onToggleDensityMode?: () => void;
+  activeFixtureKey?: 'LIVE' | 'A' | 'B' | 'C';
+  onSelectFixture?: (fixture: 'LIVE' | 'A' | 'B' | 'C') => void;
+  availableZones?: Array<{ key: string | null; label: string }>;
 }
 
 export default function MapToolbar({
@@ -72,6 +75,9 @@ export default function MapToolbar({
   onSearchChange,
   densityMode = 'optimized',
   onToggleDensityMode,
+  activeFixtureKey = 'LIVE',
+  onSelectFixture,
+  availableZones,
 }: MapToolbarProps) {
   const [isLayersOpen, setIsLayersOpen] = useState(false);
   const layersMenuRef = useRef<HTMLDivElement>(null);
@@ -114,8 +120,8 @@ export default function MapToolbar({
     <div 
       id="map-toolbar-simplified"
       data-testid="map-toolbar"
-      className={`max-w-full overflow-hidden bg-white px-3 py-2 text-xs text-slate-700 font-sans select-none space-y-2 border-b border-slate-200 ${
-        isFullscreen ? 'rounded-none shadow-md z-20' : 'rounded-t'
+      className={`sticky top-0 z-30 max-w-full overflow-hidden bg-white/95 backdrop-blur-sm px-3 py-2 text-xs text-slate-700 font-sans select-none space-y-2 border-b border-slate-200 shadow-2xs ${
+        isFullscreen ? 'rounded-none shadow-md' : 'rounded-t'
       }`}
     >
       {/* ========================================================================= */}
@@ -148,17 +154,46 @@ export default function MapToolbar({
             </div>
           </div>
 
+          {/* Mặt Bằng / Fixture */}
+          {onSelectFixture && (
+            <div className="flex items-center gap-1">
+              <span className="text-slate-500 font-bold hidden xl:inline text-[11px]">Mặt bằng:</span>
+              <div className="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200">
+                {[
+                  { key: 'LIVE', label: 'Đồng Xuân (Live 50 sạp)' },
+                  { key: 'A', label: 'Chợ Đồng Xuân' },
+                  { key: 'B', label: 'Chợ Bến Thành chữ L' },
+                  { key: 'C', label: 'Chợ An Đông 2 Block' },
+                ].map((f) => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => onSelectFixture(f.key as any)}
+                    aria-pressed={activeFixtureKey === f.key}
+                    className={`min-h-11 rounded-md px-2.5 py-2 text-xs font-bold transition-colors cursor-pointer ${
+                      activeFixtureKey === f.key
+                        ? 'bg-[#076C31] text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-950 hover:bg-white'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Phân khu */}
           {onSelectZone && (
             <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-[11px]">
-              {[
+              {(availableZones || [
                 { key: null, label: 'Toàn chợ' },
                 { key: 'zone_A', label: 'Khu A' },
                 { key: 'zone_B', label: 'Khu B' },
                 { key: 'zone_C', label: 'Khu C' },
                 { key: 'zone_D', label: 'Khu D' },
                 { key: 'zone_E', label: 'Khu E' },
-              ].map((z) => (
+              ]).map((z) => (
                 <button
                   key={z.key || 'all'}
                   type="button"
@@ -190,12 +225,12 @@ export default function MapToolbar({
           />
         </div>
 
-        {/* Nhóm Phải: 3D Không Gian Phụ & Popover Lớp Bản Đồ */}
+        {/* Nhóm Phải: 3D Không Gian & Popover Lớp Bản Đồ */}
         <div className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1 sm:overflow-visible sm:pb-0">
           {/* Nút 3D Không gian Phụ (Secondary action kín đáo) */}
           <button
             type="button"
-            onClick={() => onToggleViewEngine(viewEngine === '2d_svg' ? '3d_three' : '2d_svg')}
+            onClick={() => onToggleViewEngine?.(viewEngine === '3d_three' ? '2d_svg' : '3d_three')}
             className={`flex min-h-11 flex-none cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${
               viewEngine === '3d_three'
                 ? 'bg-[#076C31] text-white border-[#076C31] shadow-xs'

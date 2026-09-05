@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import {
-  Store, LayoutDashboard, Users, Package, Star, AlertCircle,
+  Store, LayoutDashboard, Users, Globe,
   ShoppingCart, Receipt, ChevronLeft, ChevronRight, Building2, X
 } from 'lucide-react';
 
@@ -52,12 +52,24 @@ export default function Sidebar({
 
   const navigationGroups: Array<{ groupTitle: string; items: NavigationItem[] }> = [
     {
-      groupTitle: 'VẬN HÀNH MẶT BẰNG',
+      groupTitle: 'ĐIỀU HÀNH CHỢ',
       items: [
         {
           id: 'overview',
-          label: 'Tổng quan sơ đồ',
+          label: 'Tổng quan',
           icon: LayoutDashboard,
+          view: 'overview',
+          onClick: () => {
+            onSelectView('overview');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        },
+        {
+          id: 'stalls',
+          label: 'Sơ đồ chợ',
+          icon: Store,
+          badge: '50 sạp',
+          badgeType: 'brand',
           view: 'market_map',
           onClick: () => {
             onSelectView('market_map');
@@ -65,23 +77,18 @@ export default function Sidebar({
           }
         },
         {
-          id: 'stalls',
-          label: 'Sạp hàng không gian',
-          icon: Store,
-          badge: '38',
+          id: 'gis_map',
+          label: 'Bản đồ GIS',
+          icon: Globe,
+          badge: 'Live',
           badgeType: 'neutral',
-          view: 'market_map',
           onClick: () => {
-            onSelectView('market_map');
-            setTimeout(() => {
-              const mapSec = document.getElementById('market-map-section');
-              if (mapSec) mapSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 50);
+            if (onSelectView) onSelectView('market_map');
           }
         },
         {
           id: 'merchants',
-          label: 'Hồ sơ tiểu thương',
+          label: 'Duyệt hồ sơ tiểu thương',
           icon: Users,
           badge: '7',
           badgeType: 'warning',
@@ -89,51 +96,6 @@ export default function Sidebar({
           onClick: () => {
             onSelectView('pending_profiles');
             window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        },
-        {
-          id: 'products',
-          label: 'Sản phẩm & Hàng hóa',
-          icon: Package,
-          badge: '1.2k',
-          badgeType: 'neutral'
-        },
-        {
-          id: 'ratings',
-          label: 'Đánh giá & Xếp hạng',
-          icon: Star
-        }
-      ]
-    },
-    {
-      groupTitle: 'GIÁM SÁT & TÁC VỤ',
-      items: [
-        {
-          id: 'complaints',
-          label: 'Phản ánh & Khiếu nại',
-          icon: AlertCircle,
-          badge: '12',
-          badgeType: 'danger',
-          onClick: () => {
-            if (onFilterComplaints) onFilterComplaints();
-          }
-        },
-        {
-          id: 'orders',
-          label: 'Đơn hàng online',
-          icon: ShoppingCart,
-          badge: '5',
-          badgeType: 'neutral'
-        },
-        {
-          id: 'fees',
-          label: 'Thu phí thị trường',
-          icon: Receipt,
-          badge: '93%',
-          badgeType: 'brand',
-          onClick: () => {
-            if (currentView !== 'market_map') onSelectView('market_map');
-            if (onScrollToFees) onScrollToFees();
           }
         }
       ]
@@ -157,24 +119,28 @@ export default function Sidebar({
     >
       {/* Brand Header */}
       <div>
-        <div className="h-14 px-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+        <div className="h-16 px-3.5 border-b border-[#DCE8F1] flex items-center justify-between bg-white">
           {!showCollapsed ? (
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-green)] text-white flex items-center justify-center font-bold font-mono shadow-xs">
-                SM
-              </div>
+              <img
+                src="/images/smartmarket-logo.svg"
+                alt="Smart Market Logo"
+                className="w-8 h-8 object-contain shrink-0"
+              />
               <div>
-                <h1 className="text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-1">
+                <h1 className="text-sm font-black text-[#1D385F] tracking-tight leading-tight">
                   SMART MARKET
                 </h1>
-                <p className="text-[10px] text-slate-500 font-sans font-medium">Ban Quản Lý Chợ Đồng Xuân</p>
+                <p className="text-[10px] text-[#7185A1] font-sans font-medium">Command Center</p>
               </div>
             </div>
           ) : (
             <div className="w-full flex justify-center">
-              <div className="w-8 h-8 rounded-lg bg-[var(--color-brand-green)] text-white flex items-center justify-center font-bold font-mono shadow-xs">
-                SM
-              </div>
+              <img
+                src="/images/smartmarket-logo.svg"
+                alt="Smart Market Logo"
+                className="w-8 h-8 object-contain"
+              />
             </div>
           )}
           {isMobilePanel ? (
@@ -182,7 +148,7 @@ export default function Sidebar({
               type="button"
               onClick={onCloseMobile}
               aria-label="Đóng menu điều hướng"
-              className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200/70 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] md:hidden"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-[#7185A1] hover:bg-slate-100 hover:text-[#1D385F] md:hidden"
             >
               <X className="h-5 w-5" />
             </button>
@@ -191,7 +157,7 @@ export default function Sidebar({
               type="button"
               onClick={onToggleCollapse}
               aria-label={showCollapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
-              className="hidden h-11 w-11 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] md:flex"
+              className="hidden h-9 w-9 items-center justify-center rounded-lg text-[#7185A1] hover:text-[#1D385F] hover:bg-[#F5FAF8] border border-[#DCE8F1] transition-colors cursor-pointer md:flex"
               title={showCollapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
             >
               {showCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -204,11 +170,11 @@ export default function Sidebar({
           {navigationGroups.map((group, idx) => (
             <div key={idx}>
               {!showCollapsed && (
-                <div className="px-2.5 mb-1.5 text-[10px] font-bold text-slate-400 tracking-wider uppercase font-sans">
+                <div className="px-2.5 mb-1.5 text-[10px] font-black text-[#7185A1] tracking-wider uppercase font-sans">
                   {group.groupTitle}
                 </div>
               )}
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   const isActive = item.view ? currentView === item.view : false;
@@ -222,27 +188,29 @@ export default function Sidebar({
                         if (isMobilePanel) onCloseMobile?.();
                       }}
                       aria-label={item.badge ? `${item.label} ${item.badge}` : item.label}
-                      className={`w-full min-h-11 flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] ${
+                      className={`w-full min-h-11 flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0B7A3A] ${
                         isActive
-                          ? 'bg-[var(--color-selected-surface)] text-[var(--color-brand-green)] shadow-2xs border border-emerald-200/80 font-bold'
-                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                          ? 'bg-[#0B7A3A] text-white shadow-[0_4px_14px_rgba(11,122,58,0.28)] font-extrabold'
+                          : 'text-[#7185A1] hover:bg-[#E8F8EF] hover:text-[#0B7A3A]'
                       } ${showCollapsed ? 'justify-center px-0' : ''}`}
                       title={showCollapsed ? item.label : undefined}
                     >
-                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[var(--color-brand-green)]' : 'text-slate-500'}`} />
+                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-[#7185A1]'}`} />
                       {!showCollapsed && (
                         <>
                           <span className="flex-1 text-left truncate">{item.label}</span>
                           {item.badge && (
                             <span
-                              className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded ${
-                                item.badgeType === 'danger'
-                                  ? 'bg-rose-100 text-rose-700 font-extrabold border border-rose-200'
+                              className={`text-[10px] font-extrabold font-mono px-1.5 py-0.5 rounded-md ${
+                                isActive
+                                  ? 'bg-white/20 text-white'
+                                  : item.badgeType === 'danger'
+                                  ? 'bg-[#FFF1F2] text-[#EE565D] border border-[#FFD1D4]'
                                   : item.badgeType === 'warning'
-                                  ? 'bg-amber-100 text-amber-900 border border-amber-200'
+                                  ? 'bg-[#FFFBEB] text-[#F5A623] border border-[#FDE68A]'
                                   : item.badgeType === 'brand'
-                                  ? 'bg-emerald-100 text-[var(--color-brand-green)] border border-emerald-200'
-                                  : 'bg-slate-100 text-slate-600 border border-slate-200'
+                                  ? 'bg-[#E8F8EF] text-[#0B7A3A] border border-[#B9F4CA]'
+                                  : 'bg-[#F5FAF8] text-[#7185A1] border border-[#DCE8F1]'
                               }`}
                             >
                               {item.badge}
@@ -260,20 +228,18 @@ export default function Sidebar({
       </div>
 
       {/* Footer Info */}
-      <div className="p-3 border-t border-slate-200 bg-slate-50/50 text-[11px] text-slate-500">
+      <div className="p-3.5 border-t border-[#DCE8F1] bg-white text-[11px] text-[#7185A1]">
         {!showCollapsed ? (
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded bg-emerald-100 text-[var(--color-brand-green)] flex items-center justify-center font-bold text-xs">
-              <Building2 className="w-3.5 h-3.5" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-[#0B7A3A]"></div>
+              <span className="text-[11px] font-bold text-[#1D385F]">Smart Market CMS</span>
             </div>
-            <div className="truncate">
-              <div className="text-slate-800 font-bold text-xs">Hệ thống Trực ban IoT</div>
-              <div className="text-[10px] text-slate-400">Canonical Spatial v3.2.0</div>
-            </div>
+            <span className="text-[10px] text-[#7185A1]">v3.2.0</span>
           </div>
         ) : (
           <div className="flex justify-center">
-            <Building2 className="w-4 h-4 text-[var(--color-brand-green)]" />
+            <div className="w-2 h-2 rounded-full bg-[#0B7A3A]" />
           </div>
         )}
       </div>

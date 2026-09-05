@@ -1,0 +1,14 @@
+{
+  "success": true,
+  "data": {
+    "summary": {
+      "invoiceCount": 0,
+      "billed": 0,
+      "paid": 0,
+      "debt": 0,
+      "overdue": 0
+    },
+    "byMarket": [],
+    "overdue": []
+  }
+}
