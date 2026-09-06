@@ -13,7 +13,6 @@ import {
   FIXTURE_A_DONG_XUAN,
   FIXTURE_B_L_SHAPED_MARKET,
   FIXTURE_C_TWO_BLOCK_BRIDGE_MARKET,
-  LIVE_FLOOR_DONG_XUAN,
   MEGA_FLOOR_DONG_XUAN_STANDARD,
   REALISTIC_FLOOR_DATA,
   type MapDensityMode,
@@ -127,13 +126,13 @@ export default function SmartMarketHome() {
   const [currentView, setCurrentView] = useState<'overview' | 'market_map' | 'pending_profiles'>('overview');
   const [selectedFloor, setSelectedFloor] = useState('1');
   const [viewEngine, setViewEngine] = useState<'2d_svg' | '3d_three'>('2d_svg');
-  const [activeFixtureKey, setActiveFixtureKey] = useState<'LIVE' | 'A' | 'B' | 'C'>('LIVE');
+  const [activeFixtureKey, setActiveFixtureKey] = useState<'A' | 'B' | 'C'>('A');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const f = params.get('fixture');
-      if (f === 'A' || f === 'B' || f === 'C' || f === 'LIVE') {
+      if (f === 'A' || f === 'B' || f === 'C') {
         setActiveFixtureKey(f as any);
       }
     }
@@ -178,16 +177,6 @@ export default function SmartMarketHome() {
   };
 
   const availableZones = useMemo(() => {
-    if (activeFixtureKey === 'LIVE') {
-      return [
-        { key: null, label: 'Toàn chợ' },
-        { key: '26c02053-ffb4-4d33-81d8-d5077bb5c74b', label: 'Khu A' },
-        { key: '94315111-597e-4260-8e11-49347759825b', label: 'TP Tươi 1' },
-        { key: 'a1c1ed1f-1d79-4ecd-bf6a-8f5afd69c282', label: 'Nông Sản 2' },
-        { key: '5c0e4bf1-f033-46ea-9d6a-cb1b4ae50893', label: 'Đặc Sản 3' },
-        { key: '4a6b297b-b82b-4fc4-bb9e-108bb68b321a', label: 'Thiết Yếu 4' },
-      ];
-    }
     return [
       { key: null, label: 'Toàn chợ' },
       { key: 'zone_A', label: 'Khu A' },
@@ -196,7 +185,7 @@ export default function SmartMarketHome() {
       { key: 'zone_D', label: 'Khu D' },
       { key: 'zone_E', label: 'Khu E' },
     ];
-  }, [activeFixtureKey]);
+  }, []);
 
   // Bi-directional sync: Chọn sạp từ danh sách sự cố trên đầu (Work Package D)
   const handleSelectStallCode = (code: string) => {
@@ -243,8 +232,6 @@ export default function SmartMarketHome() {
   const currentFloor = useMemo(() => {
     const rawFloor = (() => {
       switch (activeFixtureKey) {
-        case 'LIVE':
-          return LIVE_FLOOR_DONG_XUAN;
         case 'B':
           return FIXTURE_B_L_SHAPED_MARKET;
         case 'C':

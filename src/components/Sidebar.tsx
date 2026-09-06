@@ -68,8 +68,6 @@ export default function Sidebar({
           id: 'stalls',
           label: 'Sơ đồ chợ',
           icon: Store,
-          badge: '50 sạp',
-          badgeType: 'brand',
           view: 'market_map',
           onClick: () => {
             onSelectView('market_map');

@@ -48,8 +48,8 @@ interface MapToolbarProps {
   onSearchChange?: (query: string) => void;
   densityMode?: 'optimized' | 'standard';
   onToggleDensityMode?: () => void;
-  activeFixtureKey?: 'LIVE' | 'A' | 'B' | 'C';
-  onSelectFixture?: (fixture: 'LIVE' | 'A' | 'B' | 'C') => void;
+  activeFixtureKey?: 'A' | 'B' | 'C';
+  onSelectFixture?: (fixture: 'A' | 'B' | 'C') => void;
   availableZones?: Array<{ key: string | null; label: string }>;
 }
 
@@ -75,7 +75,7 @@ export default function MapToolbar({
   onSearchChange,
   densityMode = 'optimized',
   onToggleDensityMode,
-  activeFixtureKey = 'LIVE',
+  activeFixtureKey = 'A',
   onSelectFixture,
   availableZones,
 }: MapToolbarProps) {
@@ -160,7 +160,6 @@ export default function MapToolbar({
               <span className="text-slate-500 font-bold hidden xl:inline text-[11px]">Mặt bằng:</span>
               <div className="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200">
                 {[
-                  { key: 'LIVE', label: 'Đồng Xuân (Live 50 sạp)' },
                   { key: 'A', label: 'Chợ Đồng Xuân' },
                   { key: 'B', label: 'Chợ Bến Thành chữ L' },
                   { key: 'C', label: 'Chợ An Đông 2 Block' },
