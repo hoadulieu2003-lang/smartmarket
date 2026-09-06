@@ -30,7 +30,7 @@ interface NavigationItem {
 export default function Sidebar({
   isCollapsed,
   onToggleCollapse,
-  currentView = 'market_map',
+  currentView = 'overview',
   onSelectView,
   onScrollToFees,
   onFilterComplaints,

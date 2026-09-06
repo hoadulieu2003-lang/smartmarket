@@ -124,7 +124,7 @@ export default function SmartMarketHome() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
-  const [currentView, setCurrentView] = useState<'overview' | 'market_map' | 'pending_profiles'>('market_map');
+  const [currentView, setCurrentView] = useState<'overview' | 'market_map' | 'pending_profiles'>('overview');
   const [selectedFloor, setSelectedFloor] = useState('1');
   const [viewEngine, setViewEngine] = useState<'2d_svg' | '3d_three'>('2d_svg');
   const [activeFixtureKey, setActiveFixtureKey] = useState<'LIVE' | 'A' | 'B' | 'C'>('LIVE');
