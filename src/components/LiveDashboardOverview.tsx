@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Building2,
   Users,
@@ -31,13 +31,25 @@ import {
   Wrench,
   Coins,
   Check,
-  ExternalLink
+  ExternalLink,
+  TrendingUp,
+  TrendingDown,
+  Info
 } from 'lucide-react';
 import MarketFeeCollectionSection from './MarketFeeCollectionSection';
+import DonutChartSvg from './DonutChartSvg';
+import type {
+  DonutSegment,
+  ShopFinancialMetric,
+  RevenueAnomaly,
+  SlaMetricReport
+} from '@/types/dashboard';
 
 interface LiveDashboardOverviewProps {
-  onNavigateToMap: () => void;
+  onNavigateToMap: (stallCode?: string) => void;
   onNavigateToProfiles?: () => void;
+  dispatchedStalls?: Record<string, { teamName: string; status: string }>;
+  onQuickDispatch?: (stallId: string, teamName: string) => void;
 }
 
 export interface ComplaintItem {
@@ -431,9 +443,87 @@ const SAMPLE_TRADERS = [
   { id: 't7', name: 'Hoàng Kim Oanh', stall: 'D04-09', category: 'Hàng thiết yếu', phone: '0915 678 ***', contractDays: 195, status: 'Hoàn tất hồ sơ' }
 ];
 
+// Dữ liệu doanh thu theo Shop (đồng bộ nghiệp vụ từ staff sandbox)
+const SAMPLE_SHOP_FINANCIALS: ShopFinancialMetric[] = [
+  { stallId: 'D900-01', stallName: 'Thịt bò sạch Minh Quân', revenue: 68500000, cogs: 49000000, profit: 19500000, marginPercent: 28.5 },
+  { stallId: 'D900-06', stallName: 'Gia vị & Hạt nêm Tây Bắc', revenue: 42300000, cogs: 28000000, profit: 14300000, marginPercent: 33.8 },
+  { stallId: 'A-01', stallName: 'Rau củ hữu cơ Đà Lạt', revenue: 38900000, cogs: 26500000, profit: 12400000, marginPercent: 31.9 },
+  { stallId: 'A-02', stallName: 'Trái cây sạch Miền Tây', revenue: 34200000, cogs: 24000000, profit: 10200000, marginPercent: 29.8 },
+  { stallId: 'D04-05', stallName: 'Gạo ST25 & Nông sản Việt', revenue: 29800000, cogs: 22000000, profit: 7800000, marginPercent: 26.2 },
+];
+
+// Cảnh báo đối chiếu lệch doanh thu POS vs Cashless (từ staff sandbox)
+const SAMPLE_REVENUE_ANOMALIES: RevenueAnomaly[] = [
+  {
+    stallId: 'D900-01',
+    stallName: 'Thịt bò sạch & Thực phẩm tươi Minh Quân',
+    posRevenue: 42500000,
+    cashlessRevenue: 31000000,
+    diffPercent: 27.1,
+    severity: 'high',
+    note: 'Chênh lệch dòng tiền POS so với quét QR lớn bất thường, nghi vấn dùng tài khoản cá nhân ngoài luồng.'
+  },
+  {
+    stallId: 'D900-06',
+    stallName: 'Gia vị & Hạt nêm Tây Bắc',
+    posRevenue: 18200000,
+    cashlessRevenue: 15100000,
+    diffPercent: 17.0,
+    severity: 'medium',
+    note: 'Lệch biên độ doanh thu giữa ca sáng và ca chiều, cần đối chiếu lại hóa đơn bán lẻ.'
+  },
+  {
+    stallId: 'A-02',
+    stallName: 'Trái cây sạch Miền Tây',
+    posRevenue: 25000000,
+    cashlessRevenue: 23500000,
+    diffPercent: 6.0,
+    severity: 'low',
+    note: 'Chênh lệch 6% nằm trong biên độ làm tròn tiền mặt thông thường.'
+  }
+];
+
+// Đo lường chuẩn SLA xử lý phản ánh PAKN
+const SAMPLE_SLA_REPORT: SlaMetricReport = {
+  totalPending: 15,
+  dueSoon: 3,
+  overdue: 0,
+  avgResponseMins: 12.4
+};
+
+function DetailStatCard({
+  label,
+  value,
+  toneClass = 'text-[#172F55]',
+  badge
+}: {
+  label: string;
+  value: React.ReactNode;
+  toneClass?: string;
+  badge?: string;
+}) {
+  return (
+    <div className="flex-1 min-w-[130px] border border-dashed border-[#D7E2EB] rounded-xl p-3 bg-white shadow-2xs hover:border-[#1974C8]/40 transition-colors">
+      <div className="text-[11px] font-bold text-[#6D84A3] flex items-center justify-between gap-1">
+        <span className="truncate">{label}</span>
+        {badge && (
+          <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 shrink-0">
+            {badge}
+          </span>
+        )}
+      </div>
+      <div className={`text-lg sm:text-xl font-black font-mono mt-1 ${toneClass}`}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
 export default function LiveDashboardOverview({
   onNavigateToMap,
-  onNavigateToProfiles
+  onNavigateToProfiles,
+  dispatchedStalls = {},
+  onQuickDispatch
 }: LiveDashboardOverviewProps) {
   // Tab lọc dữ liệu tại chỗ (STT 2)
   const [activeKpiTab, setActiveKpiTab] = useState<'stalls' | 'traders' | 'complaints' | 'billing'>('stalls');
@@ -445,6 +535,13 @@ export default function LiveDashboardOverview({
   // Modal Chi Tiết Sự Cố & Lệnh Điều Phối Tức Thì (Yêu cầu mới)
   const [selectedComplaint, setSelectedComplaint] = useState<ComplaintItem | null>(null);
   const [dispatchSuccessMsg, setDispatchSuccessMsg] = useState<string | null>(null);
+
+  // Trạng thái điều phối đồng bộ (Work Package C: Bidirectional Dispatch State)
+  const [localDispatches, setLocalDispatches] = useState<Record<string, { teamName: string; status: string }>>({});
+  const allDispatches = useMemo(() => ({
+    ...dispatchedStalls,
+    ...localDispatches
+  }), [dispatchedStalls, localDispatches]);
 
   // Đóng modal bằng Escape
   useEffect(() => {
@@ -493,7 +590,7 @@ export default function LiveDashboardOverview({
             </div>
             <button
               type="button"
-              onClick={onNavigateToMap}
+              onClick={() => onNavigateToMap()}
               aria-label="Mở sơ đồ chợ tác chiến"
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white text-[#0B672E] hover:bg-[#F1FFF5] text-xs font-black shadow-xs transition-transform hover:-translate-y-0.5 cursor-pointer"
             >
@@ -766,12 +863,32 @@ export default function LiveDashboardOverview({
               </div>
               <button
                 type="button"
-                onClick={onNavigateToMap}
+                onClick={() => onNavigateToMap()}
                 className="px-4 py-2 bg-[#0B7A3A] hover:bg-[#075A2B] text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
               >
                 <span>Mở Sơ Đồ Không Gian Đầy Đủ</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
+            </div>
+
+            {/* Khối biểu đồ Donut & Chỉ số chi tiết sạp hàng (kết nối chuẩn từ staff sandbox) */}
+            <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 p-4 rounded-xl bg-[#F8FAFC] border border-[#DCE8F1]">
+              <DonutChartSvg
+                data={[
+                  { name: 'Đang thuê', value: 24, color: '#0B7A3A' },
+                  { name: 'Trống', value: 21, color: '#94A3B8' },
+                  { name: 'Bảo trì / Giữ chỗ', value: 5, color: '#F59E0B' },
+                ]}
+                centerValue="50"
+                centerLabel="Tổng sạp"
+                size={140}
+              />
+              <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full">
+                <DetailStatCard label="Đã thuê" value="24 sạp" toneClass="text-[#0B7A3A]" badge="48%" />
+                <DetailStatCard label="Còn trống" value="21 sạp" toneClass="text-[#64748B]" badge="42%" />
+                <DetailStatCard label="Bảo trì / Giữ chỗ" value="5 sạp" toneClass="text-[#D97706]" badge="10%" />
+                <DetailStatCard label="Biến động tháng" value="↑ +8%" toneClass="text-[#059669]" badge="Tháng này" />
+              </div>
             </div>
 
             {/* Bảng phân khu tóm tắt */}
@@ -880,6 +997,25 @@ export default function LiveDashboardOverview({
               )}
             </div>
 
+            {/* Khối biểu đồ Donut & Chỉ số chi tiết tiểu thương (kết nối chuẩn từ staff sandbox) */}
+            <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 p-4 rounded-xl bg-[#F8FAFC] border border-[#DCE8F1]">
+              <DonutChartSvg
+                data={[
+                  { name: 'Cố định (có sạp)', value: 19, color: '#1F78C7' },
+                  { name: 'Chờ duyệt hồ sơ', value: 7, color: '#F59E0B' },
+                ]}
+                centerValue="19"
+                centerLabel="Tiểu thương"
+                size={140}
+              />
+              <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full">
+                <DetailStatCard label="Cố định (có sạp)" value="19 hộ" toneClass="text-[#1F78C7]" badge="Kinh doanh" />
+                <DetailStatCard label="Vãng lai" value="0 hộ" toneClass="text-[#64748B]" badge="Ổn định" />
+                <DetailStatCard label="Hồ sơ chờ duyệt" value="7 hồ sơ" toneClass="text-[#D97706]" badge="2 quá hạn" />
+                <DetailStatCard label="Đã xác minh" value="100%" toneClass="text-[#059669]" badge="Đạt chuẩn" />
+              </div>
+            </div>
+
             {/* Khối liên kết hàng đợi thẩm định 7 hồ sơ */}
             <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div className="flex items-center gap-2.5">
@@ -974,6 +1110,25 @@ export default function LiveDashboardOverview({
               </div>
             </div>
 
+            {/* Khối biểu đồ Donut & Chỉ số SLA phản ánh (kết nối chuẩn từ staff sandbox) */}
+            <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 p-4 rounded-xl bg-[#F8FAFC] border border-[#DCE8F1]">
+              <DonutChartSvg
+                data={[
+                  { name: 'Chưa xử lý', value: 15, color: '#D3484D' },
+                  { name: 'Đã giải quyết (tuần)', value: 42, color: '#0B7A3A' },
+                ]}
+                centerValue="15"
+                centerLabel="PAKN mở"
+                size={140}
+              />
+              <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full">
+                <DetailStatCard label="Chưa xử lý" value="15 vụ" toneClass="text-[#D3484D]" badge="Trong ca" />
+                <DetailStatCard label="Đã giải quyết" value="42 vụ" toneClass="text-[#0B7A3A]" badge="Tuần này" />
+                <DetailStatCard label="Sắp đến hạn SLA" value="3 vụ" toneClass="text-[#D97706]" badge="< 15 phút" />
+                <DetailStatCard label="Quá hạn SLA" value="0 vụ" toneClass="text-[#059669]" badge="Đúng chuẩn" />
+              </div>
+            </div>
+
             {/* 3 Cột Phân Nhóm Cấp Độ Nghiệp Vụ */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
               {COMPLAINT_GROUPS.map((group) => {
@@ -1056,10 +1211,30 @@ export default function LiveDashboardOverview({
                                 <MapPin className="w-3 h-3" />
                                 <span>Sơ đồ</span>
                               </button>
-                              <span className="font-extrabold text-[#1974C8] group-hover:underline flex items-center gap-0.5">
-                                <PhoneCall className="w-3 h-3 text-[#1974C8]" />
-                                <span>Điều phối →</span>
-                              </span>
+                              {(() => {
+                                const dispatchInfo =
+                                  allDispatches[item.stallId] ||
+                                  allDispatches[item.code] ||
+                                  (item.stallId.startsWith('D900-') ? allDispatches[item.stallId.replace('D900-', 'B')] : null) ||
+                                  (item.stallId.startsWith('A-') ? allDispatches[item.stallId.replace('A-', 'A')] : null) ||
+                                  (item.stallId.startsWith('D04-') ? allDispatches[item.stallId.replace('D04-', 'D')] : null);
+
+                                if (dispatchInfo) {
+                                  return (
+                                    <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1 text-[10px]">
+                                      <Check className="w-3 h-3 text-emerald-600" />
+                                      <span>Đã điều phối ({dispatchInfo.teamName || 'Tổ An Ninh'})</span>
+                                    </span>
+                                  );
+                                }
+
+                                return (
+                                  <span className="font-extrabold text-[#1974C8] group-hover:underline flex items-center gap-0.5">
+                                    <PhoneCall className="w-3 h-3 text-[#1974C8]" />
+                                    <span>Điều phối →</span>
+                                  </span>
+                                );
+                              })()}
                             </div>
                           </div>
                         </div>
@@ -1072,9 +1247,154 @@ export default function LiveDashboardOverview({
           </div>
         )}
 
-        {/* TAB 4: THU PHÍ & XỬ LÝ CÔNG NỢ TÁC CHIẾN */}
+        {/* TAB 4: THU PHÍ & TÀI CHÍNH TÁC CHIẾN */}
         {activeKpiTab === 'billing' && (
-          <div className="pt-1">
+          <div className="space-y-5 pt-1">
+            {/* 1. Biểu đồ Donut & Chỉ số thu phí (kết nối chuẩn từ staff sandbox) */}
+            <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 p-4 rounded-xl bg-[#F8FAFC] border border-[#DCE8F1]">
+              <DonutChartSvg
+                data={[
+                  { name: 'Đã thu', value: 223200000, color: '#0B7A3A' },
+                  { name: 'Còn nợ', value: 16800000, color: '#D3484D' },
+                ]}
+                centerValue="93%"
+                centerLabel="Thu phí"
+                size={140}
+              />
+              <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full">
+                <DetailStatCard label="Tổng phải thu" value="240.0 tr" toneClass="text-[#172F55]" badge="Tháng 08" />
+                <DetailStatCard label="Đã thu thực tế" value="223.2 tr" toneClass="text-[#0B7A3A]" badge="93%" />
+                <DetailStatCard label="Còn nợ đôn đốc" value="16.8 tr" toneClass="text-[#D3484D]" badge="4 sạp nợ" />
+                <DetailStatCard label="Lệch POS vs QR" value="3 sạp" toneClass="text-[#D97706]" badge="1 cảnh báo cao" />
+              </div>
+            </div>
+
+            {/* 2. Cảnh báo đối chiếu bất thường doanh thu POS vs Cashless (từ staff sandbox) */}
+            <div className="rounded-xl border border-[#DCE8F1] bg-white p-4 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between gap-2 pb-2 border-b border-[#DCE8F1]">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+                    <AlertTriangle className="w-4 h-4 text-rose-600" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-[#172F55] flex items-center gap-1.5">
+                      <span>Cảnh Báo Đối Chiếu Doanh Thu Bất Thường (POS vs Cashless)</span>
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                        {SAMPLE_REVENUE_ANOMALIES.filter((a) => a.severity === 'high').length} Cảnh báo cao
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-[#6D84A3]">
+                      Tự động rà soát chênh lệch dòng tiền giữa máy POS tại quầy và cổng thanh toán QR/Không tiền mặt.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+                {SAMPLE_REVENUE_ANOMALIES.map((anomaly) => (
+                  <div
+                    key={anomaly.stallId}
+                    className={`rounded-xl p-3.5 border transition-all ${
+                      anomaly.severity === 'high'
+                        ? 'bg-rose-50/50 border-rose-200 hover:border-rose-300'
+                        : anomaly.severity === 'medium'
+                        ? 'bg-amber-50/50 border-amber-200 hover:border-amber-300'
+                        : 'bg-emerald-50/40 border-emerald-200 hover:border-emerald-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <div className="font-bold text-[#172F55] truncate">
+                        Sạp {anomaly.stallId}
+                      </div>
+                      <span
+                        className={`text-[10px] font-black px-1.5 py-0.5 rounded-md ${
+                          anomaly.severity === 'high'
+                            ? 'bg-rose-100 text-rose-800'
+                            : anomaly.severity === 'medium'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-emerald-100 text-emerald-800'
+                        }`}
+                      >
+                        Lệch {anomaly.diffPercent}%
+                      </span>
+                    </div>
+                    <div className="text-xs font-bold text-slate-800 mt-1 truncate">
+                      {anomaly.stallName}
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-dashed border-slate-200 text-[11px] flex justify-between font-mono">
+                      <span className="text-slate-500">POS: <strong>{(anomaly.posRevenue / 1000000).toFixed(1)}tr</strong></span>
+                      <span className="text-slate-500">QR: <strong>{(anomaly.cashlessRevenue / 1000000).toFixed(1)}tr</strong></span>
+                    </div>
+                    {anomaly.note && (
+                      <p className="text-[10px] text-slate-600 mt-2 line-clamp-2 italic">
+                        "{anomaly.note}"
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. Bảng Doanh Thu Theo Shop (Shop Financials từ staff sandbox) */}
+            <div className="rounded-xl border border-[#DCE8F1] bg-white p-4 shadow-2xs space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#DCE8F1]">
+                <div>
+                  <h4 className="text-sm font-black text-[#172F55] flex items-center gap-2">
+                    <span>Doanh Thu & Hiệu Quả Kinh Doanh Theo Shop</span>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#6D84A3] bg-slate-100 px-2 py-0.5 rounded-md">
+                      <Info className="w-3 h-3 text-[#1974C8]" />
+                      BQL & Cấp Tỉnh
+                    </span>
+                  </h4>
+                  <p className="text-[11px] text-[#6D84A3]">
+                    Theo dõi doanh thu, giá vốn hàng bán và lợi nhuận gộp từng điểm sạp phục vụ điều phối và hỗ trợ tiểu thương.
+                  </p>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-[#DCE8F1] text-[#7185A1] font-bold">
+                      <th className="py-2.5 px-3">Mã sạp</th>
+                      <th className="py-2.5 px-3">Tên sạp / Hộ kinh doanh</th>
+                      <th className="py-2.5 px-3 text-right">Doanh thu</th>
+                      <th className="py-2.5 px-3 text-right">Giá vốn (COGS)</th>
+                      <th className="py-2.5 px-3 text-right">Lợi nhuận gộp</th>
+                      <th className="py-2.5 px-3 text-right">Biên LN (%)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#DCE8F1]/60">
+                    {SAMPLE_SHOP_FINANCIALS.map((shop) => (
+                      <tr key={shop.stallId} className="hover:bg-[#F8FAFC] transition-colors">
+                        <td className="py-2.5 px-3 font-mono font-black text-[#172F55]">
+                          {shop.stallId}
+                        </td>
+                        <td className="py-2.5 px-3 font-bold text-[#172F55]">
+                          {shop.stallName}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono font-bold text-[#1974C8]">
+                          {new Intl.NumberFormat('vi-VN').format(shop.revenue)}đ
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono text-[#6D84A3]">
+                          {shop.cogs ? `${new Intl.NumberFormat('vi-VN').format(shop.cogs)}đ` : '—'}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono font-extrabold text-[#0B7A3A]">
+                          {shop.profit ? `${new Intl.NumberFormat('vi-VN').format(shop.profit)}đ` : '—'}
+                        </td>
+                        <td className="py-2.5 px-3 text-right">
+                          <span className="inline-block px-1.5 py-0.5 rounded text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            {shop.marginPercent}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* 4. Nghiệp vụ thu nợ & biên lai */}
             <MarketFeeCollectionSection
               onOpenQuickMap={(stall) => setQuickMapStall(stall)}
               onNavigateToMap={onNavigateToMap}
@@ -1502,6 +1822,14 @@ export default function LiveDashboardOverview({
                     setDispatchSuccessMsg(
                       `Đã phát lệnh điều động tới bộ đàm của Đ/c ${selectedComplaint.coordinator.name}! Trạng thái chuyển sang: Đang xử lý tại hiện trường.`
                     );
+                    setLocalDispatches((prev) => ({
+                      ...prev,
+                      [selectedComplaint.stallId]: { teamName: selectedComplaint.coordinator.name, status: 'in_progress' },
+                      [selectedComplaint.code]: { teamName: selectedComplaint.coordinator.name, status: 'in_progress' }
+                    }));
+                    if (onQuickDispatch) {
+                      onQuickDispatch(selectedComplaint.stallId, selectedComplaint.coordinator.name);
+                    }
                   }}
                   className="flex-1 sm:flex-none px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-black transition-colors shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
                 >
@@ -1676,8 +2004,9 @@ export default function LiveDashboardOverview({
               <button
                 type="button"
                 onClick={() => {
+                  const targetCode = quickMapStall?.code;
                   setQuickMapStall(null);
-                  onNavigateToMap();
+                  onNavigateToMap(targetCode);
                 }}
                 className="px-4 py-2 rounded-lg bg-[#0B7A3A] hover:bg-[#075A2B] text-white text-xs font-black transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
               >

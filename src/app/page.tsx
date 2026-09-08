@@ -187,9 +187,40 @@ export default function SmartMarketHome() {
     ];
   }, []);
 
-  // Bi-directional sync: Chọn sạp từ danh sách sự cố trên đầu (Work Package D)
+  // Bi-directional sync: Chọn sạp từ danh sách sự cố trên đầu & Dashboard Overview
   const handleSelectStallCode = (code: string) => {
-    const stall = currentFloor.stalls.find((s) => s.code === code);
+    // 1. Khớp mã trực tiếp (Exact match)
+    let stall = currentFloor.stalls.find((s) => s.code === code || s.id === code);
+
+    // 2. Chuẩn hoá mã sạp thực tế (Normalize live CMS stall codes)
+    if (!stall) {
+      const clean = code.trim().toUpperCase();
+      let targetCode = clean;
+
+      if (clean.startsWith('A-')) {
+        targetCode = clean.replace('A-', 'A'); // A-01 -> A01
+      } else if (clean.startsWith('D900-')) {
+        targetCode = clean.replace('D900-', 'B'); // D900-06 -> B06
+      } else if (clean.startsWith('D04-')) {
+        targetCode = clean.replace('D04-', 'D'); // D04-03 -> D03
+      } else if (clean.includes('S10')) {
+        targetCode = 'B10';
+      }
+
+      stall = currentFloor.stalls.find((s) => s.code === targetCode || s.id === targetCode);
+
+      // 3. Khớp dự phòng theo số sạp (Fallback numeric match)
+      if (!stall) {
+        const numMatch = clean.match(/\d+/);
+        if (numMatch) {
+          const num = numMatch[0].padStart(2, '0');
+          stall = currentFloor.stalls.find(
+            (s) => s.code.endsWith(num) || s.code === `A${num}` || s.code === `B${num}` || s.code === `D${num}`
+          );
+        }
+      }
+    }
+
     if (stall) {
       handleSelectZone(stall.zoneId);
       handleSelectStall(stall);
@@ -439,7 +470,7 @@ export default function SmartMarketHome() {
         <Header
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          urgentCount={URGENT_ACTIONS.complaints.total}
+          urgentCount={LIVE_URGENT_ACTIONS.complaints.total}
           isMobileMenuOpen={isMobileSidebarOpen}
           onToggleMobileMenu={() => setIsMobileSidebarOpen((open) => !open)}
           mobileMenuButtonRef={mobileMenuButtonRef}
@@ -454,8 +485,15 @@ export default function SmartMarketHome() {
           ) : currentView === 'overview' ? (
             /* VIEW C: TỔNG QUAN VẬN HÀNH (ĐỒNG BỘ 100% GIAO DIỆN LIVE CMS QL.CHOTHONGMINH.TOP) */
             <LiveDashboardOverview
-              onNavigateToMap={() => setCurrentView('market_map')}
+              onNavigateToMap={(code?: string) => {
+                setCurrentView('market_map');
+                if (code) {
+                  setTimeout(() => handleSelectStallCode(code), 150);
+                }
+              }}
               onNavigateToProfiles={() => setCurrentView('pending_profiles')}
+              dispatchedStalls={dispatchedStalls}
+              onQuickDispatch={handleQuickDispatch}
             />
           ) : (
             /* VIEW B: MẶT BẰNG ĐIỀU HÀNH & TÁC CHIẾN CHỢ (IMMERSIVE SPATIAL MAP) */
