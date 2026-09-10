@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ArrowLeft, CheckCircle2, Search, XCircle, X,
   User, Phone, MapPin, Calendar, Clock, ShieldCheck,
@@ -12,6 +12,12 @@ import { URGENT_ACTIONS } from '../data/mockMarketData';
 interface PendingProfilesViewProps {
   onBackToMap: () => void;
   onNavigateToMap?: (stallCode: string) => void;
+  applications?: any[];
+  stalls?: any[];
+  selectedMarketId?: string;
+  onApproveApplication?: (id: string, stallId?: string, note?: string) => Promise<void> | void;
+  onRejectApplication?: (id: string, reason?: string) => Promise<void> | void;
+  onRequestSupplement?: (id: string, note?: string) => Promise<void> | void;
 }
 
 export interface PendingProfile {
@@ -19,6 +25,7 @@ export interface PendingProfile {
   stallCode: string;
   stallZone: string;
   applicant: string;
+  avatar?: string | null;
   phone: string;
   type: string;
   category: string;
@@ -27,6 +34,7 @@ export interface PendingProfile {
   status: string;
   statusLabel: string;
   documents: string[];
+  documentUrls?: string[];
   notes: string;
   idNumber?: string;
   birthDate?: string;
@@ -41,7 +49,103 @@ export interface PendingProfile {
   verificationItems?: { name: string; status: 'verified' | 'pending' | 'supplementary'; note: string }[];
 }
 
-export default function PendingProfilesView({ onBackToMap, onNavigateToMap }: PendingProfilesViewProps) {
+function mapBackendApplications(apps: any[], stallsList?: any[], marketId?: string): PendingProfile[] {
+  const filtered = marketId && marketId !== 'all' ? apps.filter((a) => a.marketId === marketId) : apps;
+  if (!filtered || filtered.length === 0) return [];
+
+  return filtered.map((app) => {
+    const marketName = app.markets?.name || 'Chợ';
+    const categoryName = app.categories?.name || 'Ngành hàng chung';
+
+    // Xác định mã sạp
+    let stallCode = app.desiredStallNote || 'Chờ gán sạp';
+    if (stallsList && stallsList.length > 0) {
+      const match = stallsList.find((s: any) => s.id === app.desiredStallNote || s.code === app.desiredStallNote);
+      if (match) stallCode = match.code;
+    }
+
+    let status = 'pending';
+    let statusLabel = 'Đang xử lý';
+    if (app.status === 'approved') {
+      status = 'approved';
+      statusLabel = 'Đã phê duyệt';
+    } else if (app.status === 'need_more_info') {
+      status = 'supplementing';
+      statusLabel = 'Chờ bổ sung giấy tờ';
+    } else if (app.status === 'rejected') {
+      status = 'rejected';
+      statusLabel = 'Đã từ chối';
+    } else if (app.status === 'cancelled') {
+      status = 'cancelled';
+      statusLabel = 'Đã hủy';
+    } else {
+      const created = app.createdAt ? new Date(app.createdAt).getTime() : Date.now();
+      if (Date.now() - created > 48 * 3600000) {
+        status = 'overdue';
+        statusLabel = 'Quá hạn xử lý';
+      }
+    }
+
+    const submittedDate = app.createdAt ? new Date(app.createdAt).toLocaleDateString('vi-VN') : 'Hôm nay';
+    const deadline = app.createdAt
+      ? new Date(new Date(app.createdAt).getTime() + 3 * 86400000).toLocaleDateString('vi-VN')
+      : '3 ngày tới';
+
+    const documentUrls: string[] = [];
+    const documents: string[] = [];
+    if (app.documents && Array.isArray(app.documents)) {
+      app.documents.forEach((d: any, idx: number) => {
+        const url = typeof d === 'string' ? d : d.url;
+        if (url) {
+          documentUrls.push(url);
+          documents.push(`Ảnh tài liệu #${idx + 1}`);
+        }
+      });
+    }
+    if (documents.length === 0) {
+      documents.push('Đơn đăng ký qua Zalo Mini App', 'CCCD gắn chip');
+    }
+
+    return {
+      id: app.id,
+      stallCode,
+      stallZone: `${marketName} — ${categoryName}`,
+      applicant: app.fullName || app.applicant?.fullName || 'Tiểu thương Zalo',
+      avatar: app.applicant?.avatar || null,
+      phone: app.phone || app.applicant?.phone || '0908 *** ***',
+      type: app.desiredStallNote ? `Đăng ký sạp (${app.desiredStallNote})` : 'Thuê mới sạp kinh doanh',
+      category: categoryName,
+      submittedDate,
+      deadline,
+      status,
+      statusLabel,
+      documents,
+      documentUrls,
+      notes: app.businessDescription || app.adminNote || 'Hồ sơ số hóa trực tiếp từ Zalo Mini App.',
+      idNumber: app.idNumber || 'Đang cập nhật',
+      address: marketName,
+      targetProducts: app.businessDescription ? [app.businessDescription] : ['Mặt hàng đăng ký theo ngành'],
+      officerInCharge: app.reviewer?.fullName || 'Ban Quản Lý Chợ',
+      verificationItems: [
+        { name: 'Xác thực định danh Zalo Mini App', status: 'verified', note: 'Đã liên kết Zalo ID chính chủ' },
+        { name: 'Căn cước công dân (CCCD)', status: app.idNumber ? 'verified' : 'pending', note: app.idNumber ? `Số CCCD: ${app.idNumber}` : 'Chờ bổ sung CCCD' },
+        { name: 'Mô tả ngành nghề kinh doanh', status: app.businessDescription ? 'verified' : 'pending', note: app.businessDescription || 'Chờ hoàn thiện mô tả' },
+        { name: 'Tài liệu & Chứng chỉ đính kèm', status: documentUrls.length > 0 ? 'verified' : 'pending', note: `${documentUrls.length} tệp chứng từ đã tải lên` }
+      ]
+    };
+  });
+}
+
+export default function PendingProfilesView({
+  onBackToMap,
+  onNavigateToMap,
+  applications,
+  stalls,
+  selectedMarketId,
+  onApproveApplication,
+  onRejectApplication,
+  onRequestSupplement,
+}: PendingProfilesViewProps) {
   const [filterType, setFilterType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [actionNotice, setActionNotice] = useState<string | null>(null);
@@ -272,9 +376,28 @@ export default function PendingProfilesView({ onBackToMap, onNavigateToMap }: Pe
     }
   ];
 
-  const [profiles, setProfiles] = useState(profilesList);
+  const initialProfiles = useMemo(() => {
+    if (applications && applications.length > 0) {
+      const mapped = mapBackendApplications(applications, stalls, selectedMarketId);
+      if (mapped.length > 0) return mapped;
+    }
+    return profilesList;
+  }, [applications, stalls, selectedMarketId]);
 
-  const handleApprove = (item: PendingProfile) => {
+  const [profiles, setProfiles] = useState<PendingProfile[]>(initialProfiles);
+
+  useEffect(() => {
+    setProfiles(initialProfiles);
+  }, [initialProfiles]);
+
+  const handleApprove = async (item: PendingProfile) => {
+    if (onApproveApplication) {
+      try {
+        await onApproveApplication(item.id);
+      } catch (e) {
+        console.warn('onApproveApplication error:', e);
+      }
+    }
     setProfiles((prev) =>
       prev.map((p) =>
         p.id === item.id
@@ -299,7 +422,14 @@ export default function PendingProfilesView({ onBackToMap, onNavigateToMap }: Pe
     setTimeout(() => setActionNotice(null), 4000);
   };
 
-  const handleRequestSupplement = (item: PendingProfile) => {
+  const handleRequestSupplement = async (item: PendingProfile) => {
+    if (onRequestSupplement) {
+      try {
+        await onRequestSupplement(item.id, 'Vui lòng bổ sung giấy tờ và hình ảnh xác thực');
+      } catch (e) {
+        console.warn('onRequestSupplement error:', e);
+      }
+    }
     setProfiles((prev) =>
       prev.map((p) =>
         p.id === item.id
@@ -568,8 +698,12 @@ export default function PendingProfilesView({ onBackToMap, onNavigateToMap }: Pe
             {/* Modal Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-[#F8FAFC]">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#0B7A3A] to-[#153154] text-white font-black text-lg flex items-center justify-center shrink-0 shadow-xs">
-                  {selectedProfile.applicant.charAt(0)}
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#0B7A3A] to-[#153154] text-white font-black text-lg flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
+                  {selectedProfile.avatar ? (
+                    <img src={selectedProfile.avatar} alt={selectedProfile.applicant} className="w-full h-full object-cover" />
+                  ) : (
+                    selectedProfile.applicant.charAt(0)
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -737,6 +871,20 @@ export default function PendingProfilesView({ onBackToMap, onNavigateToMap }: Pe
                     </div>
                   ))}
                 </div>
+
+                {selectedProfile.documentUrls && selectedProfile.documentUrls.length > 0 && (
+                  <div className="pt-3 border-t border-slate-100">
+                    <span className="text-[11px] font-bold text-slate-700 block mb-2">Ảnh tài liệu gốc đính kèm:</span>
+                    <div className="flex flex-wrap gap-2.5">
+                      {selectedProfile.documentUrls.map((url, i) => (
+                        <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="relative group/doc block w-20 h-20 rounded-xl overflow-hidden border border-slate-200 hover:border-[#0B7A3A] shadow-xs">
+                          <img src={url} alt={`Tài liệu ${i + 1}`} className="w-full h-full object-cover group-hover/doc:scale-105 transition-transform" />
+                          <span className="absolute inset-0 bg-black/40 opacity-0 group-hover/doc:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity">Xem ảnh</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* KHỐI 4: Ý KIẾN THẨM TRA & GHI CHÚ BAN QUẢN LÝ */}

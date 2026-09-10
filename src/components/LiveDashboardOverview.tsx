@@ -581,10 +581,10 @@ export default function LiveDashboardOverview({
     return allResolvedCodes.includes(codeOrId);
   };
 
-  const handleResolveComplaint = (codeOrId: string) => {
+  const handleResolveComplaint = (codeOrId: string, altCodeOrId?: string) => {
     setInternalResolvedCodes((prev) => {
-      if (prev.includes(codeOrId)) return prev;
-      const next = [...prev, codeOrId];
+      const toAdd = [codeOrId, altCodeOrId].filter(Boolean) as string[];
+      const next = Array.from(new Set([...prev, ...toAdd]));
       if (typeof window !== 'undefined') {
         try {
           localStorage.setItem('smartmarket_resolved_complaints', JSON.stringify(next));
@@ -2358,7 +2358,8 @@ export default function LiveDashboardOverview({
                 <button
                   type="button"
                   onClick={() => {
-                    handleResolveComplaint(selectedComplaint.code);
+                    const primaryCode = selectedComplaint.code || selectedComplaint.id;
+                    handleResolveComplaint(primaryCode, selectedComplaint.id);
                     setDispatchSuccessMsg(
                       `Đã nghiệm thu và đóng phản ánh ${selectedComplaint.code} thành công! Trạng thái chuyển sang: Đã giải quyết.`
                     );

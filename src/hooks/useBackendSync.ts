@@ -49,10 +49,11 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
       await api.get('/settings/public').catch(() => null);
 
       // 2. Tải dữ liệu song song từ Backend (lấy limit=100 để đồng bộ trọn vẹn 100% dữ liệu các chợ)
-      const [marketsData, stallsData, complaintsData] = await Promise.allSettled([
+      const [marketsData, stallsData, complaintsData, applicationsData] = await Promise.allSettled([
         api.get<Market[]>('/admin/markets'),
         api.get<Stall[]>('/admin/stalls?limit=100'),
         api.get<Complaint[]>('/admin/complaints?limit=100'),
+        api.get<Application[]>('/admin/merchant-approvals?limit=100'),
       ]);
 
       const markets: Market[] =
@@ -61,6 +62,8 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
         stallsData.status === 'fulfilled' && Array.isArray(stallsData.value) ? stallsData.value : (CLIENT_STALLS as Stall[]);
       const complaints: Complaint[] =
         complaintsData.status === 'fulfilled' && Array.isArray(complaintsData.value) ? complaintsData.value : (CLIENT_COMPLAINTS as Complaint[]);
+      const applications: Application[] =
+        applicationsData.status === 'fulfilled' && Array.isArray(applicationsData.value) ? applicationsData.value : [];
 
       // Ưu tiên chợ có sạp thực tế
       const marketsWithStalls = markets.find((m) => stalls.some((s) => s.marketId === m.id));
@@ -112,7 +115,7 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
         stalls,
         zones: activeZones,
         complaints,
-        applications: [],
+        applications,
       });
     } catch (err: any) {
       // Graceful fallback khi backend offline
@@ -145,24 +148,32 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
     syncData();
   }, [syncData]);
 
-  // Hành động giải quyết khiếu nại (kết nối Backend API)
+  // Hành động giải quyết khiếu nại (kết nối Backend API POST /resolve)
   const resolveComplaint = useCallback(
-    async (complaintId: string, resolutionNote: string = 'Đã xử lý thực địa') => {
-      if (state.isConnected) {
+    async (complaintIdOrCode: string, resolutionNote: string = 'Đã xử lý thực địa') => {
+      const target = state.complaints.find(
+        (c) =>
+          c.id === complaintIdOrCode ||
+          c.code === complaintIdOrCode ||
+          (c.id && c.id.slice(0, 6).toUpperCase() === complaintIdOrCode.replace('PAKN-', ''))
+      );
+      const realId = target?.id || complaintIdOrCode;
+
+      if (state.isConnected && realId) {
         try {
-          await api.put(`/admin/complaints/${complaintId}`, {
-            status: 'resolved',
+          await api.post(`/admin/complaints/${realId}/resolve`, {
             resolutionNote,
+            resolutionImages: [],
           });
         } catch (e) {
-          console.warn('[useBackendSync] Không thể ghi lên backend, lưu cục bộ:', e);
+          console.warn('[useBackendSync] Không thể ghi lên backend:', e);
         }
       }
 
       // Cập nhật state cục bộ ngay lập tức
       setState((prev) => {
         const updatedComplaints = prev.complaints.map((c) =>
-          c.id === complaintId
+          c.id === realId || c.code === complaintIdOrCode
             ? { ...c, status: 'resolved' as const, resolutionNote, resolvedAt: new Date().toISOString() }
             : c
         );
@@ -181,12 +192,91 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
         };
       });
     },
-    [state.isConnected, state.markets, state.zones, state.stalls]
+    [state.isConnected, state.complaints]
+  );
+
+  // Hành động phê duyệt hồ sơ tiểu thương (kết nối Backend API POST /admin/merchant-approvals/:id/approve)
+  const approveApplication = useCallback(
+    async (applicationId: string, stallId?: string, adminNote: string = 'BQL Chợ đã phê duyệt hồ sơ') => {
+      let targetStallId = stallId;
+      if (!targetStallId) {
+        const app = state.applications.find((a) => a.id === applicationId);
+        const marketStalls = state.stalls.filter((s) => !app?.marketId || s.marketId === app.marketId);
+        const candidateStall = marketStalls.find((s) => s.status === 'vacant') || marketStalls[0];
+        targetStallId = candidateStall?.id || state.stalls[0]?.id;
+      }
+
+      if (state.isConnected && targetStallId) {
+        try {
+          await api.post(`/admin/merchant-approvals/${applicationId}/approve`, {
+            stallId: targetStallId,
+            adminNote,
+          });
+        } catch (e) {
+          console.warn('[useBackendSync] Không thể duyệt hồ sơ lên backend:', e);
+        }
+      }
+
+      // Cập nhật state cục bộ ngay lập tức
+      setState((prev) => ({
+        ...prev,
+        applications: prev.applications.map((a) =>
+          a.id === applicationId ? { ...a, status: 'approved' as const, adminNote } : a
+        ),
+      }));
+    },
+    [state.isConnected, state.applications, state.stalls]
+  );
+
+  // Hành động từ chối hồ sơ (kết nối Backend API POST /admin/merchant-approvals/:id/reject)
+  const rejectApplication = useCallback(
+    async (applicationId: string, reason: string = 'Hồ sơ chưa đạt tiêu chuẩn quy chế chợ') => {
+      if (state.isConnected) {
+        try {
+          await api.post(`/admin/merchant-approvals/${applicationId}/reject`, { reason });
+        } catch (e) {
+          console.warn('[useBackendSync] Không thể từ chối hồ sơ lên backend:', e);
+        }
+      }
+
+      setState((prev) => ({
+        ...prev,
+        applications: prev.applications.map((a) =>
+          a.id === applicationId ? { ...a, status: 'rejected' as const, adminNote: reason } : a
+        ),
+      }));
+    },
+    [state.isConnected]
+  );
+
+  // Hành động yêu cầu bổ sung giấy tờ (kết nối Backend API POST /admin/merchant-approvals/:id/request-info)
+  const requestApplicationInfo = useCallback(
+    async (applicationId: string, note: string = 'Vui lòng bổ sung ảnh CCCD và giấy chứng nhận liên quan') => {
+      if (state.isConnected) {
+        try {
+          await api.post(`/admin/merchant-approvals/${applicationId}/request-info`, { note });
+        } catch (e) {
+          console.warn('[useBackendSync] Không thể gửi yêu cầu bổ sung lên backend:', e);
+        }
+      }
+
+      setState((prev) => ({
+        ...prev,
+        applications: prev.applications.map((a) =>
+          a.id === applicationId ? { ...a, status: 'need_more_info' as const, adminNote: note } : a
+        ),
+      }));
+    },
+    [state.isConnected]
   );
 
   return {
     ...state,
     refetch: syncData,
     resolveComplaint,
+    approveApplication,
+    rejectApplication,
+    requestApplicationInfo,
   };
 }
+

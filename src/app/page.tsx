@@ -55,9 +55,13 @@ export default function SmartMarketHome() {
     stalls: liveStalls,
     complaints: liveComplaints,
     zones: liveZones,
+    applications: liveApplications,
     isConnected: isBackendConnected,
     isLoading: isBackendLoading,
-    resolveComplaint: handleBackendResolveComplaint
+    resolveComplaint: handleBackendResolveComplaint,
+    approveApplication,
+    rejectApplication,
+    requestApplicationInfo,
   } = useBackendSync(selectedMarketId);
 
   // 2. Navigation & Shell Layout
@@ -117,7 +121,14 @@ export default function SmartMarketHome() {
     ).length;
   }, [liveComplaints, resolvedComplaintCodes]);
 
-  const pendingProfilesCount = URGENT_ACTIONS.pendingProfiles.totalPending;
+  const pendingProfilesCount = useMemo(() => {
+    if (liveApplications && liveApplications.length > 0) {
+      return liveApplications.filter(
+        (a: any) => a.status === 'pending' || a.status === 'reviewing' || a.status === 'need_more_info'
+      ).length;
+    }
+    return URGENT_ACTIONS.pendingProfiles.totalPending;
+  }, [liveApplications]);
   const pendingOrdersCount = CLIENT_ORDERS.length;
 
   const handleResolveComplaint = (codeOrId: string) => {
@@ -264,6 +275,12 @@ export default function SmartMarketHome() {
                 setSelectedStallCodeForMap(code);
                 setCurrentView('market_map');
               }}
+              applications={liveApplications}
+              stalls={liveStalls}
+              selectedMarketId={selectedMarketId}
+              onApproveApplication={approveApplication}
+              onRejectApplication={rejectApplication}
+              onRequestSupplement={requestApplicationInfo}
             />
           ) : currentView === 'stalls' ? (
             <StallsManagementView
@@ -361,6 +378,11 @@ export default function SmartMarketHome() {
                 onOpenTraderProfile={() => {
                   setCurrentView('traders');
                 }}
+                stalls={liveStalls}
+                markets={liveMarkets}
+                selectedMarketId={selectedMarketId}
+                complaints={liveComplaints}
+                zones={liveZones}
               />
             </div>
           )}

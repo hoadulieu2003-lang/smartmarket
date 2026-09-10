@@ -159,19 +159,61 @@ function createDefaultSpatialGrid(): GridCell[][] {
   return grid;
 }
 
-export default function MarketInteractiveMapView({
-  initialSelectedStallCode,
-  onOpenTraderProfile
-}: {
+export interface MarketInteractiveMapViewProps {
   initialSelectedStallCode?: string;
   onOpenTraderProfile?: (traderId: string) => void;
-}) {
+  stalls?: any[];
+  markets?: any[];
+  selectedMarketId?: string;
+  complaints?: any[];
+  zones?: any[];
+}
+
+export default function MarketInteractiveMapView({
+  initialSelectedStallCode,
+  onOpenTraderProfile,
+  stalls,
+  markets,
+  selectedMarketId,
+  complaints,
+  zones,
+}: MarketInteractiveMapViewProps) {
+  const activeMarket = useMemo(() => {
+    if (selectedMarketId && selectedMarketId !== 'all') {
+      const found = markets?.find((m) => m.id === selectedMarketId);
+      if (found) return found;
+    }
+    return markets?.[0] || CLIENT_MARKETS[0];
+  }, [markets, selectedMarketId]);
+
+  const effectiveStalls = useMemo(() => {
+    if (stalls && stalls.length > 0) {
+      if (selectedMarketId && selectedMarketId !== 'all') {
+        const filtered = stalls.filter((s) => s.marketId === selectedMarketId);
+        if (filtered.length > 0) return filtered;
+      }
+      return stalls;
+    }
+    return CLIENT_STALLS;
+  }, [stalls, selectedMarketId]);
+
+  const effectiveComplaints = useMemo(() => {
+    if (complaints && complaints.length > 0) {
+      if (selectedMarketId && selectedMarketId !== 'all') {
+        const filtered = complaints.filter((c) => c.marketId === selectedMarketId);
+        if (filtered.length > 0) return filtered;
+      }
+      return complaints;
+    }
+    return CLIENT_COMPLAINTS;
+  }, [complaints, selectedMarketId]);
+
   // Stalls Map Lookup Map: Code -> Stall Entity
   const stallsByCode = useMemo(() => {
-    const map = new Map<string, Stall>();
-    CLIENT_STALLS.forEach((s) => map.set(s.code, s));
+    const map = new Map<string, any>();
+    effectiveStalls.forEach((s) => map.set(s.code, s));
     return map;
-  }, []);
+  }, [effectiveStalls]);
 
   const [grid, setGrid] = useState<GridCell[][]>(() => {
     if (typeof window !== 'undefined') {
@@ -218,7 +260,31 @@ export default function MarketInteractiveMapView({
     }, 3500);
   };
 
-  // Tính toán KPI thực tế từ CLIENT_STALLS & grid
+  // Đồng bộ mã sạp thực tế lên lưới không gian khi danh sách sạp thay đổi
+  useEffect(() => {
+    if (stalls && stalls.length > 0) {
+      setGrid((prevGrid) => {
+        const next = prevGrid.map((row) => [...row]);
+        let stallIdx = 0;
+        for (let r = 0; r < next.length; r++) {
+          for (let c = 0; c < next[r].length; c++) {
+            if (next[r][c].type === 'stall') {
+              if (stallIdx < effectiveStalls.length) {
+                next[r][c] = {
+                  ...next[r][c],
+                  stallCode: effectiveStalls[stallIdx].code,
+                };
+                stallIdx++;
+              }
+            }
+          }
+        }
+        return next;
+      });
+    }
+  }, [effectiveStalls, stalls]);
+
+  // Tính toán KPI thực tế từ effectiveStalls & grid
   const metrics = useMemo(() => {
     let occupied = 0;
     let vacant = 0;
@@ -227,13 +293,14 @@ export default function MarketInteractiveMapView({
     let complaint = 0;
     let totalRentMonthly = 0;
 
-    CLIENT_STALLS.forEach((s) => {
+    effectiveStalls.forEach((s: any) => {
       if (s.status === 'occupied') occupied++;
       if (s.status === 'vacant') vacant++;
       if (s.status === 'maintenance') maintenance++;
       if (s.displayStatus === 'expiring_soon') expiring++;
       if ((s.openComplaintCount ?? 0) > 0 || s.displayStatus === 'has_complaint') complaint++;
       if (s.currentContract?.fee) totalRentMonthly += s.currentContract.fee;
+      else if (s.revenue30d) totalRentMonthly += s.revenue30d;
     });
 
     let fireCount = 0;
@@ -252,14 +319,17 @@ export default function MarketInteractiveMapView({
     if (walkwayCount < 35) safetyScore -= 15;
     safetyScore = Math.max(0, Math.min(100, safetyScore));
 
+    const totalStallsCount = effectiveStalls.length;
+    const occupancyRate = totalStallsCount > 0 ? Math.round((occupied / totalStallsCount) * 100) : 0;
+
     return {
-      totalStalls: CLIENT_STALLS.length,
+      totalStalls: totalStallsCount,
       occupied,
       vacant,
       maintenance,
       expiring,
       complaint,
-      occupancyRate: Math.round((occupied / CLIENT_STALLS.length) * 100),
+      occupancyRate,
       totalRentMonthly,
       safetyScore,
       fireCount,
@@ -267,7 +337,7 @@ export default function MarketInteractiveMapView({
       walkwayCount,
       simTraffic: isSimulating ? 120 + npcs.length * 15 : 0
     };
-  }, [grid, isSimulating, npcs.length]);
+  }, [grid, isSimulating, npcs.length, effectiveStalls]);
 
   // Áp dụng công cụ lên ô lưới
   const handleCellClick = (r: number, c: number) => {
@@ -434,8 +504,8 @@ export default function MarketInteractiveMapView({
   // Phản ánh của sạp đang chọn
   const selectedStallComplaints = useMemo(() => {
     if (!selectedStall) return [];
-    return CLIENT_COMPLAINTS.filter((c) => c.stallId === selectedStall.id || c.stalls?.code === selectedStall.code);
-  }, [selectedStall]);
+    return effectiveComplaints.filter((c: any) => c.stallId === selectedStall.id || c.stalls?.code === selectedStall.code);
+  }, [selectedStall, effectiveComplaints]);
 
   return (
     <div className="w-full flex-1 flex flex-col bg-slate-50 text-slate-800 font-sans select-none overflow-hidden h-full min-h-0 rounded-2xl border border-slate-200 shadow-xl">
@@ -462,11 +532,11 @@ export default function MarketInteractiveMapView({
                 SƠ ĐỒ ĐIỀU HÀNH & QUY HOẠCH MẶT BẰNG
               </h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 border border-emerald-300 text-[#0B7A3A] uppercase font-mono">
-                CHỢ ĐỒNG XUÂN
+                {activeMarket?.name ? activeMarket.name.toUpperCase() : 'CHỢ ĐỒNG XUÂN'}
               </span>
             </div>
             <p className="text-[11px] text-slate-500">
-              Mặt bằng số hoá thời gian thực · 50 sạp hàng · 5 phân khu thương mại
+              Mặt bằng số hoá thời gian thực · {effectiveStalls.length} sạp hàng · {activeMarket?.name || 'Phân khu thương mại'}
             </p>
           </div>
         </div>
