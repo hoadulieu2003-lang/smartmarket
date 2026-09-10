@@ -17,11 +17,11 @@ describe('LiveDashboardOverview Command Center Integration', () => {
     expect(screen.getByRole('button', { name: /Thẻ chỉ số tiểu thương/i })).toBeDefined();
     expect(screen.getByRole('button', { name: /Thẻ chỉ số phản ánh/i })).toBeDefined();
     expect(screen.getByRole('button', { name: /Thẻ chỉ số thu phí/i })).toBeDefined();
-    expect(screen.getByText(/24 \/ 50/i)).toBeDefined();
+    expect(screen.getByText(/43 \/ 50/i)).toBeDefined();
 
     // Operations Hero Action Chips
     expect(screen.getByText(/3 Phản ánh khẩn cấp/i)).toBeDefined();
-    expect(screen.getByText(/8 Vấn đề hạ tầng & 4 Trật tự/i)).toBeDefined();
+    expect(screen.getByText(/7 Vấn đề hạ tầng & 4 Trật tự/i)).toBeDefined();
     expect(screen.getByText(/4 Sạp đến hạn nộp phí/i)).toBeDefined();
   });
 
@@ -34,7 +34,7 @@ describe('LiveDashboardOverview Command Center Integration', () => {
     );
 
     // Default tab is stalls
-    expect(screen.getByText(/Quy Mô Sạp Hàng — 50 Sạp Chợ Đồng Xuân/i)).toBeDefined();
+    expect(screen.getByText(/Quy Mô Sạp Hàng/i)).toBeDefined();
     expect(screen.getAllByText(/Tổng sạp/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Đã thuê/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Còn trống/i)).toBeDefined();
@@ -51,7 +51,7 @@ describe('LiveDashboardOverview Command Center Integration', () => {
     const tradersCard = screen.getByRole('button', { name: /Thẻ chỉ số tiểu thương/i });
     fireEvent.click(tradersCard);
 
-    expect(screen.getByText(/Danh Bạ 19 Hộ Tiểu Thương Đang Kinh Doanh/i)).toBeDefined();
+    expect(screen.getByText(/Danh Bạ .* Hộ Tiểu Thương Đang Kinh Doanh/i)).toBeDefined();
     expect(screen.getByText(/Hàng đợi phê duyệt: 7 hồ sơ/i)).toBeDefined();
     expect(screen.getAllByText(/Cố định \(có sạp\)/i).length).toBeGreaterThan(0);
   });
@@ -67,7 +67,7 @@ describe('LiveDashboardOverview Command Center Integration', () => {
     const complaintsCard = screen.getByRole('button', { name: /Thẻ chỉ số phản ánh/i });
     fireEvent.click(complaintsCard);
 
-    expect(screen.getByText(/Hệ Thống 15 Sự Cố Phản Ánh PAKN/i)).toBeDefined();
+    expect(screen.getByText(/Hệ Thống 14 Sự Cố Phản Ánh PAKN/i)).toBeDefined();
     expect(screen.getAllByText(/Sắp đến hạn SLA/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Quá hạn SLA/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Gian Lận & An Toàn Thực Phẩm/i)).toBeDefined();
@@ -75,7 +75,7 @@ describe('LiveDashboardOverview Command Center Integration', () => {
     expect(screen.getByText(/Hạ Tầng & Vệ Sinh Môi Trường/i)).toBeDefined();
   });
 
-  it('switches to Billing tab and displays POS vs Cashless anomalies and shop financials', () => {
+  it('switches to Billing tab and displays fee metrics and management section', () => {
     render(
       <LiveDashboardOverview
         onNavigateToMap={vi.fn()}
@@ -86,15 +86,13 @@ describe('LiveDashboardOverview Command Center Integration', () => {
     const billingCard = screen.getByRole('button', { name: /Thẻ chỉ số thu phí/i });
     fireEvent.click(billingCard);
 
-    // Revenue anomalies from staff sandbox
-    expect(screen.getByText(/Cảnh Báo Đối Chiếu Doanh Thu Bất Thường \(POS vs Cashless\)/i)).toBeDefined();
-    expect(screen.getByText(/Thịt bò sạch & Thực phẩm tươi Minh Quân/i)).toBeDefined();
-    expect(screen.getByText(/Lệch 27.1%/i)).toBeDefined();
-
-    // Shop financials from staff sandbox
-    expect(screen.getByText(/Doanh Thu & Hiệu Quả Kinh Doanh Theo Shop/i)).toBeDefined();
-    expect(screen.getByText(/Giá vốn \(COGS\)/i)).toBeDefined();
-    expect(screen.getAllByText(/Lợi nhuận gộp/i).length).toBeGreaterThan(0);
+    // Fee metrics & BQL collection section
+    expect(screen.getByText(/Tổng phải thu/i)).toBeDefined();
+    expect(screen.getByText(/Đã thu thực tế/i)).toBeDefined();
+    expect(screen.getByText(/Còn nợ đôn đốc/i)).toBeDefined();
+    expect(screen.getByText(/Tỷ lệ thu nợ/i)).toBeDefined();
+    expect(screen.getByText(/TÌNH HÌNH THU PHÍ QUẢN LÝ THỊ TRƯỜNG & DỊCH VỤ/i)).toBeDefined();
+    expect(screen.getByText(/Danh Sách Sạp Cần Thu Phí & Xử Lý Công Nợ Thực Địa/i)).toBeDefined();
   });
 
   it('triggers onNavigateToMap when user clicks on map navigation CTA', () => {
@@ -156,4 +154,120 @@ describe('LiveDashboardOverview Command Center Integration', () => {
 
     expect(onNavigateToMap).toHaveBeenCalledWith(expect.any(String));
   });
+
+  it('allows resolving/closing a complaint from the complaint detail modal and updates UI state', () => {
+    const onResolveComplaint = vi.fn();
+    render(
+      <LiveDashboardOverview
+        onNavigateToMap={vi.fn()}
+        onNavigateToProfiles={vi.fn()}
+        onResolveComplaint={onResolveComplaint}
+      />
+    );
+
+    // Switch to Complaints tab
+    const complaintsCard = screen.getByRole('button', { name: /Thẻ chỉ số phản ánh/i });
+    fireEvent.click(complaintsCard);
+
+    // Click on the first complaint item to open detail modal
+    const complaintCard = screen.getByRole('button', { name: /Chi tiết sự cố PAKN-2026-075/i });
+    fireEvent.click(complaintCard);
+
+    // Modal opens with "Đóng phản ánh" button
+    const resolveBtn = screen.getByRole('button', { name: /Đóng phản ánh/i });
+    expect(resolveBtn).toBeDefined();
+
+    // Click to resolve
+    fireEvent.click(resolveBtn);
+
+    expect(onResolveComplaint).toHaveBeenCalledWith('PAKN-2026-075');
+    expect(screen.getByText(/Đã nghiệm thu và đóng phản ánh PAKN-2026-075 thành công/i)).toBeDefined();
+    expect(screen.getByText(/Hồ sơ đã đóng hoàn tất/i)).toBeDefined();
+
+    // Close modal via header close button
+    const closeBtn = screen.getByRole('button', { name: /Đóng chi tiết sự cố/i });
+    fireEvent.click(closeBtn);
+
+    // Now the complaint item is removed from the active open list
+    expect(screen.queryByRole('button', { name: /Chi tiết sự cố PAKN-2026-075/i })).toBeNull();
+
+    // Toggle to view resolved complaints and verify it displays "Đã xử lý dứt điểm"
+    const toggleResolvedBtn = screen.getByRole('button', { name: /Ẩn vụ việc đã xử lý|Đang hiện cả vụ đã đóng/i });
+    fireEvent.click(toggleResolvedBtn);
+    expect(screen.getAllByText(/Đã xử lý dứt điểm/i).length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('accurately filters stalls and zones strictly for the selected market without bleeding data', () => {
+    const mockMarkets = [
+      { id: 'm-vinh', name: 'Chợ Vinh', code: 'CHO-VINH' },
+      { id: 'm-bm', name: 'Chợ Bình Minh', code: 'CHO-BM' }
+    ];
+    const mockStalls = [
+      { id: 's-v1', marketId: 'm-vinh', code: 'VINH-01', name: 'Sạp Vinh Số 1', status: 'occupied', acreage: 10 },
+      { id: 's-b1', marketId: 'm-bm', code: 'BM-01', name: 'Sạp Bình Minh 1', status: 'occupied', acreage: 12 }
+    ];
+
+    render(
+      <LiveDashboardOverview
+        onNavigateToMap={vi.fn()}
+        onNavigateToProfiles={vi.fn()}
+        selectedMarketId="m-vinh"
+        markets={mockMarkets}
+        stalls={mockStalls}
+      />
+    );
+
+    // Banner should show Chợ Vinh
+    expect(screen.getAllByText(/Chợ Vinh \(CHO-VINH\)/i).length).toBeGreaterThanOrEqual(1);
+    // Stall VINH-01 must be present
+    expect(screen.getByText('VINH-01')).toBeDefined();
+    // Stall BM-01 from another market MUST NOT be present
+    expect(screen.queryByText('BM-01')).toBeNull();
+  });
+
+  it('accurately filters complaints strictly for the selected market', () => {
+    const mockMarkets = [
+      { id: 'm-vinh', name: 'Chợ Vinh', code: 'CHO-VINH' },
+      { id: 'm-bm', name: 'Chợ Bình Minh', code: 'CHO-BM' }
+    ];
+    const mockComplaints = [
+      {
+        id: 'c-v1',
+        marketId: 'm-vinh',
+        code: 'PAKN-VINH-001',
+        title: 'Khiếu nại cân thiếu Chợ Vinh',
+        content: 'Cân thiếu 200g',
+        severityLevel: 'P0',
+        type: 'weighing_fraud'
+      },
+      {
+        id: 'c-b1',
+        marketId: 'm-bm',
+        code: 'PAKN-BM-001',
+        title: 'Khiếu nại sạp Bình Minh',
+        content: 'Lấn chiếm lối đi',
+        severityLevel: 'P1',
+        type: 'infrastructure'
+      }
+    ];
+
+    render(
+      <LiveDashboardOverview
+        onNavigateToMap={vi.fn()}
+        onNavigateToProfiles={vi.fn()}
+        selectedMarketId="m-vinh"
+        markets={mockMarkets}
+        complaints={mockComplaints}
+      />
+    );
+
+    const complaintsCard = screen.getByRole('button', { name: /Thẻ chỉ số phản ánh/i });
+    fireEvent.click(complaintsCard);
+
+    // Chợ Vinh complaint should be present
+    expect(screen.getByText(/PAKN-VINH-001/i)).toBeDefined();
+    // Chợ Bình Minh complaint MUST NOT be present
+    expect(screen.queryByText(/PAKN-BM-001/i)).toBeNull();
+  });
 });
+

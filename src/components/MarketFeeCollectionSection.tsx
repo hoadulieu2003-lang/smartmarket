@@ -7,6 +7,7 @@ import {
   ShieldAlert, Send, Clock, User, Check, Sparkles, Building
 } from 'lucide-react';
 import { MARKET_FEE_COLLECTION } from '../data/mockMarketData';
+import DonutChartSvg from './DonutChartSvg';
 
 const parseCurrency = (value: string) => Number(value.replace(/[^\d]/g, ''));
 const formatCurrency = (value: number) => `${new Intl.NumberFormat('vi-VN').format(value)}đ`;
@@ -35,11 +36,11 @@ const INITIAL_FEE_STALLS: FeeStallItem[] = [
   {
     id: 'fee-1',
     code: 'A-02',
-    name: 'Trái cây sạch Miền Tây',
-    category: 'Trái cây',
-    zone: 'Khu A Rau củ',
-    merchant: 'Lê Hoàng Nam',
-    phone: '0904 567 890',
+    name: 'Hải Sản Tươi Sống Hùng Phát',
+    category: 'Thực phẩm tươi sống',
+    zone: 'Khu A · Tươi sống',
+    merchant: 'Trần Văn Hùng',
+    phone: '0903 234 502',
     amount: 4200000,
     amountFormatted: '4.200.000đ',
     status: 'overdue',
@@ -50,12 +51,12 @@ const INITIAL_FEE_STALLS: FeeStallItem[] = [
   },
   {
     id: 'fee-2',
-    code: 'D04-07',
-    name: 'Trà sen & Đặc sản Hà Nội',
-    category: 'Đặc sản vùng miền',
-    zone: 'Khu Đặc sản 3',
-    merchant: 'Vũ Đức Thịnh',
-    phone: '0988 234 567',
+    code: 'B-02',
+    name: 'Đặc Sản Tây Bắc Đức Hạnh',
+    category: 'Nông sản khô',
+    zone: 'Khu B · Nông sản khô',
+    merchant: 'Hoàng Văn Đức',
+    phone: '0936 789 005',
     amount: 3800000,
     amountFormatted: '3.800.000đ',
     status: 'overdue',
@@ -66,44 +67,44 @@ const INITIAL_FEE_STALLS: FeeStallItem[] = [
   },
   {
     id: 'fee-3',
-    code: 'D900-08',
-    name: 'Đồ hộp & Lạp xưởng gia truyền',
-    category: 'Thực phẩm khô',
-    zone: 'Khu Thực phẩm tươi 1',
-    merchant: 'Nguyễn Văn Cường',
-    phone: '0913 456 789',
+    code: 'A-06',
+    name: 'Gia Cầm Đông Lạnh Quốc Bảo',
+    category: 'Thực phẩm tươi sống',
+    zone: 'Khu A · Tươi sống',
+    merchant: 'Phan Quốc Bảo',
+    phone: '0908 999 514',
     amount: 5200000,
     amountFormatted: '5.200.000đ',
     status: 'overdue',
     statusLabel: 'Quá hạn 10 ngày',
     daysOverdue: 10,
     dueDate: '25/08/2026',
-    note: 'Tiểu thương đi công tác vắng mặt, người nhà bán thay'
+    note: 'Tạm dừng sạp khử khuẩn, hẹn nộp phí sau kiểm tra'
   },
   {
     id: 'fee-4',
-    code: 'A-12',
-    name: 'Thủy hải sản Nam Định',
+    code: 'A-04',
+    name: 'Thịt Heo Sinh Học Bác Năm',
     category: 'Thực phẩm tươi sống',
-    zone: 'Khu A Rau củ',
-    merchant: 'Lê Văn Nam',
-    phone: '0909 332 114',
+    zone: 'Khu A · Tươi sống',
+    merchant: 'Phạm Văn Năm',
+    phone: '0912 888 104',
     amount: 3600000,
     amountFormatted: '3.600.000đ',
     status: 'overdue',
     statusLabel: 'Quá hạn 8 ngày',
     daysOverdue: 8,
     dueDate: '27/08/2026',
-    note: 'Đang làm việc với tổ trật tự về vệ sinh lối đi chung'
+    note: 'Hợp đồng sắp hết hạn (17 ngày), đôn đốc gia hạn'
   },
   {
     id: 'fee-5',
-    code: 'D04-05',
-    name: 'Gạo ST25 & Nông sản Việt',
-    category: 'Lương thực & Nông sản',
-    zone: 'Khu Nông sản 2',
-    merchant: 'Đỗ Thu Trang',
-    phone: '0936 789 456',
+    code: 'B-05',
+    name: 'Hạt Dinh Dưỡng Thanh Huyền',
+    category: 'Nông sản khô',
+    zone: 'Khu B · Nông sản khô',
+    merchant: 'Ngô Thanh Huyền',
+    phone: '0913 888 511',
     amount: 3500000,
     amountFormatted: '3.500.000đ',
     status: 'pending',
@@ -113,12 +114,12 @@ const INITIAL_FEE_STALLS: FeeStallItem[] = [
   },
   {
     id: 'fee-6',
-    code: 'D900-06',
-    name: 'Gia vị & Hạt nêm Tây Bắc',
-    category: 'Gia vị khô',
-    zone: 'Khu Thực phẩm tươi 1',
-    merchant: 'Phạm Khánh Linh',
-    phone: '0983 124 888',
+    code: 'C-03',
+    name: 'Bánh Cuốn Thanh Trì Bà Hoành',
+    category: 'Ẩm thực & Đồ uống',
+    zone: 'Khu C · Ẩm thực',
+    merchant: 'Bà Nguyễn Thị Hoành',
+    phone: '0912 334 455',
     amount: 4000000,
     amountFormatted: '4.000.000đ',
     status: 'pending',
@@ -128,39 +129,69 @@ const INITIAL_FEE_STALLS: FeeStallItem[] = [
   },
   {
     id: 'fee-7',
-    code: 'A-01',
-    name: 'Rau củ hữu cơ Đà Lạt',
-    category: 'Rau củ quả',
-    zone: 'Khu A Rau củ',
-    merchant: 'Trần Thị Lan',
-    phone: '0978 654 321',
-    amount: 4200000,
-    amountFormatted: '4.200.000đ',
-    status: 'paid',
-    statusLabel: 'Đã nộp đủ',
-    dueDate: '05/08/2026',
-    paidAt: '01/09/2026 08:30',
-    paymentMethod: 'vietqr',
-    receiptCode: 'PT-2026-0801',
-    note: 'Đã quyết toán phí quản lý & dịch vụ tháng 8'
+    code: 'D-01',
+    name: 'Bách Hóa Bích Thủy',
+    category: 'Bách hóa & Đặc sản',
+    zone: 'Khu D · Bách hóa',
+    merchant: 'Nguyễn Bích Thủy',
+    phone: '0968 901 208',
+    amount: 4500000,
+    amountFormatted: '4.500.000đ',
+    status: 'pending',
+    statusLabel: 'Chờ thu trong kỳ',
+    dueDate: '12/09/2026',
+    note: 'Đang đối soát chứng từ thanh toán POS quầy'
   },
   {
     id: 'fee-8',
-    code: 'D900-03',
-    name: 'Hải sản tươi sống Minh Quang',
-    category: 'Thực phẩm tươi sống',
-    zone: 'Khu Thực phẩm tươi 1',
-    merchant: 'Nguyễn Văn Minh',
-    phone: '0912 345 678',
+    code: 'E-01',
+    name: 'Lụa Tơ Tằm Kim Cúc',
+    category: 'Vải sợi & Quà lưu niệm',
+    zone: 'Khu E · Vải sợi',
+    merchant: 'Lê Thị Kim Cúc',
+    phone: '0904 567 809',
     amount: 5000000,
     amountFormatted: '5.000.000đ',
+    status: 'pending',
+    statusLabel: 'Chờ thu trong kỳ',
+    dueDate: '15/09/2026',
+    note: 'Chuẩn bị nộp phí quý IV'
+  },
+  {
+    id: 'fee-9',
+    code: 'A-01',
+    name: 'Sạp Thịt Bò Tươi Cô Mai',
+    category: 'Thực phẩm tươi sống',
+    zone: 'Khu A · Tươi sống',
+    merchant: 'Nguyễn Thị Mai',
+    phone: '0912 345 601',
+    amount: 4500000,
+    amountFormatted: '4.500.000đ',
     status: 'paid',
-    statusLabel: 'Đã nộp đủ',
-    dueDate: '05/08/2026',
-    paidAt: '02/09/2026 09:15',
-    paymentMethod: 'cash',
-    receiptCode: 'PT-2026-0802',
-    note: 'Đã nộp tiền mặt tại phòng Kế toán BQL'
+    statusLabel: 'Đã nộp thành công',
+    paidAt: '01/09/2026 09:15',
+    paymentMethod: 'vietqr',
+    receiptCode: 'BL-2026-0901-01',
+    dueDate: '05/09/2026',
+    note: 'Nộp qua VietQR ngân hàng Vietcombank'
+  },
+  {
+    id: 'fee-10',
+    code: 'C-01',
+    name: 'Bún Chả Gia Truyền Cô Nga',
+    category: 'Ẩm thực & Đồ uống',
+    zone: 'Khu C · Ẩm thực',
+    merchant: 'Đỗ Thị Nga',
+    phone: '0915 678 906',
+    amount: 6500000,
+    amountFormatted: '6.500.000đ',
+    status: 'paid',
+    statusLabel: 'Đã nộp thành công',
+    paidAt: '02/09/2026 14:30',
+    paymentMethod: 'vietqr',
+    receiptCode: 'BL-2026-0902-04',
+    dueDate: '05/09/2026',
+    note: 'Nộp qua cổng thanh toán QR SmartMarket'
   }
 ];
 
@@ -318,46 +349,87 @@ export default function MarketFeeCollectionSection({
         </div>
       )}
 
-      {/* 3. Lưới chỉ số tổng quan (Fee Summary Grid) */}
-      <div data-testid="fee-summary-grid" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200 shadow-2xs">
-          <span className="text-slate-500 text-[10px] uppercase font-extrabold block">Tổng chỉ tiêu thu</span>
-          <span className="text-xl font-black font-mono text-[#172F55] mt-1 block">
-            {MARKET_FEE_COLLECTION.totalTarget}
-          </span>
-          <span className="text-[10px] text-slate-400 mt-0.5 block">Kế hoạch thu định mức 50 sạp</span>
+      {/* 3. Phân tích tài chính & Lưới chỉ số thu phí hợp nhất (Unified Fee Analytics & Metrics) */}
+      <div className="flex flex-col lg:flex-row items-center gap-4 sm:gap-6 p-4 rounded-xl bg-[#F8FAFC] border border-[#DCE8F1]">
+        {/* Biểu đồ Donut tỷ lệ thu phí */}
+        <div className="shrink-0 flex flex-col items-center justify-center p-1">
+          <DonutChartSvg
+            data={[
+              { name: 'Đã thu', value: currentCollectedNum, color: '#0B7A3A' },
+              { name: 'Còn nợ', value: currentUncollectedNum, color: '#D3484D' },
+            ]}
+            centerValue={`${Math.round((currentCollectedNum / baseTarget) * 100)}%`}
+            centerLabel="Thu phí"
+            size={135}
+          />
+          <div className="text-[11px] font-bold text-[#172F55] mt-1.5 flex items-center gap-1.5">
+            <span className="inline-block w-2 h-2 rounded-full bg-[#0B7A3A]" aria-hidden="true"></span>
+            <span>Tỷ lệ thu nợ:</span>
+            <span className="font-mono text-[#0B7A3A] font-black">{((currentCollectedNum / baseTarget) * 100).toFixed(1)}%</span>
+          </div>
         </div>
 
-        <div className="p-3.5 bg-emerald-50/80 rounded-xl border border-emerald-200 shadow-2xs">
-          <span className="text-emerald-700 text-[10px] uppercase font-extrabold block">
-            Đã thực thu ({Math.round((currentCollectedNum / baseTarget) * 100)}%)
-          </span>
-          <span className="text-xl font-black font-mono text-[#076C31] mt-1 block">
-            {formatCurrency(currentCollectedNum)}
-          </span>
-          <span className="text-[10px] text-emerald-600 mt-0.5 block">Đã quyết toán vào tài khoản BQL</span>
-        </div>
+        {/* Lưới 4 thẻ chỉ số tổng quan (Fee Summary Grid) */}
+        <div data-testid="fee-summary-grid" className="flex-1 grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-4 w-full">
+          {/* Card 1: Tổng phải thu */}
+          <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-600 text-[10px] uppercase font-black tracking-wide">Tổng phải thu</span>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">Tháng 08</span>
+            </div>
+            <span className="text-lg font-black font-mono text-[#172F55] mt-1.5 block">
+              {MARKET_FEE_COLLECTION.totalTarget}
+            </span>
+            <span className="text-[10px] text-slate-500 font-medium mt-0.5 block">Kế hoạch thu định mức 50 sạp</span>
+          </div>
 
-        <div className="p-3.5 bg-amber-50/80 rounded-xl border border-amber-200 shadow-2xs">
-          <span className="text-amber-800 text-[10px] uppercase font-extrabold block">
-            Tổng chưa thu ({10 + overdueCount} sạp)
-          </span>
-          <span data-testid="fee-uncollected-amount" className="text-xl font-black font-mono text-amber-900 mt-1 block">
-            {formatCurrency(currentUncollectedNum)}
-          </span>
-          <span className="text-[10px] text-amber-700 mt-0.5 block">Bao gồm 4 sạp nợ quá hạn</span>
-        </div>
+          {/* Card 2: Đã thu thực tế */}
+          <div className="p-3 bg-white rounded-xl border border-emerald-200 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-emerald-800 text-[10px] uppercase font-black tracking-wide">Đã thu thực tế</span>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-900">
+                {Math.round((currentCollectedNum / baseTarget) * 100)}%
+              </span>
+            </div>
+            <span className="text-lg font-black font-mono text-[#076C31] mt-1.5 block">
+              {formatCurrency(currentCollectedNum)}
+            </span>
+            <span className="text-[10px] text-emerald-700 font-medium mt-0.5 block">Đã quyết toán vào tài khoản BQL</span>
+          </div>
 
-        <div className="p-3.5 bg-rose-50/80 rounded-xl border border-rose-200 shadow-2xs">
-          <span className="text-rose-800 text-[10px] uppercase font-extrabold block">
-            Nợ phí quá hạn ({overdueCount} sạp)
-          </span>
-          <span className="text-xl font-black font-mono text-rose-700 mt-1 block">
-            {formatCurrency(overdueTotalAmount)}
-          </span>
-          <span className="text-[10px] text-rose-600 mt-0.5 font-bold block">
-            {overdueCount > 0 ? 'Cần đôn đốc xử lý ngay' : 'Đã thanh toán hết nợ'}
-          </span>
+          {/* Card 3: Tổng chưa thu & Còn nợ đôn đốc */}
+          <div className="p-3 bg-white rounded-xl border border-amber-200 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-amber-900 text-[10px] uppercase font-black tracking-wide">
+                Tổng chưa thu ({pendingStalls.length + overdueCount} sạp)
+              </span>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-950">
+                Còn nợ đôn đốc
+              </span>
+            </div>
+            <span data-testid="fee-uncollected-amount" className="text-lg font-black font-mono text-amber-950 mt-1.5 block">
+              {formatCurrency(currentUncollectedNum)}
+            </span>
+            <span className="text-[10px] text-amber-800 font-medium mt-0.5 block">Bao gồm {overdueCount} sạp nợ quá hạn</span>
+          </div>
+
+          {/* Card 4: Nợ phí quá hạn */}
+          <div className="p-3 bg-white rounded-xl border border-rose-200 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-rose-900 text-[10px] uppercase font-black tracking-wide">
+                Nợ phí quá hạn ({overdueCount} sạp)
+              </span>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-900">
+                Đạt kế hoạch
+              </span>
+            </div>
+            <span className="text-lg font-black font-mono text-rose-800 mt-1.5 block">
+              {formatCurrency(overdueTotalAmount)}
+            </span>
+            <span className="text-[10px] text-rose-700 font-bold mt-0.5 block">
+              {overdueCount > 0 ? 'Cần đôn đốc xử lý ngay' : 'Đã thanh toán hết nợ'}
+            </span>
+          </div>
         </div>
       </div>
 

@@ -160,7 +160,7 @@ describe('Operational responsive contract', () => {
   it('labels uncollected fees without treating the same amount as overdue debt', () => {
     render(<MarketFeeCollectionSection />);
 
-    expect(screen.getByText(/Tổng chưa thu \(14 sạp\)/i)).toBeDefined();
+    expect(screen.getByText(/Tổng chưa thu \(8 sạp\)/i)).toBeDefined();
     expect(screen.getByTestId('fee-uncollected-amount').textContent).toBe('16.800.000đ');
     expect(screen.getByText(/Nợ phí quá hạn \(4 sạp\)/i)).toBeDefined();
   });

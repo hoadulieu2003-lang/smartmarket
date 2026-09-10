@@ -564,7 +564,7 @@ export function extractStallAlertInfo(stall: StallEntity): StallAlertInfo | null
     return {
       stallCode: stall.code,
       priority: 'urgent',
-      badgeTitle: 'P0 • KHẨN CẤP',
+      badgeTitle: 'KHẨN CẤP',
       issueDetail: detail,
       themeColor: '#ef4444',
     };
@@ -578,7 +578,7 @@ export function extractStallAlertInfo(stall: StallEntity): StallAlertInfo | null
     return {
       stallCode: stall.code,
       priority: 'attention',
-      badgeTitle: 'P1 • CHÚ Ý',
+      badgeTitle: 'CẦN CHÚ Ý',
       issueDetail: detail,
       themeColor: '#f97316',
     };

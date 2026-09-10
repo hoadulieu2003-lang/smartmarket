@@ -34,14 +34,17 @@ import {
   ExternalLink,
   TrendingUp,
   TrendingDown,
-  Info
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Layers
 } from 'lucide-react';
 import MarketFeeCollectionSection from './MarketFeeCollectionSection';
 import DonutChartSvg from './DonutChartSvg';
+import { CLIENT_STALLS, CLIENT_ZONES, CLIENT_TRADERS, CLIENT_COMPLAINTS } from '@/data/clientCmsData';
 import type {
   DonutSegment,
-  ShopFinancialMetric,
-  RevenueAnomaly,
   SlaMetricReport
 } from '@/types/dashboard';
 
@@ -50,6 +53,13 @@ interface LiveDashboardOverviewProps {
   onNavigateToProfiles?: () => void;
   dispatchedStalls?: Record<string, { teamName: string; status: string }>;
   onQuickDispatch?: (stallId: string, teamName: string) => void;
+  resolvedComplaintCodes?: string[];
+  onResolveComplaint?: (codeOrId: string) => void;
+  selectedMarketId?: string;
+  markets?: any[];
+  stalls?: any[];
+  zones?: any[];
+  complaints?: any[];
 }
 
 export interface ComplaintItem {
@@ -96,13 +106,13 @@ export const COMPLAINT_GROUPS: {
       {
         id: 'c1',
         code: 'PAKN-2026-075',
-        stallId: 'D900-06',
-        stallName: 'Gian hàng gia vị & Hạt nêm Tây Bắc',
-        merchantName: 'Phạm Khánh Linh',
-        phone: '0983 124 888',
-        zone: 'Khu Thực phẩm tươi 1',
-        title: 'Gian hàng gia vị: Hàng không tem mác nguồn gốc xuất xứ (PAKN #075)',
-        description: 'Khách hàng phản ánh phát hiện nhiều bao hạt nêm và gia vị khô không có nhãn phụ tiếng Việt, thiếu hạn sử dụng và thiếu tem chứng nhận an toàn thực phẩm.',
+        stallId: 'A-06',
+        stallName: 'Gia Cầm Đông Lạnh Quốc Bảo',
+        merchantName: 'Phan Quốc Bảo',
+        phone: '0908 999 514',
+        zone: 'Khu A · Tươi sống',
+        title: 'Gian hàng gia cầm: Rã đông gà trên sàn xi măng vi phạm ATTP (PAKN #075)',
+        description: 'Khách hàng phản ánh phát hiện sạp rã đông gia cầm trên sàn xi măng không có khay cách ly, thiếu tem chứng nhận kiểm dịch an toàn thực phẩm.',
         severity: 'Khẩn cấp',
         severityLevel: 'P0',
         reporter: 'Khách mua hàng & Tổ QLTT',
@@ -116,13 +126,13 @@ export const COMPLAINT_GROUPS: {
       {
         id: 'c2',
         code: 'PAKN-2026-081',
-        stallId: 'D900-01',
-        stallName: 'Thịt bò sạch & Thực phẩm tươi Minh Quân',
-        merchantName: 'Trần Văn Mạnh',
-        phone: '0912 888 111',
-        zone: 'Khu Thực phẩm tươi 1',
-        title: 'Dấu hiệu cân sai lệch 15% khi kiểm tra đột xuất thịt bò tươi',
-        description: 'Ban Kiểm Tra Giá phát hiện quả cân điện tử tại sạp D900-01 sai lệch +150g trên mỗi 1kg hàng bán ra. Đề nghị lập biên bản và niêm phong cân đối chứng.',
+        stallId: 'B-02',
+        stallName: 'Đặc Sản Tây Bắc Đức Hạnh',
+        merchantName: 'Hoàng Văn Đức',
+        phone: '0936 789 005',
+        zone: 'Khu B · Nông sản khô',
+        title: 'Dấu hiệu không niêm yết giá nấm hương rừng rõ ràng (PAKN #081)',
+        description: 'Ban Kiểm Tra Giá phát hiện sạp B-02 không niêm yết giá nấm hương rừng Điện Biên, có hiện tượng chênh lệch giá so với bảng niêm yết chung.',
         severity: 'Khẩn cấp',
         severityLevel: 'P0',
         reporter: 'Ban Kiểm Tra Giá',
@@ -136,13 +146,13 @@ export const COMPLAINT_GROUPS: {
       {
         id: 'c3',
         code: 'PAKN-2026-084',
-        stallId: 'D260802V1-S10',
-        stallName: 'Thủy hải sản tươi sống Quang Huy',
-        merchantName: 'Nguyễn Quang Huy',
-        phone: '0978 999 222',
-        zone: 'Khu Thực phẩm tươi 1',
-        title: 'Xô xát to tiếng, tranh giành khách cản trở lối đi công cộng',
-        description: 'Hai nhân viên tại sạp xô xát to tiếng với khách hàng về giá cá hồi, gây tụ tập đông người cản trở lối đi chung. Cần tổ phản ứng nhanh giải tán.',
+        stallId: 'A-02',
+        stallName: 'Hải Sản Tươi Sống Hùng Phát',
+        merchantName: 'Trần Văn Hùng',
+        phone: '0903 234 502',
+        zone: 'Khu A · Tươi sống',
+        title: 'Tranh chấp lối đi vận chuyển khay hải sản tươi sống cản trở lối đi (PAKN #084)',
+        description: 'Nhân viên chuyển khay cá tôm cản trở lối đi chung của khách hàng và sạp lân cận. Cần tổ phản ứng nhanh giải tỏa trật tự.',
         severity: 'Khẩn cấp',
         severityLevel: 'P0',
         reporter: 'Tổ Trật Tự Chợ',
@@ -168,10 +178,10 @@ export const COMPLAINT_GROUPS: {
         id: 'c4',
         code: 'PAKN-2026-088',
         stallId: 'A-01',
-        stallName: 'Rau củ hữu cơ Đà Lạt',
-        merchantName: 'Trần Thị Lan',
-        phone: '0978 654 321',
-        zone: 'Khu A — Rau củ quả',
+        stallName: 'Sạp Thịt Bò Tươi Cô Mai',
+        merchantName: 'Nguyễn Thị Mai',
+        phone: '0912 345 601',
+        zone: 'Khu A · Tươi sống',
         title: 'Dựng dù bạt che khuất tầm nhìn biển chỉ dẫn an toàn PCCC',
         description: 'Chủ sạp dựng thêm mái che dù bạt vươn ra ngoài 1.2m, che khuất hoàn toàn hộp họng nước chữa cháy vách tường và biển thoát hiểm số 1.',
         severity: 'Trật tự',
@@ -187,13 +197,13 @@ export const COMPLAINT_GROUPS: {
       {
         id: 'c5',
         code: 'PAKN-2026-090',
-        stallId: 'D04-05',
-        stallName: 'Gạo ST25 & Nông sản Việt',
-        merchantName: 'Đỗ Thu Trang',
-        phone: '0936 789 456',
-        zone: 'Khu Nông sản 2',
+        stallId: 'B-06',
+        stallName: 'Gia Vị Phở Bác Tùng',
+        merchantName: 'Bùi Thanh Tùng',
+        phone: '0944 556 677',
+        zone: 'Khu B · Nông sản khô',
         title: 'Tập kết thùng hàng và bao tải lấn chiếm 0.8m lối đi bộ',
-        description: 'Hàng chục bao gạo và thùng nông sản xếp lấn quá vạch sơn ranh giới sạp 0.8m, người đi bộ phải lách qua khó khăn.',
+        description: 'Hàng chục bao quế hồi và gia vị xếp lấn quá vạch sơn ranh giới sạp 0.8m, người đi bộ phải lách qua khó khăn.',
         severity: 'Trật tự',
         severityLevel: 'P1',
         reporter: 'Lê Hoàng Nam',
@@ -207,11 +217,11 @@ export const COMPLAINT_GROUPS: {
       {
         id: 'c6',
         code: 'PAKN-2026-092',
-        stallId: 'D04-07',
-        stallName: 'Trà sen & Đặc sản Hà Nội',
-        merchantName: 'Vũ Đức Thịnh',
-        phone: '0988 234 567',
-        zone: 'Khu Đặc sản 3',
+        stallId: 'D-01',
+        stallName: 'Bách Hóa & Trà Bích Thủy',
+        merchantName: 'Nguyễn Bích Thủy',
+        phone: '0968 901 208',
+        zone: 'Khu D · Bách hóa',
         title: 'Kê thêm quầy phụ trưng bày ngoài phạm vi vạch sơn phân định',
         description: 'Sạp tự ý kê thêm tủ kính mini bày mẫu trà ngoài ranh giới cho thuê đã được ký trong hợp đồng mặt bằng.',
         severity: 'Trật tự',
@@ -227,13 +237,13 @@ export const COMPLAINT_GROUPS: {
       {
         id: 'c7',
         code: 'PAKN-2026-095',
-        stallId: 'CỔNG-BẮC',
-        stallName: 'Khu vực Cổng Phố Hàng Khoai',
-        merchantName: 'Đội bốc dỡ hàng hóa',
-        phone: '0915 678 999',
-        zone: 'Khu Hàng thiết yếu 4',
+        stallId: 'C-01',
+        stallName: 'Bún Chả Gia Truyền Cô Nga',
+        merchantName: 'Đỗ Thị Nga',
+        phone: '0915 678 906',
+        zone: 'Khu C · Ẩm thực',
         title: 'Xe đẩy bốc dỡ hàng đỗ sai vị trí cản trở cửa thoát hiểm',
-        description: '3 xe đẩy chở thùng carton để chắn ngang cửa thông gió và lối tiếp cận xe cấp cứu cổng phía Bắc.',
+        description: '3 xe đẩy chở thùng hàng để chắn ngang cửa thông gió và lối tiếp cận xe cấp cứu cổng phía Bắc.',
         severity: 'Trật tự',
         severityLevel: 'P1',
         reporter: 'Tổ Bảo Vệ',
@@ -259,10 +269,10 @@ export const COMPLAINT_GROUPS: {
         id: 'c8',
         code: 'PAKN-2026-096',
         stallId: 'A-02',
-        stallName: 'Trái cây sạch Miền Tây',
-        merchantName: 'Lê Hoàng Nam',
-        phone: '0904 567 890',
-        zone: 'Khu A — Rau củ quả',
+        stallName: 'Hải Sản Tươi Sống Hùng Phát',
+        merchantName: 'Trần Văn Hùng',
+        phone: '0903 234 502',
+        zone: 'Khu A · Tươi sống',
         title: 'Nước tràn lối đi trước sạp A-02 do rò rỉ đường ống thoát sàn',
         description: 'Đường ống dẫn thoát nước sàn phía sau sạp A-02 bị cặn rác nghẹt khiến nước tràn nhẹ ra lối đi chung gây ẩm ướt trơn trượt.',
         severity: 'Cơ sở hạ tầng',
@@ -278,13 +288,13 @@ export const COMPLAINT_GROUPS: {
       {
         id: 'c9',
         code: 'PAKN-2026-098',
-        stallId: 'D900-03',
-        stallName: 'Hải sản tươi sống Minh Quang',
-        merchantName: 'Nguyễn Văn Minh',
-        phone: '0912 345 678',
-        zone: 'Khu Thực phẩm tươi 1',
-        title: 'Mùi hôi rãnh thoát nước sau sạp D900-03 cần nạo vét khử mùi',
-        description: 'Rãnh thu gom nước thải cá tôm đọng cặn hữu cơ bốc mùi khó chịu trong bán kính 5m. Cần tổ môi trường phun dung dịch khử khuẩn.',
+        stallId: 'A-03',
+        stallName: 'Gia Cầm Sạch Nam Hải',
+        merchantName: 'Lê Hoàng Nam',
+        phone: '0988 123 403',
+        zone: 'Khu A · Tươi sống',
+        title: 'Mùi hôi rãnh thoát nước sau sạp A-03 cần nạo vét khử mùi',
+        description: 'Rãnh thu gom nước thải đọng cặn hữu cơ bốc mùi khó chịu trong bán kính 5m. Cần tổ môi trường phun dung dịch khử khuẩn.',
         severity: 'Cơ sở hạ tầng',
         severityLevel: 'P2',
         reporter: 'Tiểu thương lân cận',
@@ -299,10 +309,10 @@ export const COMPLAINT_GROUPS: {
         id: 'c10',
         code: 'PAKN-2026-101',
         stallId: 'A-05',
-        stallName: 'Kho phụ & Cửa thoát hiểm 2',
-        merchantName: 'Tổ Vệ Sinh Chợ',
-        phone: '0945 111 222',
-        zone: 'Khu A — Rau củ quả',
+        stallName: 'Tôm Cua Cà Mau Minh Sang',
+        merchantName: 'Đặng Minh Sang',
+        phone: '0934 112 233',
+        zone: 'Khu A · Tươi sống',
         title: 'Ứ đọng rác thải hữu cơ tại cửa thoát hiểm số 2 cần thu gom',
         description: 'Thùng rác hữu cơ đầy tràn nắp chưa được xe ép rác chuyên dụng chuyển đi trong ca sáng, cần điều xe rác tăng cường.',
         severity: 'Cơ sở hạ tầng',
@@ -318,16 +328,16 @@ export const COMPLAINT_GROUPS: {
       {
         id: 'c11',
         code: 'PAKN-2026-103',
-        stallId: 'D900-08',
-        stallName: 'Thực phẩm chế biến đóng gói',
-        merchantName: 'Trần Văn Hưng',
-        phone: '0966 333 444',
-        zone: 'Khu Thực phẩm tươi 1',
-        title: 'Đèn LED chiếu sáng hành lang phân khu 1 chập chờn',
+        stallId: 'C-04',
+        stallName: 'Bún Riêu Cua Đồng Cô Liên',
+        merchantName: 'Hoàng Thị Liên',
+        phone: '0936 889 911',
+        zone: 'Khu C · Ẩm thực',
+        title: 'Đèn LED chiếu sáng hành lang ẩm thực chập chờn',
         description: 'Bóng đèn tuýp LED số 04 hành lang giữa chập chờn nhấp nháy, ánh sáng không đủ cho khách đi lại.',
         severity: 'Cơ sở hạ tầng',
         severityLevel: 'P2',
-        reporter: 'Trần Văn Hưng',
+        reporter: 'Hoàng Thị Liên',
         time: '2 giờ trước',
         coordinator: {
           name: 'Lê Văn Khoa',
@@ -338,12 +348,12 @@ export const COMPLAINT_GROUPS: {
       {
         id: 'c12',
         code: 'PAKN-2026-105',
-        stallId: 'D04-06',
-        stallName: 'Nông sản sấy khô Hà Nam',
-        merchantName: 'Hoàng Kim Oanh',
-        phone: '0915 678 123',
-        zone: 'Khu Nông sản 2',
-        title: 'Rò rỉ van vòi nước rửa tay chung khu vực nông sản',
+        stallId: 'E-01',
+        stallName: 'Lụa Tơ Tằm Kim Cúc',
+        merchantName: 'Lê Thị Kim Cúc',
+        phone: '0904 567 809',
+        zone: 'Khu E · Vải sợi',
+        title: 'Rò rỉ van vòi nước rửa tay chung khu vực vải sợi',
         description: 'Van khóa vòi inox bồn rửa tay số 2 bị rỉ nước liên tục, cần thợ cơ điện thay gioăng cao su chống thất thoát nước.',
         severity: 'Cơ sở hạ tầng',
         severityLevel: 'P2',
@@ -358,16 +368,16 @@ export const COMPLAINT_GROUPS: {
       {
         id: 'c13',
         code: 'PAKN-2026-108',
-        stallId: 'D04-10',
-        stallName: 'Gia dụng & Thiết yếu Đồng Xuân',
-        merchantName: 'Đặng Quốc Bảo',
-        phone: '0982 444 555',
-        zone: 'Khu Hàng thiết yếu 4',
+        stallId: 'B-08',
+        stallName: 'Khoai Sọ & Nông Sản Bắc Kạn',
+        merchantName: 'Nguyễn Thị Thoa',
+        phone: '0972 334 455',
+        zone: 'Khu B · Nông sản khô',
         title: 'Quạt thông gió hành lang phía Nam phát tiếng ồn lớn',
         description: 'Quạt hút công nghiệp trục motor bị khô dầu phát ra tiếng rít lớn khi vận hành ở tốc độ cao.',
         severity: 'Cơ sở hạ tầng',
         severityLevel: 'P2',
-        reporter: 'Đỗ Thu Trang',
+        reporter: 'Nguyễn Thị Thoa',
         time: '3 giờ trước',
         coordinator: {
           name: 'Lê Văn Khoa',
@@ -378,11 +388,11 @@ export const COMPLAINT_GROUPS: {
       {
         id: 'c14',
         code: 'PAKN-2026-110',
-        stallId: 'D04-08',
-        stallName: 'Mật ong & Đặc sản Tây Bắc',
-        merchantName: 'Lê Minh Tuấn',
-        phone: '0973 555 666',
-        zone: 'Khu Đặc sản 3',
+        stallId: 'D-04',
+        stallName: 'Bách Hóa Tổng Hợp Minh Châu',
+        merchantName: 'Nguyễn Minh Châu',
+        phone: '0975 667 788',
+        zone: 'Khu D · Bách hóa',
         title: 'Mã QR truy xuất nguồn gốc gắn tại cột sạp bị mờ',
         description: 'Biển mica in mã QR truy xuất bị trầy xước góc, camera điện thoại khó nhận diện, cần in dán lại mã mới.',
         severity: 'Cơ sở hạ tầng',
@@ -398,16 +408,16 @@ export const COMPLAINT_GROUPS: {
       {
         id: 'c15',
         code: 'PAKN-2026-112',
-        stallId: 'A-03',
-        stallName: 'Rau xanh & Nấm tươi',
-        merchantName: 'Nguyễn Thị Mai',
-        phone: '0903 777 888',
-        zone: 'Khu A — Rau củ quả',
-        title: 'Khách góp ý nhân viên thanh toán chưa niềm nở',
+        stallId: 'E-02',
+        stallName: 'Thủ Công Mỹ Nghệ Trọng Phát',
+        merchantName: 'Dương Đình Trọng',
+        phone: '0983 234 510',
+        zone: 'Khu E · Vải sợi',
+        title: 'Khách góp ý nhân viên thanh toán chưa niềm nở trong giờ cao điểm',
         description: 'Khách hàng phản ánh nhân viên tính tiền chưa hướng dẫn quét mã chuyển khoản nhiệt tình trong giờ cao điểm.',
         severity: 'Cơ sở hạ tầng',
         severityLevel: 'P2',
-        reporter: 'Nguyễn Thị Mai',
+        reporter: 'Khách hàng mua sắm',
         time: '5 giờ trước',
         coordinator: {
           name: 'Trần Văn Hùng',
@@ -419,69 +429,24 @@ export const COMPLAINT_GROUPS: {
   }
 ];
 
-// Danh sách sạp tiêu biểu theo phân khu
-const SAMPLE_STALLS = [
-  { code: 'D900-06', name: 'Gia vị & Hạt nêm Tây Bắc', zone: 'Khu Thực phẩm tươi 1', merchant: 'Phạm Khánh Linh', status: 'complaint', rent: 'Đang thuê', fee: 'Đã nộp' },
-  { code: 'D900-03', name: 'Hải sản tươi sống Minh Quang', zone: 'Khu Thực phẩm tươi 1', merchant: 'Nguyễn Văn Minh', status: 'complaint', rent: 'Đang thuê', fee: 'Đã nộp' },
-  { code: 'A-01', name: 'Rau củ hữu cơ Đà Lạt', zone: 'Khu A Rau củ', merchant: 'Trần Thị Lan', status: 'occupied', rent: 'Đang thuê', fee: 'Đã nộp' },
-  { code: 'A-02', name: 'Trái cây sạch Miền Tây', zone: 'Khu A Rau củ', merchant: 'Lê Hoàng Nam', status: 'complaint', rent: 'Đang thuê', fee: 'Nợ phí 4.2tr' },
-  { code: 'D04-05', name: 'Gạo ST25 & Nông sản Việt', zone: 'Khu Nông sản 2', merchant: 'Đỗ Thu Trang', status: 'occupied', rent: 'Đang thuê', fee: 'Đã nộp' },
-  { code: 'D04-07', name: 'Trà sen & Đặc sản Hà Nội', zone: 'Khu Đặc sản 3', merchant: 'Vũ Đức Thịnh', status: 'occupied', rent: 'Đang thuê', fee: 'Nợ phí 3.8tr' },
-  { code: 'D04-09', name: 'Bách hóa tổng hợp Đồng Xuân', zone: 'Khu Thiết yếu 4', merchant: 'Hoàng Kim Oanh', status: 'occupied', rent: 'Đang thuê', fee: 'Đã nộp' },
-  { code: 'D900-04', name: 'Sạp trống sẵn sàng kinh doanh', zone: 'Khu Thực phẩm tươi 1', merchant: 'Chưa có', status: 'empty', rent: 'Trống', fee: '—' },
-  { code: 'A-06', name: 'Sạp trống chuẩn bị bàn giao', zone: 'Khu A Rau củ', merchant: 'Chưa có', status: 'empty', rent: 'Trống', fee: '—' }
-];
 
-// Danh sách 19 hộ tiểu thương
-const SAMPLE_TRADERS = [
-  { id: 't1', name: 'Phạm Khánh Linh', stall: 'D900-06', category: 'Gia vị & Hàng khô', phone: '0983 124 ***', contractDays: 240, status: 'Hoàn tất hồ sơ' },
-  { id: 't2', name: 'Nguyễn Văn Minh', stall: 'D900-03', category: 'Thực phẩm tươi sống', phone: '0912 345 ***', contractDays: 180, status: 'Hoàn tất hồ sơ' },
-  { id: 't3', name: 'Trần Thị Lan', stall: 'A-01', category: 'Rau củ hữu cơ', phone: '0978 654 ***', contractDays: 320, status: 'Hoàn tất hồ sơ' },
-  { id: 't4', name: 'Lê Hoàng Nam', stall: 'A-02', category: 'Trái cây sạch', phone: '0904 567 ***', contractDays: 28, status: 'Sắp hết hạn (28 ngày)' },
-  { id: 't5', name: 'Đỗ Thu Trang', stall: 'D04-05', category: 'Nông sản & Lương thực', phone: '0936 789 ***', contractDays: 310, status: 'Hoàn tất hồ sơ' },
-  { id: 't6', name: 'Vũ Đức Thịnh', stall: 'D04-07', category: 'Đặc sản vùng miền', phone: '0988 234 ***', contractDays: 15, status: 'Sắp hết hạn (15 ngày)' },
-  { id: 't7', name: 'Hoàng Kim Oanh', stall: 'D04-09', category: 'Hàng thiết yếu', phone: '0915 678 ***', contractDays: 195, status: 'Hoàn tất hồ sơ' }
-];
+// Danh sách 19 hộ tiểu thương tiêu biểu (đồng bộ 100% CLIENT_TRADERS)
+const SAMPLE_TRADERS = CLIENT_TRADERS.map((t) => {
+  const stall = CLIENT_STALLS.find((s) => s.currentContract?.merchant?.phone === t.phone || s.code === t.stall?.code);
+  const contractDays = stall?.currentContract?.daysLeft ?? 114;
+  const status = contractDays <= 30 ? `Sắp hết hạn (${contractDays} ngày)` : 'Hoàn tất hồ sơ';
+  return {
+    id: t.id,
+    name: t.fullName,
+    stall: t.stall?.code || stall?.code || 'A-01',
+    category: t.category?.name || 'Thực phẩm',
+    phone: t.phone ? t.phone.slice(0, 8) + ' ***' : '0908 999 ***',
+    contractDays,
+    status
+  };
+});
 
-// Dữ liệu doanh thu theo Shop (đồng bộ nghiệp vụ từ staff sandbox)
-const SAMPLE_SHOP_FINANCIALS: ShopFinancialMetric[] = [
-  { stallId: 'D900-01', stallName: 'Thịt bò sạch Minh Quân', revenue: 68500000, cogs: 49000000, profit: 19500000, marginPercent: 28.5 },
-  { stallId: 'D900-06', stallName: 'Gia vị & Hạt nêm Tây Bắc', revenue: 42300000, cogs: 28000000, profit: 14300000, marginPercent: 33.8 },
-  { stallId: 'A-01', stallName: 'Rau củ hữu cơ Đà Lạt', revenue: 38900000, cogs: 26500000, profit: 12400000, marginPercent: 31.9 },
-  { stallId: 'A-02', stallName: 'Trái cây sạch Miền Tây', revenue: 34200000, cogs: 24000000, profit: 10200000, marginPercent: 29.8 },
-  { stallId: 'D04-05', stallName: 'Gạo ST25 & Nông sản Việt', revenue: 29800000, cogs: 22000000, profit: 7800000, marginPercent: 26.2 },
-];
 
-// Cảnh báo đối chiếu lệch doanh thu POS vs Cashless (từ staff sandbox)
-const SAMPLE_REVENUE_ANOMALIES: RevenueAnomaly[] = [
-  {
-    stallId: 'D900-01',
-    stallName: 'Thịt bò sạch & Thực phẩm tươi Minh Quân',
-    posRevenue: 42500000,
-    cashlessRevenue: 31000000,
-    diffPercent: 27.1,
-    severity: 'high',
-    note: 'Chênh lệch dòng tiền POS so với quét QR lớn bất thường, nghi vấn dùng tài khoản cá nhân ngoài luồng.'
-  },
-  {
-    stallId: 'D900-06',
-    stallName: 'Gia vị & Hạt nêm Tây Bắc',
-    posRevenue: 18200000,
-    cashlessRevenue: 15100000,
-    diffPercent: 17.0,
-    severity: 'medium',
-    note: 'Lệch biên độ doanh thu giữa ca sáng và ca chiều, cần đối chiếu lại hóa đơn bán lẻ.'
-  },
-  {
-    stallId: 'A-02',
-    stallName: 'Trái cây sạch Miền Tây',
-    posRevenue: 25000000,
-    cashlessRevenue: 23500000,
-    diffPercent: 6.0,
-    severity: 'low',
-    note: 'Chênh lệch 6% nằm trong biên độ làm tròn tiền mặt thông thường.'
-  }
-];
 
 // Đo lường chuẩn SLA xử lý phản ánh PAKN
 const SAMPLE_SLA_REPORT: SlaMetricReport = {
@@ -523,8 +488,213 @@ export default function LiveDashboardOverview({
   onNavigateToMap,
   onNavigateToProfiles,
   dispatchedStalls = {},
-  onQuickDispatch
+  onQuickDispatch,
+  resolvedComplaintCodes = [],
+  onResolveComplaint,
+  selectedMarketId,
+  markets,
+  stalls,
+  zones,
+  complaints
 }: LiveDashboardOverviewProps) {
+  // 1. Phân giải Chợ hiện tại và Tiêu đề điều hành
+  const currentMarket = useMemo(() => {
+    if (!selectedMarketId || selectedMarketId === 'all') return null;
+    return markets?.find((m: any) => m.id === selectedMarketId) || null;
+  }, [selectedMarketId, markets]);
+
+  const marketTitle = useMemo(() => {
+    if (currentMarket) return `${currentMarket.name} (${currentMarket.code})`;
+    if (markets && markets.length > 0) return `Toàn Hệ Thống (${markets.length} Chợ)`;
+    return 'Toàn Hệ Thống Chợ';
+  }, [currentMarket, markets]);
+
+  // 2. Lấy danh sách Sạp thực tế tương ứng với Chợ được chọn
+  const activeStalls = useMemo(() => {
+    const source = (stalls && stalls.length > 0) ? stalls : CLIENT_STALLS;
+    if (!selectedMarketId || selectedMarketId === 'all') return source;
+    return source.filter((s: any) => s.marketId === selectedMarketId);
+  }, [stalls, selectedMarketId]);
+
+  // 3. Lấy danh sách Phân khu thực tế tương ứng
+  const activeZones = useMemo(() => {
+    if (zones && zones.length > 0) {
+      if (selectedMarketId && selectedMarketId !== 'all') {
+        const marketZones = zones.filter((z: any) => z.marketId === selectedMarketId);
+        if (marketZones.length > 0) return marketZones;
+      } else {
+        return zones;
+      }
+    }
+    // Dynamic fallback: trích xuất các phân khu duy nhất từ danh sách sạp
+    const list: any[] = [];
+    const seen = new Set<string>();
+    activeStalls.forEach((s: any) => {
+      const z = s.zones;
+      if (z && z.id && !seen.has(z.id)) {
+        seen.add(z.id);
+        list.push({
+          id: z.id,
+          code: z.code || 'ZONE',
+          name: z.name || 'Phân khu',
+          description: z.description || z.name
+        });
+      }
+    });
+    if (list.length > 0) return list;
+    return (!selectedMarketId || selectedMarketId === 'all') ? CLIENT_ZONES : [];
+  }, [zones, selectedMarketId, activeStalls]);
+
+  // 4. Lấy danh sách Khiếu nại thực tế tương ứng
+  const activeComplaintsList = useMemo(() => {
+    const source = (complaints && complaints.length > 0) ? complaints : CLIENT_COMPLAINTS;
+    if (!selectedMarketId || selectedMarketId === 'all') return source;
+    return source.filter((c: any) => c.marketId === selectedMarketId);
+  }, [complaints, selectedMarketId]);
+
+  // Trạng thái giải quyết/đóng phản ánh bền vững (Persistent Resolved Complaints State)
+  const [internalResolvedCodes, setInternalResolvedCodes] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return JSON.parse(localStorage.getItem('smartmarket_resolved_complaints') || '[]');
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  const allResolvedCodes = useMemo(() => {
+    return Array.from(
+      new Set([
+        'PAKN-2026-108',
+        'cp-13',
+        'c13',
+        ...resolvedComplaintCodes,
+        ...internalResolvedCodes
+      ])
+    );
+  }, [resolvedComplaintCodes, internalResolvedCodes]);
+
+  const isComplaintResolved = (codeOrId?: string) => {
+    if (!codeOrId) return false;
+    return allResolvedCodes.includes(codeOrId);
+  };
+
+  const handleResolveComplaint = (codeOrId: string) => {
+    setInternalResolvedCodes((prev) => {
+      if (prev.includes(codeOrId)) return prev;
+      const next = [...prev, codeOrId];
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('smartmarket_resolved_complaints', JSON.stringify(next));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      return next;
+    });
+    if (onResolveComplaint) {
+      onResolveComplaint(codeOrId);
+    }
+  };
+
+  // 5. Cấu trúc nhóm phản ánh PAKN động theo dữ liệu Backend
+  const dynamicComplaintGroups = useMemo(() => {
+    if (complaints && complaints.length > 0) {
+      const p0Items = activeComplaintsList.filter((c: any) => c.severityLevel === 'P0' || c.type === 'product_quality' || c.type === 'food_safety' || c.type === 'weighing_fraud');
+      const p1Items = activeComplaintsList.filter((c: any) => c.severityLevel === 'P1' || c.type === 'service_attitude' || c.type === 'price_issue' || c.type === 'order_issue');
+      const p2Items = activeComplaintsList.filter((c: any) => c.severityLevel === 'P2' || c.type === 'infrastructure' || c.type === 'other');
+
+      const mapToItem = (c: any): ComplaintItem => ({
+        id: c.id,
+        code: c.code || `PAKN-${(c.id || '').slice(0, 6).toUpperCase()}`,
+        stallId: c.stalls?.code || c.stallId || 'Chung',
+        stallName: c.stalls?.name || 'Khu vực chung',
+        merchantName: c.reporter?.fullName || 'Khách phản ánh',
+        phone: c.reporter?.phone || '0908 999 ***',
+        zone: c.zones?.name || c.zone || 'Khu vực chợ',
+        title: c.title || c.content?.slice(0, 50) || 'Phản ánh chất lượng',
+        description: c.content || '',
+        severity: (c.severityLevel === 'P0' ? 'Khẩn cấp' : c.severityLevel === 'P1' ? 'Trật tự' : 'Cơ sở hạ tầng') as any,
+        severityLevel: (c.severityLevel || 'P1') as any,
+        reporter: c.reporter?.fullName || 'Người tiêu dùng',
+        time: c.createdAt ? new Date(c.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'Hôm nay',
+        coordinator: {
+          name: 'Ban Quản Lý Chợ',
+          role: 'Tổ cơ động',
+          phone: '0904.777.999'
+        }
+      });
+
+      return [
+        {
+          id: 'food_safety_fraud',
+          title: 'Gian Lận & An Toàn Thực Phẩm',
+          subtitle: 'Mức khẩn cấp (SLA < 15 phút)',
+          icon: Flame,
+          badgeColor: 'bg-rose-50 text-rose-700 border-rose-200',
+          priorityTag: 'Khẩn cấp',
+          count: p0Items.length,
+          items: p0Items.map(mapToItem)
+        },
+        {
+          id: 'order_space',
+          title: 'Trật Tự & Lấn Chiếm Lối Đi',
+          subtitle: 'Mức trật tự (SLA < 30 phút)',
+          icon: ShieldAlert,
+          badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
+          priorityTag: 'Trật tự',
+          count: p1Items.length,
+          items: p1Items.map(mapToItem)
+        },
+        {
+          id: 'sanitation_infra',
+          title: 'Vệ Sinh & Cơ Sở Hạ Tầng',
+          subtitle: 'Mức hạ tầng (SLA < 2 giờ)',
+          icon: Wrench,
+          badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
+          priorityTag: 'Hạ tầng',
+          count: p2Items.length,
+          items: p2Items.map(mapToItem)
+        }
+      ];
+    }
+    return COMPLAINT_GROUPS;
+  }, [complaints, activeComplaintsList]);
+
+  const activeComplaintCount = useMemo(() => {
+    return dynamicComplaintGroups.reduce((acc, group) => {
+      return acc + group.items.filter((item: any) => !isComplaintResolved(item.code) && !isComplaintResolved(item.id)).length;
+    }, 0);
+  }, [dynamicComplaintGroups, allResolvedCodes]);
+
+  const resolvedCount = useMemo(() => {
+    return dynamicComplaintGroups.reduce((acc, group) => {
+      return acc + group.items.filter((item: any) => isComplaintResolved(item.code) || isComplaintResolved(item.id)).length;
+    }, 0);
+  }, [dynamicComplaintGroups, allResolvedCodes]);
+
+  const criticalComplaintCount = useMemo(() => {
+    const p0Group = dynamicComplaintGroups.find((g) => g.id === 'food_safety_fraud');
+    if (!p0Group) return 0;
+    return p0Group.items.filter((i: any) => !isComplaintResolved(i.code) && !isComplaintResolved(i.id)).length;
+  }, [dynamicComplaintGroups, allResolvedCodes]);
+
+  const infrastructureComplaintCount = useMemo(() => {
+    const p2Group = dynamicComplaintGroups.find((g) => g.id === 'sanitation_infra');
+    if (!p2Group) return 0;
+    return p2Group.items.filter((i: any) => !isComplaintResolved(i.code) && !isComplaintResolved(i.id)).length;
+  }, [dynamicComplaintGroups, allResolvedCodes]);
+
+  const orderComplaintCount = useMemo(() => {
+    const p1Group = dynamicComplaintGroups.find((g) => g.id === 'order_space');
+    if (!p1Group) return 0;
+    return p1Group.items.filter((i: any) => !isComplaintResolved(i.code) && !isComplaintResolved(i.id)).length;
+  }, [dynamicComplaintGroups, allResolvedCodes]);
+
+  // Bộ lọc hiển thị vụ việc đã đóng (Mặc định: ẩn để chỉ tập trung vào vụ việc còn tồn đọng)
+  const [showResolvedComplaints, setShowResolvedComplaints] = useState<boolean>(false);
   // Tab lọc dữ liệu tại chỗ (STT 2)
   const [activeKpiTab, setActiveKpiTab] = useState<'stalls' | 'traders' | 'complaints' | 'billing'>('stalls');
   const [ratingRange, setRatingRange] = useState<'7days' | '30days'>('7days');
@@ -532,7 +702,7 @@ export default function LiveDashboardOverview({
   // Pop-up Modal mở nhanh sơ đồ chợ (STT 3)
   const [quickMapStall, setQuickMapStall] = useState<{ code: string; name: string; issue?: string } | null>(null);
 
-  // Modal Chi Tiết Sự Cố & Lệnh Điều Phối Tức Thì (Yêu cầu mới)
+  // Modal Chi Tiết Sự Cố & Lệnh Điều Phối Tức Thì
   const [selectedComplaint, setSelectedComplaint] = useState<ComplaintItem | null>(null);
   const [dispatchSuccessMsg, setDispatchSuccessMsg] = useState<string | null>(null);
 
@@ -542,6 +712,175 @@ export default function LiveDashboardOverview({
     ...dispatchedStalls,
     ...localDispatches
   }), [dispatchedStalls, localDispatches]);
+
+  // Bộ lọc & phân trang tương tác tab Sạp hàng
+  const [selectedZoneId, setSelectedZoneId] = useState<string>('all');
+  const [stallStatusFilter, setStallStatusFilter] = useState<'all' | 'complaint' | 'expiring' | 'occupied' | 'vacant' | 'maintenance'>('all');
+  const [stallSearchQuery, setStallSearchQuery] = useState<string>('');
+  const [stallPage, setStallPage] = useState<number>(1);
+  const STALLS_PER_PAGE = 8;
+
+  // 6. Danh sách Tiểu thương đồng bộ từ sạp thực tế
+  const activeTraders = useMemo(() => {
+    const list: any[] = [];
+    const seen = new Set<string>();
+    activeStalls.forEach((s: any) => {
+      const m = s.currentContract?.merchant;
+      if (m && !seen.has(m.id || m.fullName)) {
+        seen.add(m.id || m.fullName);
+        const contractDays = s.currentContract?.daysLeft ?? 180;
+        list.push({
+          id: m.id || `tr-${list.length + 1}`,
+          name: m.fullName,
+          stall: s.code || 'Sạp',
+          category: s.categories?.name || 'Nông sản',
+          phone: m.phone ? m.phone.slice(0, 7) + ' ***' : '0908 999 ***',
+          contractDays,
+          status: contractDays <= 30 ? `Sắp hết hạn (${contractDays} ngày)` : 'Hoàn tất hồ sơ'
+        });
+      }
+    });
+    return list.length > 0 ? list : SAMPLE_TRADERS;
+  }, [activeStalls]);
+
+  const traderCount = useMemo(() => {
+    if (currentMarket?.traderCount) return currentMarket.traderCount;
+    return activeTraders.length || 15;
+  }, [currentMarket, activeTraders]);
+
+  // Bộ lọc & phân trang tương tác tab Tiểu thương
+  const [traderSearchQuery, setTraderSearchQuery] = useState<string>('');
+  const [traderPage, setTraderPage] = useState<number>(1);
+  const TRADERS_PER_PAGE = 8;
+
+  const filteredTraders = useMemo(() => {
+    if (!traderSearchQuery.trim()) return activeTraders;
+    const q = traderSearchQuery.trim().toLowerCase();
+    return activeTraders.filter(
+      (t) =>
+        t.name.toLowerCase().includes(q) ||
+        t.stall.toLowerCase().includes(q) ||
+        t.category.toLowerCase().includes(q) ||
+        t.phone.toLowerCase().includes(q)
+    );
+  }, [traderSearchQuery, activeTraders]);
+
+  const totalTraderPages = Math.max(1, Math.ceil(filteredTraders.length / TRADERS_PER_PAGE));
+  const paginatedTraders = useMemo(() => {
+    const start = (traderPage - 1) * TRADERS_PER_PAGE;
+    return filteredTraders.slice(start, start + TRADERS_PER_PAGE);
+  }, [filteredTraders, traderPage]);
+
+  // 7. Thống kê nhanh theo từng phân khu thực tế
+  const zoneStats = useMemo(() => {
+    return activeZones.map((zone: any) => {
+      const stallsInZone = activeStalls.filter((s: any) => s.zoneId === zone.id || s.zones?.id === zone.id || s.zones?.code === zone.code);
+      const occupied = stallsInZone.filter((s: any) => s.status === 'occupied').length;
+      const complaintCount = stallsInZone.filter((s: any) => s.displayStatus === 'has_complaint' || (s.openComplaintCount && s.openComplaintCount > 0)).length;
+      return {
+        ...zone,
+        total: stallsInZone.length || zone.stallCount || 0,
+        occupied: occupied || zone.occupiedCount || 0,
+        complaintCount
+      };
+    });
+  }, [activeZones, activeStalls]);
+
+  // 8. Đếm số lượng sạp theo từng trạng thái thực tế
+  const stallCounts = useMemo(() => {
+    let complaint = 0;
+    let expiring = 0;
+    let occupied = 0;
+    let vacant = 0;
+    let maintenance = 0;
+
+    activeStalls.forEach((s: any) => {
+      if (s.displayStatus === 'has_complaint' || (s.openComplaintCount && s.openComplaintCount > 0)) {
+        complaint++;
+      }
+      if (s.displayStatus === 'expiring_soon' || (s.currentContract && s.currentContract.daysLeft != null && s.currentContract.daysLeft <= 30)) {
+        expiring++;
+      }
+      if (s.status === 'occupied') {
+        occupied++;
+      } else if (s.status === 'vacant') {
+        vacant++;
+      } else if (s.status === 'maintenance' || s.status === 'reserved') {
+        maintenance++;
+      }
+    });
+
+    return {
+      all: activeStalls.length,
+      complaint,
+      expiring,
+      occupied,
+      vacant,
+      maintenance
+    };
+  }, [activeStalls]);
+
+  // 9. Danh sách sạp sau khi lọc theo Phân khu, Trạng thái và Từ khóa tìm kiếm
+  const filteredStalls = useMemo(() => {
+    return activeStalls.filter((s: any) => {
+      // 1. Lọc theo phân khu
+      if (selectedZoneId !== 'all') {
+        const matchZone = s.zoneId === selectedZoneId || s.zones?.id === selectedZoneId || s.zones?.code === selectedZoneId;
+        if (!matchZone) return false;
+      }
+
+      // 2. Lọc theo trạng thái
+      if (stallStatusFilter === 'complaint') {
+        if (s.displayStatus !== 'has_complaint' && (!s.openComplaintCount || s.openComplaintCount === 0)) return false;
+      } else if (stallStatusFilter === 'expiring') {
+        if (s.displayStatus !== 'expiring_soon' && (!s.currentContract || s.currentContract.daysLeft == null || s.currentContract.daysLeft > 30)) return false;
+      } else if (stallStatusFilter === 'occupied') {
+        if (s.status !== 'occupied') return false;
+      } else if (stallStatusFilter === 'vacant') {
+        if (s.status !== 'vacant') return false;
+      } else if (stallStatusFilter === 'maintenance') {
+        if (s.status !== 'maintenance' && s.status !== 'reserved') return false;
+      }
+
+      // 3. Lọc theo từ khóa tìm kiếm
+      if (stallSearchQuery.trim()) {
+        const q = stallSearchQuery.trim().toLowerCase();
+        const matchCode = (s.code || '').toLowerCase().includes(q);
+        const matchName = (s.name || '').toLowerCase().includes(q);
+        const matchZone = (s.zones?.name || '').toLowerCase().includes(q);
+        const matchCategory = (s.categories?.name || '').toLowerCase().includes(q);
+        const matchMerchant = (s.currentContract?.merchant?.fullName || '').toLowerCase().includes(q);
+        if (!matchCode && !matchName && !matchZone && !matchCategory && !matchMerchant) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [activeStalls, selectedZoneId, stallStatusFilter, stallSearchQuery]);
+
+  // Phân trang
+  const totalStallPages = Math.max(1, Math.ceil(filteredStalls.length / STALLS_PER_PAGE));
+  const paginatedStalls = useMemo(() => {
+    const startIndex = (stallPage - 1) * STALLS_PER_PAGE;
+    return filteredStalls.slice(startIndex, startIndex + STALLS_PER_PAGE);
+  }, [filteredStalls, stallPage, STALLS_PER_PAGE]);
+
+  // Reset trang khi thay đổi bộ lọc
+  const handleZoneSelect = (zoneId: string) => {
+    setSelectedZoneId(zoneId);
+    setStallPage(1);
+  };
+
+  const handleStatusSelect = (status: typeof stallStatusFilter) => {
+    setStallStatusFilter(status);
+    setStallPage(1);
+  };
+
+  const handleSearchChange = (query: string) => {
+    setStallSearchQuery(query);
+    setStallPage(1);
+  };
 
   // Đóng modal bằng Escape
   useEffect(() => {
@@ -579,7 +918,7 @@ export default function LiveDashboardOverview({
               Khung Nhắc Việc Tác Chiến & Điểm Nóng Cần Xử Lý
             </h2>
             <div className="text-[11px] text-[#B9F4CA]/90 font-bold mt-0.5">
-              Tổng Quan Vận Hành — Chợ Đồng Xuân (Demo Live)
+              Tổng Quan Vận Hành — {marketTitle}
             </div>
           </div>
 
@@ -612,10 +951,10 @@ export default function LiveDashboardOverview({
           >
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
-                3
+                {criticalComplaintCount}
               </div>
               <div>
-                <div className="text-xs font-extrabold text-white">3 Phản ánh khẩn cấp</div>
+                <div className="text-xs font-extrabold text-white">{criticalComplaintCount} Phản ánh khẩn cấp</div>
                 <div className="text-[10px] text-white/80">Gian lận & ATTP cần xử lý ngay</div>
               </div>
             </div>
@@ -632,10 +971,10 @@ export default function LiveDashboardOverview({
           >
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
-                8
+                {infrastructureComplaintCount}
               </div>
               <div>
-                <div className="text-xs font-extrabold text-white">8 Vấn đề hạ tầng & 4 Trật tự</div>
+                <div className="text-xs font-extrabold text-white">{infrastructureComplaintCount} Vấn đề hạ tầng & {orderComplaintCount} Trật tự</div>
                 <div className="text-[10px] text-white/80">Bảo trì & Trật tự trong ca</div>
               </div>
             </div>
@@ -712,7 +1051,7 @@ export default function LiveDashboardOverview({
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-xl sm:text-2xl lg:text-[26px] font-black text-[#172F55] leading-none tracking-tight font-mono">
-                24 / 50
+                {stallCounts.occupied} / {stallCounts.all}
               </div>
               <div className="text-xs sm:text-[13px] font-bold text-[#637B9C] mt-1 flex items-center justify-between">
                 <span>Sạp hàng</span>
@@ -723,7 +1062,7 @@ export default function LiveDashboardOverview({
                 )}
               </div>
               <div className="text-[10px] sm:text-[11px] font-extrabold text-[#12934D] mt-0.5">
-                ↑ 48% đang thuê (21 trống)
+                ↑ {Math.round((stallCounts.occupied / stallCounts.all) * 100)}% đang thuê ({stallCounts.vacant} trống)
               </div>
             </div>
           </div>
@@ -749,7 +1088,7 @@ export default function LiveDashboardOverview({
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-xl sm:text-2xl lg:text-[26px] font-black text-[#172F55] leading-none tracking-tight font-mono">
-                19
+                {traderCount}
               </div>
               <div className="text-xs sm:text-[13px] font-bold text-[#637B9C] mt-1 flex items-center justify-between">
                 <span>Tiểu thương</span>
@@ -760,9 +1099,9 @@ export default function LiveDashboardOverview({
                 )}
               </div>
               <div className="text-[10px] sm:text-[11px] font-extrabold text-[#1974C8] mt-0.5 flex items-center gap-1.5 flex-wrap">
-                <span>19 đang kinh doanh</span>
+                <span>{traderCount} đang kinh doanh</span>
                 <span className="text-[#B45309] font-black bg-[#FEF3C7] px-1.5 py-0.2 rounded border border-[#FCD34D]/60 text-[10px]">
-                  7 chờ duyệt
+                  {currentMarket?.vacantStallCount || stallCounts.vacant || 0} sạp trống
                 </span>
               </div>
             </div>
@@ -789,7 +1128,7 @@ export default function LiveDashboardOverview({
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-xl sm:text-2xl lg:text-[26px] font-black text-[#D3484D] leading-none tracking-tight font-mono">
-                15
+                {activeComplaintCount}
               </div>
               <div className="text-xs sm:text-[13px] font-bold text-[#637B9C] mt-1 flex items-center justify-between">
                 <span>Phản ánh PAKN</span>
@@ -800,7 +1139,7 @@ export default function LiveDashboardOverview({
                 )}
               </div>
               <div className="text-[10px] sm:text-[11px] font-extrabold text-[#D3484D] mt-0.5">
-                3 vụ khẩn cấp • 8 hạ tầng
+                {criticalComplaintCount} vụ khẩn cấp • {infrastructureComplaintCount} hạ tầng
               </div>
             </div>
           </div>
@@ -855,10 +1194,10 @@ export default function LiveDashboardOverview({
               <div>
                 <h3 className="text-base font-black text-[#172F55] flex items-center gap-2">
                   <Store className="w-5 h-5 text-[#0B7A3A]" />
-                  <span>Quy Mô Sạp Hàng — 50 Sạp Chợ Đồng Xuân</span>
+                  <span>Quy Mô Sạp Hàng — {stallCounts.all} Sạp ({marketTitle})</span>
                 </h3>
                 <p className="text-xs text-[#7185A1] mt-0.5">
-                  Phân bố 5 phân khu chức năng: 24 sạp đang thuê • 21 sạp trống • 5 sạp giữ chỗ
+                  Phân bố {zoneStats.length} phân khu chức năng: {stallCounts.occupied} sạp đang thuê • {stallCounts.vacant} sạp trống • {stallCounts.maintenance} sạp bảo trì/giữ chỗ
                 </p>
               </div>
               <button
@@ -875,56 +1214,172 @@ export default function LiveDashboardOverview({
             <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 p-4 rounded-xl bg-[#F8FAFC] border border-[#DCE8F1]">
               <DonutChartSvg
                 data={[
-                  { name: 'Đang thuê', value: 24, color: '#0B7A3A' },
-                  { name: 'Trống', value: 21, color: '#94A3B8' },
-                  { name: 'Bảo trì / Giữ chỗ', value: 5, color: '#F59E0B' },
+                  { name: 'Đang thuê', value: stallCounts.occupied, color: '#0B7A3A' },
+                  { name: 'Trống', value: stallCounts.vacant, color: '#94A3B8' },
+                  { name: 'Bảo trì / Giữ chỗ', value: stallCounts.maintenance, color: '#F59E0B' },
                 ]}
-                centerValue="50"
+                centerValue={String(stallCounts.all)}
                 centerLabel="Tổng sạp"
                 size={140}
               />
               <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full">
-                <DetailStatCard label="Đã thuê" value="24 sạp" toneClass="text-[#0B7A3A]" badge="48%" />
-                <DetailStatCard label="Còn trống" value="21 sạp" toneClass="text-[#64748B]" badge="42%" />
-                <DetailStatCard label="Bảo trì / Giữ chỗ" value="5 sạp" toneClass="text-[#D97706]" badge="10%" />
+                <DetailStatCard label="Đã thuê" value={`${stallCounts.occupied} sạp`} toneClass="text-[#0B7A3A]" badge={`${Math.round((stallCounts.occupied / (stallCounts.all || 1)) * 100)}%`} />
+                <DetailStatCard label="Còn trống" value={`${stallCounts.vacant} sạp`} toneClass="text-[#64748B]" badge={`${Math.round((stallCounts.vacant / (stallCounts.all || 1)) * 100)}%`} />
+                <DetailStatCard label="Bảo trì / Giữ chỗ" value={`${stallCounts.maintenance} sạp`} toneClass="text-[#D97706]" badge={`${Math.round((stallCounts.maintenance / (stallCounts.all || 1)) * 100)}%`} />
                 <DetailStatCard label="Biến động tháng" value="↑ +8%" toneClass="text-[#059669]" badge="Tháng này" />
               </div>
             </div>
 
-            {/* Bảng phân khu tóm tắt */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs font-semibold">
-              <div className="p-2.5 rounded-lg bg-[#F5FAF8] border border-[#DCE8F1]">
-                <div className="text-[10px] text-[#7185A1]">Khu A (Rau củ)</div>
-                <div className="text-base font-black text-[#172F55] font-mono mt-0.5">10 sạp</div>
-                <div className="text-[10px] text-emerald-600 font-bold">8 đang thuê</div>
+            {/* Phân khu tác chiến & Lọc tương tác */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-bold text-[#7185A1] uppercase tracking-wider flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-[#0B7A3A]" />
+                  <span>Phân khu tác chiến ({zoneStats.length} khu) — Nhấp để lọc theo khu</span>
+                </div>
+                {selectedZoneId !== 'all' && (
+                  <button
+                    type="button"
+                    onClick={() => handleZoneSelect('all')}
+                    className="text-xs font-bold text-[#0B7A3A] hover:underline cursor-pointer"
+                  >
+                    Xem tất cả {zoneStats.length} phân khu
+                  </button>
+                )}
               </div>
-              <div className="p-2.5 rounded-lg bg-[#F5FAF8] border border-[#DCE8F1]">
-                <div className="text-[10px] text-[#7185A1]">TP Tươi Sống 1</div>
-                <div className="text-base font-black text-[#172F55] font-mono mt-0.5">10 sạp</div>
-                <div className="text-[10px] text-emerald-600 font-bold">6 đang thuê</div>
-              </div>
-              <div className="p-2.5 rounded-lg bg-[#F5FAF8] border border-[#DCE8F1]">
-                <div className="text-[10px] text-[#7185A1]">Nông Sản Chọn Lọc 2</div>
-                <div className="text-base font-black text-[#172F55] font-mono mt-0.5">10 sạp</div>
-                <div className="text-[10px] text-emerald-600 font-bold">5 đang thuê</div>
-              </div>
-              <div className="p-2.5 rounded-lg bg-[#F5FAF8] border border-[#DCE8F1]">
-                <div className="text-[10px] text-[#7185A1]">Đặc Sản Địa Phương 3</div>
-                <div className="text-base font-black text-[#172F55] font-mono mt-0.5">10 sạp</div>
-                <div className="text-[10px] text-emerald-600 font-bold">3 đang thuê</div>
-              </div>
-              <div className="p-2.5 rounded-lg bg-[#F5FAF8] border border-[#DCE8F1] col-span-2 sm:col-span-1">
-                <div className="text-[10px] text-[#7185A1]">Hàng Thiết Yếu 4</div>
-                <div className="text-base font-black text-[#172F55] font-mono mt-0.5">10 sạp</div>
-                <div className="text-[10px] text-emerald-600 font-bold">2 đang thuê</div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 text-xs font-semibold">
+                {zoneStats.map((z) => {
+                  const isSelected = selectedZoneId === z.id;
+                  return (
+                    <button
+                      key={z.id}
+                      type="button"
+                      onClick={() => handleZoneSelect(isSelected ? 'all' : z.id)}
+                      className={`p-2.5 rounded-lg text-left transition-all cursor-pointer border ${
+                        isSelected
+                          ? 'bg-[#E8F8EF] border-[#0B7A3A] ring-2 ring-[#0B7A3A]/20 shadow-xs'
+                          : 'bg-[#F5FAF8] border-[#DCE8F1] hover:bg-white hover:border-[#0B7A3A]/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className={`text-[10px] truncate ${isSelected ? 'text-[#0B7A3A] font-bold' : 'text-[#7185A1]'}`}>
+                          {z.name.split('·')[0].trim()}
+                        </div>
+                        {z.complaintCount > 0 && (
+                          <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-black bg-rose-500 text-white rounded-full">
+                            {z.complaintCount} sự cố
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-base font-black text-[#172F55] font-mono mt-0.5">{z.total} sạp</div>
+                      <div className="text-[10px] text-emerald-600 font-bold">{z.occupied} đang thuê</div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Bảng danh sách sạp tiêu biểu */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            {/* Thanh công cụ: Lọc Exception-First & Tìm kiếm thông minh */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+              {/* Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs">
+                <button
+                  type="button"
+                  onClick={() => handleStatusSelect('all')}
+                  className={`px-3 py-1.5 rounded-lg font-bold text-xs whitespace-nowrap transition-colors cursor-pointer ${
+                    stallStatusFilter === 'all'
+                      ? 'bg-[#172F55] text-white shadow-xs'
+                      : 'bg-[#F0F5FA] text-[#7185A1] hover:bg-[#E1EAF4] hover:text-[#172F55]'
+                  }`}
+                >
+                  Tất cả ({stallCounts.all})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStatusSelect('complaint')}
+                  className={`px-3 py-1.5 rounded-lg font-bold text-xs whitespace-nowrap transition-colors flex items-center gap-1 cursor-pointer ${
+                    stallStatusFilter === 'complaint'
+                      ? 'bg-rose-600 text-white shadow-xs'
+                      : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/60'
+                  }`}
+                >
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>Sự cố khẩn cấp ({stallCounts.complaint})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStatusSelect('expiring')}
+                  className={`px-3 py-1.5 rounded-lg font-bold text-xs whitespace-nowrap transition-colors flex items-center gap-1 cursor-pointer ${
+                    stallStatusFilter === 'expiring'
+                      ? 'bg-amber-500 text-white shadow-xs'
+                      : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/60'
+                  }`}
+                >
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Sắp hết hạn HĐ ({stallCounts.expiring})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStatusSelect('occupied')}
+                  className={`px-3 py-1.5 rounded-lg font-bold text-xs whitespace-nowrap transition-colors cursor-pointer ${
+                    stallStatusFilter === 'occupied'
+                      ? 'bg-[#0B7A3A] text-white shadow-xs'
+                      : 'bg-[#F0F5FA] text-[#7185A1] hover:bg-[#E1EAF4] hover:text-[#172F55]'
+                  }`}
+                >
+                  Đang thuê ({stallCounts.occupied})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStatusSelect('vacant')}
+                  className={`px-3 py-1.5 rounded-lg font-bold text-xs whitespace-nowrap transition-colors cursor-pointer ${
+                    stallStatusFilter === 'vacant'
+                      ? 'bg-slate-700 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  Trống ({stallCounts.vacant})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStatusSelect('maintenance')}
+                  className={`px-3 py-1.5 rounded-lg font-bold text-xs whitespace-nowrap transition-colors cursor-pointer ${
+                    stallStatusFilter === 'maintenance'
+                      ? 'bg-amber-600 text-white shadow-xs'
+                      : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/60'
+                  }`}
+                >
+                  Bảo trì / Giữ chỗ ({stallCounts.maintenance})
+                </button>
+              </div>
+
+              {/* Ô tìm kiếm */}
+              <div className="relative min-w-[240px]">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#7185A1]" />
+                <input
+                  type="text"
+                  value={stallSearchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  placeholder="Tìm mã sạp, tên sạp, tiểu thương..."
+                  className="w-full pl-8 pr-7 py-1.5 text-xs bg-white border border-[#DCE8F1] rounded-lg focus:outline-none focus:border-[#0B7A3A] focus:ring-1 focus:ring-[#0B7A3A] text-[#172F55] placeholder-[#7185A1]"
+                />
+                {stallSearchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => handleSearchChange('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[#7185A1] hover:text-[#172F55]"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Bảng danh sách 50 sạp đồng bộ thực tế kèm phân trang */}
+            <div className="overflow-x-auto rounded-lg border border-[#DCE8F1]">
+              <table className="w-full text-left text-xs border-collapse bg-white">
                 <thead>
-                  <tr className="border-b border-[#DCE8F1] text-[#7185A1] font-bold">
+                  <tr className="border-b border-[#DCE8F1] bg-[#F8FAFC] text-[#7185A1] font-bold">
                     <th className="py-2.5 px-3">Mã sạp</th>
                     <th className="py-2.5 px-3">Tên sạp & Ngành hàng</th>
                     <th className="py-2.5 px-3">Phân khu</th>
@@ -934,40 +1389,149 @@ export default function LiveDashboardOverview({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#DCE8F1]/60">
-                  {SAMPLE_STALLS.map((s) => (
-                    <tr key={s.code} className="hover:bg-[#F5FAF8] transition-colors">
-                      <td className="py-2.5 px-3 font-mono font-black text-[#172F55]">{s.code}</td>
-                      <td className="py-2.5 px-3 font-bold text-[#172F55]">{s.name}</td>
-                      <td className="py-2.5 px-3 text-[#7185A1]">{s.zone}</td>
-                      <td className="py-2.5 px-3 text-[#172F55]">{s.merchant}</td>
-                      <td className="py-2.5 px-3">
-                        {s.status === 'complaint' ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200">
-                            <AlertCircle className="w-3 h-3" /> Sự cố khẩn cấp
+                  {paginatedStalls.map((s) => {
+                    const isComplaint = s.displayStatus === 'has_complaint' || (s.openComplaintCount && s.openComplaintCount > 0);
+                    const isExpiring = s.displayStatus === 'expiring_soon' || (s.currentContract && s.currentContract.daysLeft != null && s.currentContract.daysLeft <= 30);
+                    const isVacant = s.status === 'vacant';
+                    const isMaintenance = s.status === 'maintenance';
+                    const isReserved = s.status === 'reserved';
+                    const merchantName = s.currentContract?.merchant?.fullName || (isVacant ? 'Chưa tiếp quản' : isMaintenance ? 'Đang bảo trì' : isReserved ? 'Đã giữ chỗ' : '—');
+                    const phone = s.currentContract?.merchant?.phone || s.phone;
+
+                    return (
+                      <tr key={s.id} className="hover:bg-[#F5FAF8] transition-colors">
+                        <td className="py-2.5 px-3 font-mono font-black text-[#172F55]">
+                          <span className="px-2 py-0.5 rounded bg-[#F0F5FA] border border-[#DCE8F1]">{s.code}</span>
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <div className="font-bold text-[#172F55] leading-tight">{s.name || s.code}</div>
+                          <div className="text-[11px] text-[#7185A1] mt-0.5 truncate max-w-xs">{s.categories?.name || s.description || '—'}</div>
+                        </td>
+                        <td className="py-2.5 px-3 text-[#7185A1]">
+                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold bg-[#F5FAF8] border border-[#DCE8F1]">
+                            {s.zones?.name || s.zoneId}
                           </span>
-                        ) : s.status === 'empty' ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-600">
-                            Trống
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700">
-                            Đang hoạt động
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-2.5 px-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() => setQuickMapStall({ code: s.code, name: s.name, issue: s.status === 'complaint' ? 'Sự cố cần kiểm tra' : undefined })}
-                          className="px-2.5 py-1 text-[11px] font-extrabold text-[#0B7A3A] bg-[#E8F8EF] hover:bg-emerald-100 rounded transition-colors cursor-pointer"
-                        >
-                          Xem trên sơ đồ
-                        </button>
+                        </td>
+                        <td className="py-2.5 px-3 text-[#172F55]">
+                          <div className="font-semibold">{merchantName}</div>
+                          {phone && <div className="text-[10px] text-[#7185A1] font-mono">{phone}</div>}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          {isComplaint ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200">
+                              <AlertCircle className="w-3 h-3" /> Sự cố khẩn cấp
+                            </span>
+                          ) : isExpiring ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">
+                              <Clock className="w-3 h-3" /> Hạn HĐ ({s.currentContract?.daysLeft ?? 0} ngày)
+                            </span>
+                          ) : isVacant ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-600">
+                              Trống
+                            </span>
+                          ) : isMaintenance ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-orange-50 text-orange-700 border border-orange-200">
+                              <Wrench className="w-3 h-3" /> Bảo trì
+                            </span>
+                          ) : isReserved ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                              Giữ chỗ
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700">
+                              Đang hoạt động
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => setQuickMapStall({
+                              code: s.code,
+                              name: s.name || s.code,
+                              issue: isComplaint ? 'Sự cố cần kiểm tra thực địa' : undefined
+                            })}
+                            className="px-2.5 py-1 text-[11px] font-extrabold text-[#0B7A3A] bg-[#E8F8EF] hover:bg-emerald-100 rounded transition-colors cursor-pointer"
+                          >
+                            Xem trên sơ đồ
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {paginatedStalls.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-[#7185A1]">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <Store className="w-8 h-8 text-[#A0B2C6]" />
+                          <p className="text-xs font-semibold">Không tìm thấy sạp nào phù hợp với bộ lọc hiện tại.</p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedZoneId('all');
+                              setStallStatusFilter('all');
+                              setStallSearchQuery('');
+                              setStallPage(1);
+                            }}
+                            className="text-xs font-bold text-[#0B7A3A] underline cursor-pointer"
+                          >
+                            Đặt lại bộ lọc
+                          </button>
+                        </div>
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Thanh điều khiển phân trang thông minh */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs">
+              <div className="text-[#7185A1]">
+                Hiển thị <span className="font-bold text-[#172F55]">{filteredStalls.length > 0 ? (stallPage - 1) * STALLS_PER_PAGE + 1 : 0}</span> -{' '}
+                <span className="font-bold text-[#172F55]">{Math.min(stallPage * STALLS_PER_PAGE, filteredStalls.length)}</span> trong tổng số{' '}
+                <span className="font-bold text-[#172F55]">{filteredStalls.length}</span> sạp
+                {selectedZoneId !== 'all' && (
+                  <span className="ml-1 text-[#0B7A3A] font-semibold">
+                    (Khu {activeZones.find((z: any) => z.id === selectedZoneId)?.code.replace('KHU-', '') || ''})
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={stallPage <= 1}
+                  onClick={() => setStallPage(p => Math.max(1, p - 1))}
+                  className="px-2.5 py-1 rounded border border-[#DCE8F1] bg-white font-semibold text-[#172F55] hover:bg-[#F5FAF8] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                >
+                  ← Trước
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalStallPages }, (_, i) => i + 1).map((pageNum) => (
+                    <button
+                      key={pageNum}
+                      type="button"
+                      onClick={() => setStallPage(pageNum)}
+                      className={`w-7 h-7 rounded text-xs font-bold transition-colors cursor-pointer ${
+                        stallPage === pageNum
+                          ? 'bg-[#0B7A3A] text-white shadow-xs'
+                          : 'bg-white border border-[#DCE8F1] text-[#172F55] hover:bg-[#F5FAF8]'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  disabled={stallPage >= totalStallPages}
+                  onClick={() => setStallPage(p => Math.min(totalStallPages, p + 1))}
+                  className="px-2.5 py-1 rounded border border-[#DCE8F1] bg-white font-semibold text-[#172F55] hover:bg-[#F5FAF8] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                >
+                  Sau →
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -979,10 +1543,10 @@ export default function LiveDashboardOverview({
               <div>
                 <h3 className="text-base font-black text-[#172F55] flex items-center gap-2">
                   <Users className="w-5 h-5 text-[#1974C8]" />
-                  <span>Danh Bạ 19 Hộ Tiểu Thương Đang Kinh Doanh</span>
+                  <span>Danh Bạ {traderCount} Hộ Tiểu Thương Đang Kinh Doanh</span>
                 </h3>
                 <p className="text-xs text-[#7185A1] mt-0.5">
-                  19 hộ hiện hữu đã ký hợp đồng thuê sạp • Có 7 hồ sơ mới đang chờ BQL phê duyệt
+                  {traderCount} hộ hiện hữu đã ký hợp đồng thuê sạp • Có {currentMarket?.vacantStallCount || stallCounts.vacant || 0} sạp còn trống
                 </p>
               </div>
               {onNavigateToProfiles && (
@@ -1001,15 +1565,15 @@ export default function LiveDashboardOverview({
             <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 p-4 rounded-xl bg-[#F8FAFC] border border-[#DCE8F1]">
               <DonutChartSvg
                 data={[
-                  { name: 'Cố định (có sạp)', value: 19, color: '#1F78C7' },
+                  { name: 'Cố định (có sạp)', value: traderCount, color: '#1F78C7' },
                   { name: 'Chờ duyệt hồ sơ', value: 7, color: '#F59E0B' },
                 ]}
-                centerValue="19"
+                centerValue={String(traderCount)}
                 centerLabel="Tiểu thương"
                 size={140}
               />
               <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full">
-                <DetailStatCard label="Cố định (có sạp)" value="19 hộ" toneClass="text-[#1F78C7]" badge="Kinh doanh" />
+                <DetailStatCard label="Cố định (có sạp)" value={`${traderCount} hộ`} toneClass="text-[#1F78C7]" badge="Kinh doanh" />
                 <DetailStatCard label="Vãng lai" value="0 hộ" toneClass="text-[#64748B]" badge="Ổn định" />
                 <DetailStatCard label="Hồ sơ chờ duyệt" value="7 hồ sơ" toneClass="text-[#D97706]" badge="2 quá hạn" />
                 <DetailStatCard label="Đã xác minh" value="100%" toneClass="text-[#059669]" badge="Đạt chuẩn" />
@@ -1042,6 +1606,40 @@ export default function LiveDashboardOverview({
               )}
             </div>
 
+            {/* Thanh tìm kiếm & thống kê tiểu thương */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+              <div className="text-xs text-[#7185A1] font-semibold">
+                Hiển thị <span className="font-bold text-[#172F55]">{filteredTraders.length > 0 ? (traderPage - 1) * TRADERS_PER_PAGE + 1 : 0}</span> -{' '}
+                <span className="font-bold text-[#172F55]">{Math.min(traderPage * TRADERS_PER_PAGE, filteredTraders.length)}</span> trong tổng số{' '}
+                <span className="font-bold text-[#172F55]">{filteredTraders.length}</span> hộ tiểu thương
+              </div>
+              <div className="relative min-w-[240px]">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#7185A1]" />
+                <input
+                  type="text"
+                  value={traderSearchQuery}
+                  onChange={(e) => {
+                    setTraderSearchQuery(e.target.value);
+                    setTraderPage(1);
+                  }}
+                  placeholder="Tìm họ tên, ngành hàng, sạp..."
+                  className="w-full pl-8 pr-7 py-1.5 text-xs bg-white border border-[#DCE8F1] rounded-lg focus:outline-none focus:border-[#1974C8] focus:ring-1 focus:ring-[#1974C8] text-[#172F55] placeholder-[#7185A1]"
+                />
+                {traderSearchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTraderSearchQuery('');
+                      setTraderPage(1);
+                    }}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#7185A1] hover:text-[#172F55] cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
@@ -1055,7 +1653,7 @@ export default function LiveDashboardOverview({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#DCE8F1]/60">
-                  {SAMPLE_TRADERS.map((t) => (
+                  {paginatedTraders.map((t) => (
                     <tr key={t.id} className="hover:bg-[#F5FAF8] transition-colors">
                       <td className="py-2.5 px-3 font-bold text-[#172F55] flex items-center gap-2">
                         <div className="w-7 h-7 rounded-full bg-[#1974C8]/10 text-[#1974C8] flex items-center justify-center font-bold text-xs">
@@ -1078,9 +1676,59 @@ export default function LiveDashboardOverview({
                       </td>
                     </tr>
                   ))}
+                  {paginatedTraders.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-[#7185A1]">
+                        Không tìm thấy tiểu thương nào phù hợp với từ khóa "{traderSearchQuery}"
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
+
+            {/* Thanh điều khiển phân trang tiểu thương */}
+            {totalTraderPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs">
+                <div className="text-[#7185A1]">
+                  Trang <span className="font-bold text-[#172F55]">{traderPage}</span> / {totalTraderPages}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    disabled={traderPage <= 1}
+                    onClick={() => setTraderPage((p) => Math.max(1, p - 1))}
+                    className="px-2.5 py-1 rounded border border-[#DCE8F1] bg-white font-semibold text-[#172F55] hover:bg-[#F5FAF8] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  >
+                    ← Trước
+                  </button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalTraderPages }, (_, i) => i + 1).map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        type="button"
+                        onClick={() => setTraderPage(pageNum)}
+                        className={`w-7 h-7 rounded text-xs font-bold transition-colors cursor-pointer ${
+                          traderPage === pageNum
+                            ? 'bg-[#1974C8] text-white shadow-xs'
+                            : 'bg-white border border-[#DCE8F1] text-[#172F55] hover:bg-[#F5FAF8]'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    disabled={traderPage >= totalTraderPages}
+                    onClick={() => setTraderPage((p) => Math.min(totalTraderPages, p + 1))}
+                    className="px-2.5 py-1 rounded border border-[#DCE8F1] bg-white font-semibold text-[#172F55] hover:bg-[#F5FAF8] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  >
+                    Sau →
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1091,21 +1739,32 @@ export default function LiveDashboardOverview({
               <div>
                 <h3 className="text-base font-black text-[#172F55] flex items-center gap-2">
                   <ShieldAlert className="w-5 h-5 text-[#D3484D]" />
-                  <span>Hệ Thống 15 Sự Cố Phản Ánh PAKN — 3 Cấp Độ Tác Chiến</span>
+                  <span>Hệ Thống {activeComplaintCount} Sự Cố Phản Ánh PAKN — 3 Cấp Độ Tác Chiến</span>
                 </h3>
                 <p className="text-xs text-[#7185A1] mt-0.5">
                   Bấm vào từng sự cố để xem chi tiết đối tượng vi phạm và kết nối gọi trực tiếp cán bộ điều phối hiện trường
                 </p>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setShowResolvedComplaints((v) => !v)}
+                  className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
+                    showResolvedComplaints
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  {showResolvedComplaints ? 'Đang hiện cả vụ đã đóng' : 'Ẩn vụ việc đã xử lý'}
+                </button>
                 <span className="text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
-                  3 Khẩn cấp
+                  {criticalComplaintCount} Khẩn cấp
                 </span>
                 <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
-                  4 Trật tự
+                  {orderComplaintCount} Trật tự
                 </span>
                 <span className="text-xs font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200">
-                  8 Hạ tầng
+                  {infrastructureComplaintCount} Hạ tầng
                 </span>
               </div>
             </div>
@@ -1114,16 +1773,16 @@ export default function LiveDashboardOverview({
             <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 p-4 rounded-xl bg-[#F8FAFC] border border-[#DCE8F1]">
               <DonutChartSvg
                 data={[
-                  { name: 'Chưa xử lý', value: 15, color: '#D3484D' },
-                  { name: 'Đã giải quyết (tuần)', value: 42, color: '#0B7A3A' },
+                  { name: 'Chưa xử lý', value: activeComplaintCount, color: '#D3484D' },
+                  { name: 'Đã giải quyết (tuần)', value: 42 + resolvedCount, color: '#0B7A3A' },
                 ]}
-                centerValue="15"
+                centerValue={String(activeComplaintCount)}
                 centerLabel="PAKN mở"
                 size={140}
               />
               <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full">
-                <DetailStatCard label="Chưa xử lý" value="15 vụ" toneClass="text-[#D3484D]" badge="Trong ca" />
-                <DetailStatCard label="Đã giải quyết" value="42 vụ" toneClass="text-[#0B7A3A]" badge="Tuần này" />
+                <DetailStatCard label="Chưa xử lý" value={`${activeComplaintCount} vụ`} toneClass="text-[#D3484D]" badge="Trong ca" />
+                <DetailStatCard label="Đã giải quyết" value={`${42 + resolvedCount} vụ`} toneClass="text-[#0B7A3A]" badge="Tuần này" />
                 <DetailStatCard label="Sắp đến hạn SLA" value="3 vụ" toneClass="text-[#D97706]" badge="< 15 phút" />
                 <DetailStatCard label="Quá hạn SLA" value="0 vụ" toneClass="text-[#059669]" badge="Đúng chuẩn" />
               </div>
@@ -1131,8 +1790,13 @@ export default function LiveDashboardOverview({
 
             {/* 3 Cột Phân Nhóm Cấp Độ Nghiệp Vụ */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
-              {COMPLAINT_GROUPS.map((group) => {
+              {dynamicComplaintGroups.map((group) => {
                 const IconComp = group.icon;
+                const openItems = group.items.filter(
+                   (i: any) => !isComplaintResolved(i.code) && !isComplaintResolved(i.id)
+                );
+                const displayItems = showResolvedComplaints ? group.items : openItems;
+                const openItemsCount = openItems.length;
                 return (
                   <div key={group.id} className="rounded-2xl border border-[#DCE8F1] bg-[#F8FAFC]/70 p-3.5 space-y-3">
                     <div className="flex items-center justify-between pb-2.5 border-b border-[#DCE8F1]">
@@ -1146,99 +1810,129 @@ export default function LiveDashboardOverview({
                         </div>
                       </div>
                       <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${group.badgeColor}`}>
-                        {group.count} vụ
+                        {openItemsCount} / {group.items.length} vụ
                       </span>
                     </div>
 
                     <div className="space-y-2.5">
-                      {group.items.map((item) => (
-                        <div
-                          key={item.id}
-                          role="button"
-                          tabIndex={0}
-                          aria-label={`Chi tiết sự cố ${item.code} sạp ${item.stallId}`}
-                          onClick={() => {
-                            setSelectedComplaint(item);
-                            setDispatchSuccessMsg(null);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
+                      {displayItems.length === 0 ? (
+                        <div className="p-5 rounded-xl bg-white border border-dashed border-[#CBD5E1] text-center text-slate-500 text-xs font-bold flex flex-col items-center justify-center gap-1.5 py-8">
+                          <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                          <span className="text-slate-700 font-black">Nhóm này đã xử lý xong toàn bộ!</span>
+                          <span className="text-[10px] text-slate-400 font-normal">Không còn sự cố tồn đọng trong ca trực.</span>
+                        </div>
+                      ) : (
+                        displayItems.map((item: any) => {
+                          const isResolved = isComplaintResolved(item.code) || isComplaintResolved(item.id);
+                          return (
+                          <div
+                            key={item.id}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Chi tiết sự cố ${item.code} sạp ${item.stallId}`}
+                            onClick={() => {
                               setSelectedComplaint(item);
                               setDispatchSuccessMsg(null);
-                            }
-                          }}
-                          className="p-3 rounded-xl bg-white border border-[#DCE8F1] shadow-2xs space-y-2 hover:border-[#1974C8] hover:shadow-md transition-all cursor-pointer group"
-                        >
-                          <div className="flex items-center justify-between text-[10px]">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-mono font-black text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">
-                                Sạp {item.stallId}
-                              </span>
-                              <span className="font-mono font-bold text-[#7185A1]">
-                                {item.code}
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                setSelectedComplaint(item);
+                                setDispatchSuccessMsg(null);
+                              }
+                            }}
+                            className={`p-3 rounded-xl border shadow-2xs space-y-2 transition-all cursor-pointer group ${
+                              isResolved
+                                ? 'bg-[#F0FDF4] border-emerald-200 hover:border-emerald-400'
+                                : 'bg-white border-[#DCE8F1] hover:border-[#1974C8] hover:shadow-md'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between text-[10px]">
+                              <div className="flex items-center gap-1.5">
+                                <span className={`font-mono font-black px-1.5 py-0.5 rounded ${
+                                  isResolved ? 'text-emerald-800 bg-emerald-100' : 'text-rose-600 bg-rose-50'
+                                }`}>
+                                  Sạp {item.stallId}
+                                </span>
+                                <span className="font-mono font-bold text-[#7185A1]">
+                                  {item.code}
+                                </span>
+                              </div>
+                              <span
+                                className={`text-[9px] font-black px-1.5 py-0.5 rounded-full border ${
+                                  isResolved
+                                    ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                                    : item.severityLevel === 'P0'
+                                    ? 'bg-rose-100 text-rose-800 border-rose-200'
+                                    : item.severityLevel === 'P1'
+                                    ? 'bg-amber-100 text-amber-800 border-amber-200'
+                                    : 'bg-sky-100 text-sky-800 border-sky-200'
+                                }`}
+                              >
+                                {isResolved ? '✓ Đã giải quyết' : item.severity}
                               </span>
                             </div>
-                            <span
-                              className={`text-[9px] font-black px-1.5 py-0.5 rounded-full border ${
-                                item.severityLevel === 'P0'
-                                  ? 'bg-rose-100 text-rose-800 border-rose-200'
-                                  : item.severityLevel === 'P1'
-                                  ? 'bg-amber-100 text-amber-800 border-amber-200'
-                                  : 'bg-sky-100 text-sky-800 border-sky-200'
-                              }`}
-                            >
-                              {item.severity}
-                            </span>
-                          </div>
 
-                          <p className="text-xs font-bold text-[#172F55] leading-snug group-hover:text-[#1974C8] transition-colors">
-                            {item.title}
-                          </p>
+                            <p className={`text-xs font-bold leading-snug transition-colors ${
+                              isResolved ? 'text-emerald-900' : 'text-[#172F55] group-hover:text-[#1974C8]'
+                            }`}>
+                              {item.title}
+                            </p>
 
-                          <div className="flex items-center justify-between pt-1.5 border-t border-dashed border-[#DCE8F1] text-[10px]">
-                            <span className="text-[#7185A1] truncate max-w-[120px]">
-                              Báo bởi: {item.reporter}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setQuickMapStall({ code: item.stallId, name: item.zone, issue: item.title });
-                                }}
-                                className="font-extrabold text-[#0B7A3A] hover:underline flex items-center gap-0.5 cursor-pointer"
-                              >
-                                <MapPin className="w-3 h-3" />
-                                <span>Sơ đồ</span>
-                              </button>
-                              {(() => {
-                                const dispatchInfo =
-                                  allDispatches[item.stallId] ||
-                                  allDispatches[item.code] ||
-                                  (item.stallId.startsWith('D900-') ? allDispatches[item.stallId.replace('D900-', 'B')] : null) ||
-                                  (item.stallId.startsWith('A-') ? allDispatches[item.stallId.replace('A-', 'A')] : null) ||
-                                  (item.stallId.startsWith('D04-') ? allDispatches[item.stallId.replace('D04-', 'D')] : null);
+                            <div className="flex items-center justify-between pt-1.5 border-t border-dashed border-[#DCE8F1] text-[10px]">
+                              <span className="text-[#7185A1] truncate max-w-[120px]">
+                                Báo bởi: {item.reporter}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setQuickMapStall({ code: item.stallId, name: item.zone, issue: item.title });
+                                  }}
+                                  className="font-extrabold text-[#0B7A3A] hover:underline flex items-center gap-0.5 cursor-pointer"
+                                >
+                                  <MapPin className="w-3 h-3" />
+                                  <span>Sơ đồ</span>
+                                </button>
+                                {(() => {
+                                  if (isResolved) {
+                                    return (
+                                      <span className="font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300 flex items-center gap-1 text-[10px]">
+                                        <Check className="w-3 h-3 text-emerald-600" />
+                                        <span>Đã xử lý dứt điểm</span>
+                                      </span>
+                                    );
+                                  }
 
-                                if (dispatchInfo) {
+                                  const dispatchInfo =
+                                    allDispatches[item.stallId] ||
+                                    allDispatches[item.code] ||
+                                    (item.stallId === 'A-06' ? allDispatches['D900-06'] : null) ||
+                                    (item.stallId.startsWith('D900-') ? allDispatches[item.stallId.replace('D900-', 'B')] : null) ||
+                                    (item.stallId.startsWith('A-') ? allDispatches[item.stallId.replace('A-', 'A')] : null) ||
+                                    (item.stallId.startsWith('D04-') ? allDispatches[item.stallId.replace('D04-', 'D')] : null);
+
+                                  if (dispatchInfo) {
+                                    return (
+                                      <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1 text-[10px]">
+                                        <Check className="w-3 h-3 text-emerald-600" />
+                                        <span>Đã điều phối ({dispatchInfo.teamName || 'Tổ An Ninh'})</span>
+                                      </span>
+                                    );
+                                  }
+
                                   return (
-                                    <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1 text-[10px]">
-                                      <Check className="w-3 h-3 text-emerald-600" />
-                                      <span>Đã điều phối ({dispatchInfo.teamName || 'Tổ An Ninh'})</span>
+                                    <span className="font-extrabold text-[#1974C8] group-hover:underline flex items-center gap-0.5">
+                                      <PhoneCall className="w-3 h-3 text-[#1974C8]" />
+                                      <span>Điều phối →</span>
                                     </span>
                                   );
-                                }
-
-                                return (
-                                  <span className="font-extrabold text-[#1974C8] group-hover:underline flex items-center gap-0.5">
-                                    <PhoneCall className="w-3 h-3 text-[#1974C8]" />
-                                    <span>Điều phối →</span>
-                                  </span>
-                                );
-                              })()}
+                                })()}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      }))}
                     </div>
                   </div>
                 );
@@ -1247,154 +1941,9 @@ export default function LiveDashboardOverview({
           </div>
         )}
 
-        {/* TAB 4: THU PHÍ & TÀI CHÍNH TÁC CHIẾN */}
+        {/* TAB 4: THU PHÍ & TÀI CHÍNH TÁC CHIẾN (HỢP NHẤT TOÀN DIỆN) */}
         {activeKpiTab === 'billing' && (
-          <div className="space-y-5 pt-1">
-            {/* 1. Biểu đồ Donut & Chỉ số thu phí (kết nối chuẩn từ staff sandbox) */}
-            <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 p-4 rounded-xl bg-[#F8FAFC] border border-[#DCE8F1]">
-              <DonutChartSvg
-                data={[
-                  { name: 'Đã thu', value: 223200000, color: '#0B7A3A' },
-                  { name: 'Còn nợ', value: 16800000, color: '#D3484D' },
-                ]}
-                centerValue="93%"
-                centerLabel="Thu phí"
-                size={140}
-              />
-              <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full">
-                <DetailStatCard label="Tổng phải thu" value="240.0 tr" toneClass="text-[#172F55]" badge="Tháng 08" />
-                <DetailStatCard label="Đã thu thực tế" value="223.2 tr" toneClass="text-[#0B7A3A]" badge="93%" />
-                <DetailStatCard label="Còn nợ đôn đốc" value="16.8 tr" toneClass="text-[#D3484D]" badge="4 sạp nợ" />
-                <DetailStatCard label="Lệch POS vs QR" value="3 sạp" toneClass="text-[#D97706]" badge="1 cảnh báo cao" />
-              </div>
-            </div>
-
-            {/* 2. Cảnh báo đối chiếu bất thường doanh thu POS vs Cashless (từ staff sandbox) */}
-            <div className="rounded-xl border border-[#DCE8F1] bg-white p-4 shadow-2xs space-y-3">
-              <div className="flex items-center justify-between gap-2 pb-2 border-b border-[#DCE8F1]">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
-                    <AlertTriangle className="w-4 h-4 text-rose-600" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black text-[#172F55] flex items-center gap-1.5">
-                      <span>Cảnh Báo Đối Chiếu Doanh Thu Bất Thường (POS vs Cashless)</span>
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                        {SAMPLE_REVENUE_ANOMALIES.filter((a) => a.severity === 'high').length} Cảnh báo cao
-                      </span>
-                    </h4>
-                    <p className="text-[11px] text-[#6D84A3]">
-                      Tự động rà soát chênh lệch dòng tiền giữa máy POS tại quầy và cổng thanh toán QR/Không tiền mặt.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-                {SAMPLE_REVENUE_ANOMALIES.map((anomaly) => (
-                  <div
-                    key={anomaly.stallId}
-                    className={`rounded-xl p-3.5 border transition-all ${
-                      anomaly.severity === 'high'
-                        ? 'bg-rose-50/50 border-rose-200 hover:border-rose-300'
-                        : anomaly.severity === 'medium'
-                        ? 'bg-amber-50/50 border-amber-200 hover:border-amber-300'
-                        : 'bg-emerald-50/40 border-emerald-200 hover:border-emerald-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2 text-xs">
-                      <div className="font-bold text-[#172F55] truncate">
-                        Sạp {anomaly.stallId}
-                      </div>
-                      <span
-                        className={`text-[10px] font-black px-1.5 py-0.5 rounded-md ${
-                          anomaly.severity === 'high'
-                            ? 'bg-rose-100 text-rose-800'
-                            : anomaly.severity === 'medium'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-emerald-100 text-emerald-800'
-                        }`}
-                      >
-                        Lệch {anomaly.diffPercent}%
-                      </span>
-                    </div>
-                    <div className="text-xs font-bold text-slate-800 mt-1 truncate">
-                      {anomaly.stallName}
-                    </div>
-                    <div className="mt-2 pt-2 border-t border-dashed border-slate-200 text-[11px] flex justify-between font-mono">
-                      <span className="text-slate-500">POS: <strong>{(anomaly.posRevenue / 1000000).toFixed(1)}tr</strong></span>
-                      <span className="text-slate-500">QR: <strong>{(anomaly.cashlessRevenue / 1000000).toFixed(1)}tr</strong></span>
-                    </div>
-                    {anomaly.note && (
-                      <p className="text-[10px] text-slate-600 mt-2 line-clamp-2 italic">
-                        "{anomaly.note}"
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 3. Bảng Doanh Thu Theo Shop (Shop Financials từ staff sandbox) */}
-            <div className="rounded-xl border border-[#DCE8F1] bg-white p-4 shadow-2xs space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#DCE8F1]">
-                <div>
-                  <h4 className="text-sm font-black text-[#172F55] flex items-center gap-2">
-                    <span>Doanh Thu & Hiệu Quả Kinh Doanh Theo Shop</span>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#6D84A3] bg-slate-100 px-2 py-0.5 rounded-md">
-                      <Info className="w-3 h-3 text-[#1974C8]" />
-                      BQL & Cấp Tỉnh
-                    </span>
-                  </h4>
-                  <p className="text-[11px] text-[#6D84A3]">
-                    Theo dõi doanh thu, giá vốn hàng bán và lợi nhuận gộp từng điểm sạp phục vụ điều phối và hỗ trợ tiểu thương.
-                  </p>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-[#DCE8F1] text-[#7185A1] font-bold">
-                      <th className="py-2.5 px-3">Mã sạp</th>
-                      <th className="py-2.5 px-3">Tên sạp / Hộ kinh doanh</th>
-                      <th className="py-2.5 px-3 text-right">Doanh thu</th>
-                      <th className="py-2.5 px-3 text-right">Giá vốn (COGS)</th>
-                      <th className="py-2.5 px-3 text-right">Lợi nhuận gộp</th>
-                      <th className="py-2.5 px-3 text-right">Biên LN (%)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#DCE8F1]/60">
-                    {SAMPLE_SHOP_FINANCIALS.map((shop) => (
-                      <tr key={shop.stallId} className="hover:bg-[#F8FAFC] transition-colors">
-                        <td className="py-2.5 px-3 font-mono font-black text-[#172F55]">
-                          {shop.stallId}
-                        </td>
-                        <td className="py-2.5 px-3 font-bold text-[#172F55]">
-                          {shop.stallName}
-                        </td>
-                        <td className="py-2.5 px-3 text-right font-mono font-bold text-[#1974C8]">
-                          {new Intl.NumberFormat('vi-VN').format(shop.revenue)}đ
-                        </td>
-                        <td className="py-2.5 px-3 text-right font-mono text-[#6D84A3]">
-                          {shop.cogs ? `${new Intl.NumberFormat('vi-VN').format(shop.cogs)}đ` : '—'}
-                        </td>
-                        <td className="py-2.5 px-3 text-right font-mono font-extrabold text-[#0B7A3A]">
-                          {shop.profit ? `${new Intl.NumberFormat('vi-VN').format(shop.profit)}đ` : '—'}
-                        </td>
-                        <td className="py-2.5 px-3 text-right">
-                          <span className="inline-block px-1.5 py-0.5 rounded text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            {shop.marginPercent}%
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* 4. Nghiệp vụ thu nợ & biên lai */}
+          <div className="pt-1">
             <MarketFeeCollectionSection
               onOpenQuickMap={(stall) => setQuickMapStall(stall)}
               onNavigateToMap={onNavigateToMap}
@@ -1802,54 +2351,43 @@ export default function LiveDashboardOverview({
               </div>
             </div>
 
-            {/* Modal Footer: Action CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 px-5 py-3.5 border-t border-[#DCE8F1] bg-[#F5FAF8]">
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedComplaint(null);
-                  setDispatchSuccessMsg(null);
-                }}
-                className="w-full sm:w-auto px-4 py-2 rounded-xl border border-[#DCE8F1] bg-white text-xs font-bold text-[#172F55] hover:bg-slate-100 transition-colors cursor-pointer"
-              >
-                Đóng
-              </button>
-
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+            {/* Modal Footer: Đúng 2 nút nghiệp vụ trọng tâm (Đóng phản ánh & Gọi người điều phối) */}
+            <div className="flex items-center justify-end gap-3 px-5 py-3.5 border-t border-[#DCE8F1] bg-[#F5FAF8]">
+              {/* 1. Nút Đóng phản ánh */}
+              {!isComplaintResolved(selectedComplaint.code) && !isComplaintResolved(selectedComplaint.id) ? (
                 <button
                   type="button"
                   onClick={() => {
+                    handleResolveComplaint(selectedComplaint.code);
                     setDispatchSuccessMsg(
-                      `Đã phát lệnh điều động tới bộ đàm của Đ/c ${selectedComplaint.coordinator.name}! Trạng thái chuyển sang: Đang xử lý tại hiện trường.`
+                      `Đã nghiệm thu và đóng phản ánh ${selectedComplaint.code} thành công! Trạng thái chuyển sang: Đã giải quyết.`
                     );
-                    setLocalDispatches((prev) => ({
-                      ...prev,
-                      [selectedComplaint.stallId]: { teamName: selectedComplaint.coordinator.name, status: 'in_progress' },
-                      [selectedComplaint.code]: { teamName: selectedComplaint.coordinator.name, status: 'in_progress' }
-                    }));
-                    if (onQuickDispatch) {
-                      onQuickDispatch(selectedComplaint.stallId, selectedComplaint.coordinator.name);
-                    }
                   }}
-                  className="flex-1 sm:flex-none px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-black transition-colors shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-[#0B7A3A] hover:bg-[#075A2B] text-white text-xs font-black transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <Radio className="w-3.5 h-3.5" />
-                  <span>Phát lệnh điều động</span>
+                  <CheckCircle2 className="w-4 h-4 text-white" />
+                  <span>Đóng phản ánh</span>
                 </button>
+              ) : (
+                <div className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-black">
+                  <Check className="w-4 h-4 text-emerald-700" />
+                  <span>Hồ sơ đã đóng hoàn tất</span>
+                </div>
+              )}
 
-                <a
-                  href={`tel:${selectedComplaint.coordinator.phone.replace(/[^0-9]/g, '')}`}
-                  onClick={() => {
-                    setDispatchSuccessMsg(
-                      `Đang kết nối cuộc gọi thoại tới Đ/c ${selectedComplaint.coordinator.name} (${selectedComplaint.coordinator.phone})...`
-                    );
-                  }}
-                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-[#0B7A3A] hover:bg-[#075A2B] text-white text-xs font-black transition-transform hover:-translate-y-0.5 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <PhoneCall className="w-4 h-4 animate-bounce" />
-                  <span>Gọi người điều phối ngay</span>
-                </a>
-              </div>
+              {/* 2. Nút Gọi người điều phối */}
+              <a
+                href={`tel:${selectedComplaint.coordinator.phone.replace(/[^0-9]/g, '')}`}
+                onClick={() => {
+                  setDispatchSuccessMsg(
+                    `Đang kết nối cuộc gọi thoại tới Đ/c ${selectedComplaint.coordinator.name} (${selectedComplaint.coordinator.phone})...`
+                  );
+                }}
+                className="px-4 py-2.5 rounded-xl bg-[#153154] hover:bg-[#0E2038] text-white text-xs font-black transition-transform hover:-translate-y-0.5 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <PhoneCall className="w-4 h-4 animate-bounce" />
+                <span>Gọi người điều phối</span>
+              </a>
             </div>
           </div>
         </div>
@@ -1880,7 +2418,7 @@ export default function LiveDashboardOverview({
                     </span>
                   </h3>
                   <p className="text-xs text-[#7185A1] mt-0.5">
-                    {quickMapStall.name} • Tầng 1 Chợ Đồng Xuân
+                    {quickMapStall.name} • {marketTitle}
                   </p>
                 </div>
               </div>
@@ -1905,90 +2443,186 @@ export default function LiveDashboardOverview({
                 </div>
               )}
 
-              {/* Sơ đồ mặt bằng vector trực quan với sạp được ghim nổi bật */}
-              <div className="relative w-full h-64 sm:h-72 bg-[#F5FAF8] rounded-xl border border-[#DCE8F1] overflow-hidden flex items-center justify-center p-3">
-                <svg viewBox="0 0 600 300" className="w-full h-full object-contain">
-                  {/* Cổng chính Phố Hàng Khoai */}
-                  <rect x="180" y="10" width="240" height="24" rx="4" fill="#172F55" />
-                  <text x="300" y="26" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">
-                    CỔNG BẮC • PHỐ HÀNG KHOAI
-                  </text>
+              {/* Sơ đồ mặt bằng vector trực quan với 5 phân khu chuẩn Chợ Đồng Xuân & ghim sạp động */}
+              <div className="relative w-full h-72 sm:h-80 bg-[#F8FAFC] rounded-xl border border-[#DCE8F1] overflow-hidden flex items-center justify-center p-2 sm:p-3">
+                {(() => {
+                  const getTargetStallPosition = (rawCode?: string) => {
+                    let code = rawCode || 'A-06';
+                    if (code === 'D900-06') code = 'A-06';
+                    if (code === 'D900-01') code = 'A-01';
+                    if (code === 'D900-03') code = 'A-03';
+                    if (code === 'D900-08') code = 'C-04';
+                    if (code === 'D04-05') code = 'B-06';
+                    if (code === 'D04-06') code = 'E-01';
+                    if (code === 'D04-07') code = 'D-01';
+                    if (code === 'D04-08') code = 'D-04';
+                    if (code === 'D04-09') code = 'D-02';
+                    if (code === 'D04-10') code = 'B-08';
+                    if (code === 'CỔNG-BẮC') code = 'C-01';
 
-                  {/* Khu A */}
-                  <rect x="20" y="50" width="160" height="220" rx="8" fill="#E8F8EF" stroke="#5CBD68" strokeWidth="1.5" />
-                  <text x="100" y="70" textAnchor="middle" fill="#0B7A3A" fontSize="11" fontWeight="bold">
-                    Khu A (Rau củ quả)
-                  </text>
+                    const COORDS: Record<string, { x: number; y: number; w: number; h: number }> = {
+                      'A-01': { x: 26, y: 66, w: 40, h: 24 },
+                      'A-02': { x: 72, y: 66, w: 40, h: 24 },
+                      'A-03': { x: 118, y: 66, w: 40, h: 24 },
+                      'A-04': { x: 26, y: 98, w: 40, h: 24 },
+                      'A-05': { x: 72, y: 98, w: 40, h: 24 },
+                      'A-06': { x: 118, y: 98, w: 40, h: 24 },
+                      'A-07': { x: 118, y: 98, w: 40, h: 24 },
+                      'B-01': { x: 439, y: 66, w: 40, h: 24 },
+                      'B-02': { x: 485, y: 66, w: 40, h: 24 },
+                      'B-03': { x: 531, y: 66, w: 40, h: 24 },
+                      'B-05': { x: 439, y: 98, w: 40, h: 24 },
+                      'B-06': { x: 485, y: 98, w: 40, h: 24 },
+                      'B-08': { x: 531, y: 98, w: 40, h: 24 },
+                      'D-01': { x: 210, y: 105, w: 56, h: 28 },
+                      'D-02': { x: 272, y: 105, w: 56, h: 28 },
+                      'D-03': { x: 334, y: 105, w: 56, h: 28 },
+                      'D-04': { x: 210, y: 148, w: 56, h: 28 },
+                      'D-05': { x: 272, y: 148, w: 56, h: 28 },
+                      'D-06': { x: 334, y: 148, w: 56, h: 28 },
+                      'C-01': { x: 26, y: 180, w: 40, h: 24 },
+                      'C-02': { x: 72, y: 180, w: 40, h: 24 },
+                      'C-03': { x: 118, y: 180, w: 40, h: 24 },
+                      'C-04': { x: 26, y: 212, w: 40, h: 24 },
+                      'C-05': { x: 72, y: 212, w: 40, h: 24 },
+                      'C-06': { x: 118, y: 212, w: 40, h: 24 },
+                      'E-01': { x: 439, y: 180, w: 40, h: 24 },
+                      'E-02': { x: 485, y: 180, w: 40, h: 24 },
+                      'E-03': { x: 531, y: 180, w: 40, h: 24 },
+                      'E-04': { x: 439, y: 212, w: 40, h: 24 },
+                      'E-05': { x: 485, y: 212, w: 40, h: 24 },
+                      'E-06': { x: 531, y: 212, w: 40, h: 24 }
+                    };
 
-                  {/* Khu Thực phẩm tươi 1 */}
-                  <rect x="200" y="50" width="200" height="220" rx="8" fill="#FFF9E6" stroke="#FFA834" strokeWidth="1.5" />
-                  <text x="300" y="70" textAnchor="middle" fill="#B87808" fontSize="11" fontWeight="bold">
-                    Khu Thực Phẩm Tươi 1
-                  </text>
+                    if (COORDS[code]) {
+                      return { ...COORDS[code], normalizedCode: code };
+                    }
+                    if (code.startsWith('A-')) return { x: 72, y: 98, w: 40, h: 24, normalizedCode: code };
+                    if (code.startsWith('B-')) return { x: 485, y: 98, w: 40, h: 24, normalizedCode: code };
+                    if (code.startsWith('C-')) return { x: 72, y: 212, w: 40, h: 24, normalizedCode: code };
+                    if (code.startsWith('D-')) return { x: 272, y: 148, w: 56, h: 28, normalizedCode: code };
+                    if (code.startsWith('E-')) return { x: 485, y: 212, w: 40, h: 24, normalizedCode: code };
+                    return { x: 272, y: 148, w: 56, h: 28, normalizedCode: code };
+                  };
 
-                  {/* Khu Nông sản & Thiết yếu */}
-                  <rect x="420" y="50" width="160" height="220" rx="8" fill="#EFF6FF" stroke="#82A9E6" strokeWidth="1.5" />
-                  <text x="500" y="70" textAnchor="middle" fill="#1974C8" fontSize="11" fontWeight="bold">
-                    Khu Nông Sản & Thiết Yếu
-                  </text>
+                  const targetPos = getTargetStallPosition(quickMapStall.code);
 
-                  {/* Các ô sạp mô phỏng */}
-                  {/* Sạp thông thường */}
-                  <rect x="40" y="90" width="50" height="35" rx="4" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
-                  <text x="65" y="112" textAnchor="middle" fill="#64748B" fontSize="9" fontWeight="bold">A-01</text>
+                  return (
+                    <svg viewBox="0 0 600 290" className="w-full h-full object-contain">
+                      {/* Cổng chính Phố Hàng Khoai */}
+                      <rect x="180" y="8" width="240" height="20" rx="4" fill="#172F55" />
+                      <text x="300" y="22" textAnchor="middle" fill="#ffffff" fontSize="9" fontWeight="bold">
+                        CỔNG 1 (BẮC) • PHỐ HÀNG KHOAI
+                      </text>
 
-                  <rect x="110" y="90" width="50" height="35" rx="4" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
-                  <text x="135" y="112" textAnchor="middle" fill="#64748B" fontSize="9" fontWeight="bold">A-02</text>
+                      {/* Cổng chính Phố Cầu Đông */}
+                      <rect x="180" y="262" width="240" height="20" rx="4" fill="#172F55" />
+                      <text x="300" y="276" textAnchor="middle" fill="#ffffff" fontSize="9" fontWeight="bold">
+                        CỔNG 2 (NAM) • PHỐ CẦU ĐÔNG
+                      </text>
 
-                  <rect x="220" y="90" width="65" height="35" rx="4" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
-                  <text x="252" y="112" textAnchor="middle" fill="#64748B" fontSize="9" fontWeight="bold">D900-01</text>
+                      {/* KHU A: THỰC PHẨM TƯƠI SỐNG (Tây Bắc) */}
+                      <rect x="16" y="38" width="155" height="100" rx="8" fill="#ECFDF5" stroke="#10B981" strokeWidth="1.5" />
+                      <text x="93" y="56" textAnchor="middle" fill="#065F46" fontSize="10" fontWeight="bold">
+                        Khu A · Tươi Sống
+                      </text>
+                      <rect x="26" y="66" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="46" y="82" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">A-01</text>
+                      <rect x="72" y="66" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="92" y="82" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">A-02</text>
+                      <rect x="118" y="66" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="138" y="82" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">A-03</text>
+                      <rect x="26" y="98" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="46" y="114" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">A-04</text>
+                      <rect x="72" y="98" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="92" y="114" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">A-05</text>
+                      <rect x="118" y="98" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="138" y="114" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">A-06</text>
 
-                  <rect x="310" y="90" width="65" height="35" rx="4" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
-                  <text x="342" y="112" textAnchor="middle" fill="#64748B" fontSize="9" fontWeight="bold">D900-03</text>
+                      {/* KHU B: NÔNG SẢN & GIA VỊ KHÔ (Đông Bắc) */}
+                      <rect x="429" y="38" width="155" height="100" rx="8" fill="#FFFBEB" stroke="#F59E0B" strokeWidth="1.5" />
+                      <text x="506" y="56" textAnchor="middle" fill="#92400E" fontSize="10" fontWeight="bold">
+                        Khu B · Nông Sản Khô
+                      </text>
+                      <rect x="439" y="66" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="459" y="82" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">B-01</text>
+                      <rect x="485" y="66" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="505" y="82" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">B-02</text>
+                      <rect x="531" y="66" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="551" y="82" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">B-03</text>
+                      <rect x="439" y="98" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="459" y="114" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">B-05</text>
+                      <rect x="485" y="98" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="505" y="114" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">B-06</text>
+                      <rect x="531" y="98" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="551" y="114" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">B-08</text>
 
-                  <rect x="220" y="145" width="65" height="35" rx="4" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
-                  <text x="252" y="167" textAnchor="middle" fill="#64748B" fontSize="9" fontWeight="bold">D900-06</text>
+                      {/* KHU D: BÁCH HÓA & ĐẶC SẢN (Trung Tâm) */}
+                      <rect x="195" y="65" width="210" height="160" rx="8" fill="#F0F9FF" stroke="#0EA5E9" strokeWidth="1.5" />
+                      <text x="300" y="88" textAnchor="middle" fill="#075985" fontSize="10" fontWeight="bold">
+                        Khu D · Bách Hóa & Đặc Sản
+                      </text>
+                      <rect x="210" y="105" width="56" height="28" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="238" y="122" textAnchor="middle" fill="#64748B" fontSize="8.5" fontWeight="bold">D-01</text>
+                      <rect x="272" y="105" width="56" height="28" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="300" y="122" textAnchor="middle" fill="#64748B" fontSize="8.5" fontWeight="bold">D-02</text>
+                      <rect x="334" y="105" width="56" height="28" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="362" y="122" textAnchor="middle" fill="#64748B" fontSize="8.5" fontWeight="bold">D-03</text>
+                      <rect x="210" y="148" width="56" height="28" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="238" y="165" textAnchor="middle" fill="#64748B" fontSize="8.5" fontWeight="bold">D-04</text>
+                      <rect x="272" y="148" width="56" height="28" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="300" y="165" textAnchor="middle" fill="#64748B" fontSize="8.5" fontWeight="bold">D-05</text>
+                      <rect x="334" y="148" width="56" height="28" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="362" y="165" textAnchor="middle" fill="#64748B" fontSize="8.5" fontWeight="bold">D-06</text>
 
-                  <rect x="310" y="145" width="65" height="35" rx="4" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
-                  <text x="342" y="167" textAnchor="middle" fill="#64748B" fontSize="9" fontWeight="bold">D900-08</text>
+                      {/* KHU C: ẨM THỰC (Tây Nam) */}
+                      <rect x="16" y="152" width="155" height="100" rx="8" fill="#FFF1F2" stroke="#F43F5E" strokeWidth="1.5" />
+                      <text x="93" y="170" textAnchor="middle" fill="#9F1239" fontSize="10" fontWeight="bold">
+                        Khu C · Ẩm Thực
+                      </text>
+                      <rect x="26" y="180" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="46" y="196" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">C-01</text>
+                      <rect x="72" y="180" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="92" y="196" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">C-02</text>
+                      <rect x="118" y="180" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="138" y="196" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">C-03</text>
+                      <rect x="26" y="212" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="46" y="228" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">C-04</text>
+                      <rect x="72" y="212" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="92" y="228" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">C-05</text>
+                      <rect x="118" y="212" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="138" y="228" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">C-06</text>
 
-                  <rect x="440" y="90" width="55" height="35" rx="4" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
-                  <text x="467" y="112" textAnchor="middle" fill="#64748B" fontSize="9" fontWeight="bold">D04-05</text>
+                      {/* KHU E: VẢI SỢI (Đông Nam) */}
+                      <rect x="429" y="152" width="155" height="100" rx="8" fill="#F5F3FF" stroke="#8B5CF6" strokeWidth="1.5" />
+                      <text x="506" y="170" textAnchor="middle" fill="#5B21B6" fontSize="10" fontWeight="bold">
+                        Khu E · Vải Sợi
+                      </text>
+                      <rect x="439" y="180" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="459" y="196" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">E-01</text>
+                      <rect x="485" y="180" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="505" y="196" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">E-02</text>
+                      <rect x="531" y="180" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="551" y="196" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">E-03</text>
+                      <rect x="439" y="212" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="459" y="228" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">E-04</text>
+                      <rect x="485" y="212" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="505" y="228" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">E-05</text>
+                      <rect x="531" y="212" width="40" height="24" rx="3" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
+                      <text x="551" y="228" textAnchor="middle" fill="#64748B" fontSize="8" fontWeight="bold">E-06</text>
 
-                  <rect x="510" y="90" width="55" height="35" rx="4" fill="#ffffff" stroke="#CBD5E1" strokeWidth="1" />
-                  <text x="537" y="112" textAnchor="middle" fill="#64748B" fontSize="9" fontWeight="bold">D04-07</text>
-
-                  {/* GHIM SẠP MỤC TIÊU VỚI RADAR BEACON ĐỎ NHẤP NHÁY */}
-                  {quickMapStall.code === 'D900-06' ? (
-                    <g transform="translate(220, 145)">
-                      <rect x="0" y="0" width="65" height="35" rx="4" fill="#FEE2E2" stroke="#EF4444" strokeWidth="2.5" />
-                      <text x="32" y="22" textAnchor="middle" fill="#991B1B" fontSize="10" fontWeight="900">D900-06</text>
-                      <circle cx="32" cy="0" r="10" fill="#EF4444" opacity="0.3" className="animate-ping" />
-                      <circle cx="32" cy="0" r="5" fill="#DC2626" />
-                    </g>
-                  ) : quickMapStall.code === 'D900-03' ? (
-                    <g transform="translate(310, 90)">
-                      <rect x="0" y="0" width="65" height="35" rx="4" fill="#FEE2E2" stroke="#EF4444" strokeWidth="2.5" />
-                      <text x="32" y="22" textAnchor="middle" fill="#991B1B" fontSize="10" fontWeight="900">D900-03</text>
-                      <circle cx="32" cy="0" r="10" fill="#EF4444" opacity="0.3" className="animate-ping" />
-                      <circle cx="32" cy="0" r="5" fill="#DC2626" />
-                    </g>
-                  ) : quickMapStall.code === 'A-02' ? (
-                    <g transform="translate(110, 90)">
-                      <rect x="0" y="0" width="50" height="35" rx="4" fill="#FEE2E2" stroke="#EF4444" strokeWidth="2.5" />
-                      <text x="25" y="22" textAnchor="middle" fill="#991B1B" fontSize="10" fontWeight="900">A-02</text>
-                      <circle cx="25" cy="0" r="10" fill="#EF4444" opacity="0.3" className="animate-ping" />
-                      <circle cx="25" cy="0" r="5" fill="#DC2626" />
-                    </g>
-                  ) : (
-                    <g transform="translate(440, 90)">
-                      <rect x="0" y="0" width="55" height="35" rx="4" fill="#FEE2E2" stroke="#EF4444" strokeWidth="2.5" />
-                      <text x="27" y="22" textAnchor="middle" fill="#991B1B" fontSize="10" fontWeight="900">{quickMapStall.code}</text>
-                      <circle cx="27" cy="0" r="10" fill="#EF4444" opacity="0.3" className="animate-ping" />
-                      <circle cx="27" cy="0" r="5" fill="#DC2626" />
-                    </g>
-                  )}
-                </svg>
+                      {/* GHIM SẠP MỤC TIÊU VỚI RADAR BEACON ĐỎ NHẤP NHÁY */}
+                      <g transform={`translate(${targetPos.x}, ${targetPos.y})`}>
+                        <rect x="0" y="0" width={targetPos.w} height={targetPos.h} rx="4" fill="#FEE2E2" stroke="#EF4444" strokeWidth="2.5" />
+                        <text x={targetPos.w / 2} y={targetPos.h / 2 + 3.5} textAnchor="middle" fill="#991B1B" fontSize="9" fontWeight="900">
+                          {targetPos.normalizedCode}
+                        </text>
+                        <circle cx={targetPos.w / 2} cy="0" r="10" fill="#EF4444" opacity="0.3" className="animate-ping" />
+                        <circle cx={targetPos.w / 2} cy="0" r="4.5" fill="#DC2626" />
+                      </g>
+                    </svg>
+                  );
+                })()}
               </div>
             </div>
 
@@ -2004,7 +2638,18 @@ export default function LiveDashboardOverview({
               <button
                 type="button"
                 onClick={() => {
-                  const targetCode = quickMapStall?.code;
+                  let targetCode = quickMapStall?.code || 'A-06';
+                  if (targetCode === 'D900-06') targetCode = 'A-06';
+                  if (targetCode === 'D900-01') targetCode = 'A-01';
+                  if (targetCode === 'D900-03') targetCode = 'A-03';
+                  if (targetCode === 'D900-08') targetCode = 'C-04';
+                  if (targetCode === 'D04-05') targetCode = 'B-06';
+                  if (targetCode === 'D04-06') targetCode = 'E-01';
+                  if (targetCode === 'D04-07') targetCode = 'D-01';
+                  if (targetCode === 'D04-08') targetCode = 'D-04';
+                  if (targetCode === 'D04-09') targetCode = 'D-02';
+                  if (targetCode === 'D04-10') targetCode = 'B-08';
+                  if (targetCode === 'CỔNG-BẮC') targetCode = 'C-01';
                   setQuickMapStall(null);
                   onNavigateToMap(targetCode);
                 }}

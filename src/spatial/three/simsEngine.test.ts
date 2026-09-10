@@ -124,7 +124,7 @@ describe('The Sims 3D Smart Market Engine (WP-01, WP-02, WP-03)', () => {
       const alert = extractStallAlertInfo(p0Stall);
       expect(alert).not.toBeNull();
       expect(alert?.priority).toBe('urgent');
-      expect(alert?.badgeTitle).toBe('P0 • KHẨN CẤP');
+      expect(alert?.badgeTitle).toBe('KHẨN CẤP');
       expect(alert?.themeColor).toBe('#ef4444');
       expect(alert?.issueDetail).toContain('Nước xả cá');
     });
@@ -138,7 +138,7 @@ describe('The Sims 3D Smart Market Engine (WP-01, WP-02, WP-03)', () => {
       const alert = extractStallAlertInfo(p1Stall);
       expect(alert).not.toBeNull();
       expect(alert?.priority).toBe('attention');
-      expect(alert?.badgeTitle).toBe('P1 • CHÚ Ý');
+      expect(alert?.badgeTitle).toBe('CẦN CHÚ Ý');
       expect(alert?.themeColor).toBe('#f97316');
     });
 
@@ -181,7 +181,7 @@ describe('The Sims 3D Smart Market Engine (WP-01, WP-02, WP-03)', () => {
       const alertInfo = {
         stallCode: 'A12',
         priority: 'urgent' as const,
-        badgeTitle: 'P0 • KHẨN CẤP',
+        badgeTitle: 'KHẨN CẤP',
         issueDetail: 'Nước xả cá tràn đại lộ',
         themeColor: '#ef4444',
       };
