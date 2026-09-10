@@ -269,5 +269,57 @@ describe('LiveDashboardOverview Command Center Integration', () => {
     // Chợ Bình Minh complaint MUST NOT be present
     expect(screen.queryByText(/PAKN-BM-001/i)).toBeNull();
   });
+
+  it('classifies complaints semantically with distinct tags instead of defaulting to infrastructure', () => {
+    const mockComplaints = [
+      {
+        id: 'c-food-1',
+        code: 'PAKN-FOOD-01',
+        content: 'hàng cũ quá',
+        type: 'product_quality',
+        stallId: 'A-01',
+        reporter: { fullName: 'Trần Văn Nguyện' }
+      },
+      {
+        id: 'c-price-1',
+        code: 'PAKN-PRICE-01',
+        content: 'Giá trên quầy cần được cập nhật rõ ràng',
+        type: 'price_issue',
+        stallId: 'K05-S01',
+        reporter: { fullName: 'Hải Yến' }
+      },
+      {
+        id: 'c-water-1',
+        code: 'PAKN-WATER-01',
+        content: 'Lối đi khu B bị đọng nước',
+        type: 'infrastructure',
+        stallId: 'Chung',
+        reporter: { fullName: 'Người Mua' }
+      }
+    ];
+
+    render(
+      <LiveDashboardOverview
+        onNavigateToMap={vi.fn()}
+        onNavigateToProfiles={vi.fn()}
+        complaints={mockComplaints}
+      />
+    );
+
+    // Switch to complaints tab
+    const complaintsCard = screen.getByRole('button', { name: /Thẻ chỉ số phản ánh/i });
+    fireEvent.click(complaintsCard);
+
+    // Check tags are differentiated
+    expect(screen.getByText('Chất lượng hàng hóa')).toBeDefined();
+    expect(screen.getByText('Niêm yết giá & Cân')).toBeDefined();
+    expect(screen.getByText('Vệ sinh môi trường')).toBeDefined();
+
+    // Check clean stall label for common area
+    expect(screen.getByText('Khu B (Chung)')).toBeDefined();
+
+    // Check pending count badge
+    expect(screen.getAllByText(/vụ tồn đọng/i).length).toBeGreaterThan(0);
+  });
 });
 

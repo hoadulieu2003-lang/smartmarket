@@ -76,6 +76,7 @@ export interface ComplaintItem {
   description: string;
   severity: 'Khẩn cấp' | 'Trật tự' | 'Cơ sở hạ tầng';
   severityLevel: 'P0' | 'P1' | 'P2';
+  categoryLabel?: string;
   reporter: string;
   time: string;
   coordinator: {
@@ -603,33 +604,153 @@ export default function LiveDashboardOverview({
     }
   };
 
-  // 5. Cấu trúc nhóm phản ánh PAKN động theo dữ liệu Backend
+  // Hàm phân loại ngữ nghĩa thông minh cho phản ánh PAKN (Smart Semantic Classifier)
+  const classifyComplaintSemantic = (c: any) => {
+    const rawContent = `${c.content || ''} ${c.title || ''}`.toLowerCase();
+    const rawType = (c.type || '').toLowerCase();
+
+    // 1. Làm sạch tiêu đề khỏi tiền tố thô [CHO-DEMO-...]
+    let cleanTitle = (c.title || c.content || 'Phản ánh hiện trường').trim();
+    cleanTitle = cleanTitle.replace(/^\[CHO-[^\]]+\]\s*/i, '');
+    if (cleanTitle.length > 80) {
+      cleanTitle = cleanTitle.slice(0, 77) + '...';
+    }
+
+    // 2. Làm sạch định vị sạp
+    let cleanStallId = c.stalls?.code || c.stallId || 'Chung';
+    if (cleanStallId === 'Chung' || cleanStallId === 'Sạp Chung' || cleanStallId.toLowerCase() === 'chung') {
+      if (rawContent.includes('khu b')) cleanStallId = 'Khu B (Chung)';
+      else if (rawContent.includes('khu a')) cleanStallId = 'Khu A (Chung)';
+      else if (rawContent.includes('khu c')) cleanStallId = 'Khu C (Chung)';
+      else if (rawContent.includes('khu d')) cleanStallId = 'Khu D (Chung)';
+      else if (rawContent.includes('khu e')) cleanStallId = 'Khu E (Chung)';
+      else cleanStallId = 'Khu vực chung';
+    }
+
+    // 3. Phân loại theo Ngữ nghĩa & Loại hình
+    // TIER 1: Gian Lận & An Toàn Thực Phẩm (P0 - SLA < 15 phút)
+    const isFoodSafetyOrFraud =
+      c.severityLevel === 'P0' ||
+      rawType === 'food_safety' ||
+      rawType === 'product_quality' ||
+      rawType === 'weighing_fraud' ||
+      rawContent.includes('thực phẩm') ||
+      rawContent.includes('bảo quản') ||
+      rawContent.includes('cũ quá') ||
+      rawContent.includes('hàng cũ') ||
+      rawContent.includes('ôi thiu') ||
+      rawContent.includes('hết hạn') ||
+      rawContent.includes('mốc') ||
+      rawContent.includes('giá trên quầy') ||
+      rawContent.includes('niêm yết giá') ||
+      rawContent.includes('chênh lệch giá') ||
+      rawContent.includes('cân đối chứng') ||
+      rawContent.includes('cân thiếu') ||
+      rawContent.includes('gian lận');
+
+    if (isFoodSafetyOrFraud) {
+      let tag = 'An toàn thực phẩm';
+      if (rawContent.includes('giá') || rawContent.includes('cân') || rawType === 'weighing_fraud' || rawType === 'price_issue') {
+        tag = 'Niêm yết giá & Cân';
+      } else if (rawContent.includes('bảo quản') || rawContent.includes('cũ') || rawContent.includes('ôi thiu') || rawType === 'product_quality') {
+        tag = 'Chất lượng hàng hóa';
+      }
+      return {
+        tier: 'food_safety_fraud' as const,
+        severityLevel: 'P0' as const,
+        severityLabel: 'Khẩn cấp' as const,
+        tagLabel: tag,
+        cleanTitle,
+        cleanStallId
+      };
+    }
+
+    // TIER 3: Vệ Sinh & Cơ Sở Hạ Tầng (P2 - SLA < 2 giờ)
+    const isSanitationOrInfra =
+      c.severityLevel === 'P2' ||
+      rawType === 'infrastructure' ||
+      rawContent.includes('đọng nước') ||
+      rawContent.includes('nước tràn') ||
+      rawContent.includes('rò rỉ') ||
+      rawContent.includes('vệ sinh') ||
+      rawContent.includes('rác') ||
+      rawContent.includes('bẩn') ||
+      rawContent.includes('cống') ||
+      rawContent.includes('mùi hôi') ||
+      rawContent.includes('dột') ||
+      rawContent.includes('sàn trơn') ||
+      rawContent.includes('bóng đèn') ||
+      rawContent.includes('mái che') ||
+      rawContent.includes('pccc') ||
+      rawContent.includes('cháy') ||
+      rawContent.includes('thoát sàn');
+
+    if (isSanitationOrInfra) {
+      let tag = 'Cơ sở hạ tầng';
+      if (rawContent.includes('đọng nước') || rawContent.includes('rác') || rawContent.includes('vệ sinh') || rawContent.includes('mùi')) {
+        tag = 'Vệ sinh môi trường';
+      } else if (rawContent.includes('pccc') || rawContent.includes('cháy')) {
+        tag = 'An toàn PCCC';
+      }
+      return {
+        tier: 'sanitation_infra' as const,
+        severityLevel: 'P2' as const,
+        severityLabel: 'Cơ sở hạ tầng' as const,
+        tagLabel: tag,
+        cleanTitle,
+        cleanStallId
+      };
+    }
+
+    // TIER 2: Trật Tự & Lấn Chiếm Lối Đi (P1 - SLA < 30 phút)
+    let tag = 'Trật tự lối đi';
+    if (rawContent.includes('thái độ') || rawContent.includes('quát') || rawContent.includes('phục vụ') || rawType === 'service_attitude') {
+      tag = 'Thái độ phục vụ';
+    } else if (rawContent.includes('test') || rawContent.includes('kiểm tra')) {
+      tag = 'Giám sát điều hành';
+    }
+    return {
+      tier: 'order_space' as const,
+      severityLevel: 'P1' as const,
+      severityLabel: 'Trật tự' as const,
+      tagLabel: tag,
+      cleanTitle,
+      cleanStallId
+    };
+  };
+
+  // 5. Cấu trúc nhóm phản ánh PAKN động theo phân loại ngữ nghĩa thông minh
   const dynamicComplaintGroups = useMemo(() => {
     if (complaints && complaints.length > 0) {
-      const p0Items = activeComplaintsList.filter((c: any) => c.severityLevel === 'P0' || c.type === 'product_quality' || c.type === 'food_safety' || c.type === 'weighing_fraud');
-      const p1Items = activeComplaintsList.filter((c: any) => c.severityLevel === 'P1' || c.type === 'service_attitude' || c.type === 'price_issue' || c.type === 'order_issue');
-      const p2Items = activeComplaintsList.filter((c: any) => c.severityLevel === 'P2' || c.type === 'infrastructure' || c.type === 'other');
-
-      const mapToItem = (c: any): ComplaintItem => ({
-        id: c.id,
-        code: c.code || `PAKN-${(c.id || '').slice(0, 6).toUpperCase()}`,
-        stallId: c.stalls?.code || c.stallId || 'Chung',
-        stallName: c.stalls?.name || 'Khu vực chung',
-        merchantName: c.reporter?.fullName || 'Khách phản ánh',
-        phone: c.reporter?.phone || '0908 999 ***',
-        zone: c.zones?.name || c.zone || 'Khu vực chợ',
-        title: c.title || c.content?.slice(0, 50) || 'Phản ánh chất lượng',
-        description: c.content || '',
-        severity: (c.severityLevel === 'P0' ? 'Khẩn cấp' : c.severityLevel === 'P1' ? 'Trật tự' : 'Cơ sở hạ tầng') as any,
-        severityLevel: (c.severityLevel || 'P1') as any,
-        reporter: c.reporter?.fullName || 'Người tiêu dùng',
-        time: c.createdAt ? new Date(c.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'Hôm nay',
-        coordinator: {
-          name: 'Ban Quản Lý Chợ',
-          role: 'Tổ cơ động',
-          phone: '0904.777.999'
-        }
+      const mappedComplaints = activeComplaintsList.map((c: any) => {
+        const classified = classifyComplaintSemantic(c);
+        return {
+          id: c.id,
+          code: c.code || `PAKN-${(c.id || '').slice(0, 6).toUpperCase()}`,
+          stallId: classified.cleanStallId,
+          stallName: c.stalls?.name || (classified.cleanStallId.includes('Chung') ? 'Khu vực lối đi chung' : 'Khu vực chợ'),
+          merchantName: c.reporter?.fullName || 'Khách phản ánh',
+          phone: c.reporter?.phone || '0908 999 ***',
+          zone: c.zones?.name || c.zone || 'Khu vực chợ',
+          title: classified.cleanTitle,
+          description: c.content || '',
+          severity: classified.severityLabel,
+          severityLevel: classified.severityLevel,
+          categoryLabel: classified.tagLabel,
+          reporter: c.reporter?.fullName || 'Người tiêu dùng',
+          time: c.createdAt ? new Date(c.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'Hôm nay',
+          coordinator: {
+            name: 'Ban Quản Lý Chợ',
+            role: 'Tổ cơ động',
+            phone: '0904.777.999'
+          },
+          tier: classified.tier
+        };
       });
+
+      const p0Items = mappedComplaints.filter((item: any) => item.tier === 'food_safety_fraud');
+      const p1Items = mappedComplaints.filter((item: any) => item.tier === 'order_space');
+      const p2Items = mappedComplaints.filter((item: any) => item.tier === 'sanitation_infra');
 
       return [
         {
@@ -640,7 +761,7 @@ export default function LiveDashboardOverview({
           badgeColor: 'bg-rose-50 text-rose-700 border-rose-200',
           priorityTag: 'Khẩn cấp',
           count: p0Items.length,
-          items: p0Items.map(mapToItem)
+          items: p0Items
         },
         {
           id: 'order_space',
@@ -650,7 +771,7 @@ export default function LiveDashboardOverview({
           badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
           priorityTag: 'Trật tự',
           count: p1Items.length,
-          items: p1Items.map(mapToItem)
+          items: p1Items
         },
         {
           id: 'sanitation_infra',
@@ -660,7 +781,7 @@ export default function LiveDashboardOverview({
           badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
           priorityTag: 'Hạ tầng',
           count: p2Items.length,
-          items: p2Items.map(mapToItem)
+          items: p2Items
         }
       ];
     }
@@ -1843,7 +1964,7 @@ export default function LiveDashboardOverview({
                         </div>
                       </div>
                       <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${group.badgeColor}`}>
-                        {openItemsCount} / {group.items.length} vụ
+                        {openItemsCount > 0 ? `${openItemsCount} vụ tồn đọng` : '0 vụ · Đã xong'}
                       </span>
                     </div>
 
@@ -1884,7 +2005,7 @@ export default function LiveDashboardOverview({
                                 <span className={`font-mono font-black px-1.5 py-0.5 rounded ${
                                   isResolved ? 'text-emerald-800 bg-emerald-100' : 'text-rose-600 bg-rose-50'
                                 }`}>
-                                  Sạp {item.stallId}
+                                  {item.stallId.includes('Chung') || item.stallId === 'Khu vực chung' ? item.stallId : `Sạp ${item.stallId}`}
                                 </span>
                                 <span className="font-mono font-bold text-[#7185A1]">
                                   {item.code}
@@ -1901,7 +2022,7 @@ export default function LiveDashboardOverview({
                                     : 'bg-sky-100 text-sky-800 border-sky-200'
                                 }`}
                               >
-                                {isResolved ? '✓ Đã giải quyết' : item.severity}
+                                {isResolved ? '✓ Đã giải quyết' : (item.categoryLabel || item.severity)}
                               </span>
                             </div>
 
