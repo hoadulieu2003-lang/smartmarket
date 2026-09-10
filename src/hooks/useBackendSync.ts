@@ -9,10 +9,18 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { api, ApiClientError } from '@/lib/api-client';
-import type { Stall, Zone, Market, Complaint, Application } from '@/types/backend';
+import type { Stall, Zone, Market, Complaint, Application, Trader, Product, Order, Notification } from '@/types/backend';
 import { adaptBackendToCanonicalDocument } from '@/spatial/backendAdapter';
 import type { MarketEntity } from '@/spatial/model/types';
-import { CLIENT_MARKETS, CLIENT_ZONES, CLIENT_STALLS, CLIENT_COMPLAINTS } from '@/data/clientCmsData';
+import {
+  CLIENT_MARKETS,
+  CLIENT_ZONES,
+  CLIENT_STALLS,
+  CLIENT_COMPLAINTS,
+  CLIENT_TRADERS,
+  CLIENT_PRODUCTS,
+  CLIENT_ORDERS,
+} from '@/data/clientCmsData';
 
 export interface BackendSyncState {
   isConnected: boolean;
@@ -25,6 +33,10 @@ export interface BackendSyncState {
   zones: Zone[];
   complaints: Complaint[];
   applications: Application[];
+  traders: Trader[];
+  products: Product[];
+  orders: Order[];
+  notifications: Notification[];
 }
 
 export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
@@ -39,6 +51,10 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
     zones: CLIENT_ZONES as Zone[],
     complaints: CLIENT_COMPLAINTS as Complaint[],
     applications: [],
+    traders: CLIENT_TRADERS as unknown as Trader[],
+    products: CLIENT_PRODUCTS as unknown as Product[],
+    orders: CLIENT_ORDERS as unknown as Order[],
+    notifications: [],
   });
 
   const syncData = useCallback(async () => {
@@ -49,11 +65,24 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
       await api.get('/settings/public').catch(() => null);
 
       // 2. Tải dữ liệu song song từ Backend (lấy limit=100 để đồng bộ trọn vẹn 100% dữ liệu các chợ)
-      const [marketsData, stallsData, complaintsData, applicationsData] = await Promise.allSettled([
+      const [
+        marketsData,
+        stallsData,
+        complaintsData,
+        applicationsData,
+        tradersData,
+        productsData,
+        ordersData,
+        notificationsData,
+      ] = await Promise.allSettled([
         api.get<Market[]>('/admin/markets'),
         api.get<Stall[]>('/admin/stalls?limit=100'),
         api.get<Complaint[]>('/admin/complaints?limit=100'),
         api.get<Application[]>('/admin/merchant-approvals?limit=100'),
+        api.get<Trader[]>('/admin/traders?limit=100'),
+        api.get<Product[]>('/admin/products?limit=100'),
+        api.get<Order[]>('/admin/orders?limit=100'),
+        api.get<Notification[]>('/admin/notifications?limit=100'),
       ]);
 
       const markets: Market[] =
@@ -64,6 +93,14 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
         complaintsData.status === 'fulfilled' && Array.isArray(complaintsData.value) ? complaintsData.value : (CLIENT_COMPLAINTS as Complaint[]);
       const applications: Application[] =
         applicationsData.status === 'fulfilled' && Array.isArray(applicationsData.value) ? applicationsData.value : [];
+      const traders: Trader[] =
+        tradersData.status === 'fulfilled' && Array.isArray(tradersData.value) ? tradersData.value : (CLIENT_TRADERS as unknown as Trader[]);
+      const products: Product[] =
+        productsData.status === 'fulfilled' && Array.isArray(productsData.value) ? productsData.value : (CLIENT_PRODUCTS as unknown as Product[]);
+      const orders: Order[] =
+        ordersData.status === 'fulfilled' && Array.isArray(ordersData.value) ? ordersData.value : (CLIENT_ORDERS as unknown as Order[]);
+      const notifications: Notification[] =
+        notificationsData.status === 'fulfilled' && Array.isArray(notificationsData.value) ? notificationsData.value : [];
 
       // Ưu tiên chợ có sạp thực tế
       const marketsWithStalls = markets.find((m) => stalls.some((s) => s.marketId === m.id));
@@ -116,6 +153,10 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
         zones: activeZones,
         complaints,
         applications,
+        traders,
+        products,
+        orders,
+        notifications,
       });
     } catch (err: any) {
       // Graceful fallback khi backend offline
@@ -140,6 +181,10 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
         zones: CLIENT_ZONES as Zone[],
         complaints: CLIENT_COMPLAINTS as Complaint[],
         applications: [],
+        traders: CLIENT_TRADERS as unknown as Trader[],
+        products: CLIENT_PRODUCTS as unknown as Product[],
+        orders: CLIENT_ORDERS as unknown as Order[],
+        notifications: [],
       });
     }
   }, [targetMarketId]);

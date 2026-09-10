@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useMemo } from 'react';
 import { CLIENT_ORDERS } from '@/data/clientCmsData';
@@ -17,27 +17,45 @@ const ORDER_STATUS_MAP: Record<OrderStatus, { label: string; bg: string; text: s
   cancelled: { label: 'Đã hủy', bg: '#FEE2E2', text: '#991B1B', border: '#FECACA' }
 };
 
-export default function OrdersManagementView() {
+interface OrdersManagementViewProps {
+  orders?: any[];
+  selectedMarketId?: string;
+}
+
+export default function OrdersManagementView({ orders, selectedMarketId }: OrdersManagementViewProps = {}) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
+  const effectiveOrders = useMemo(() => {
+    let list = orders && orders.length > 0 ? orders : CLIENT_ORDERS;
+    if (selectedMarketId && selectedMarketId !== 'all') {
+      const byMarket = list.filter((o: any) =>
+        o.marketId === selectedMarketId ||
+        o.markets?.id === selectedMarketId ||
+        o.stalls?.marketId === selectedMarketId
+      );
+      if (byMarket.length > 0) return byMarket;
+    }
+    return list;
+  }, [orders, selectedMarketId]);
+
   const filteredOrders = useMemo(() => {
-    return CLIENT_ORDERS.filter((o) => {
+    return effectiveOrders.filter((o: any) => {
       if (statusFilter !== 'all' && o.status !== statusFilter) return false;
       if (search.trim()) {
         const q = search.toLowerCase();
-        const matchCode = o.code.toLowerCase().includes(q);
-        const matchReceiver = o.receiverName.toLowerCase().includes(q);
-        const matchPhone = o.receiverPhone.includes(q);
+        const matchCode = (o.code || '').toLowerCase().includes(q);
+        const matchReceiver = (o.receiverName || o.customer?.fullName || '').toLowerCase().includes(q);
+        const matchPhone = (o.receiverPhone || o.customer?.phone || '').includes(q);
         const matchStall = (o.stalls?.code || '').toLowerCase().includes(q);
         if (!matchCode && !matchReceiver && !matchPhone && !matchStall) return false;
       }
       return true;
     });
-  }, [search, statusFilter]);
+  }, [effectiveOrders, search, statusFilter]);
 
   const totalAmount = useMemo(() => {
-    return filteredOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+    return filteredOrders.reduce((sum: number, o: any) => sum + (o.totalAmount || 0), 0);
   }, [filteredOrders]);
 
   return (
@@ -51,7 +69,7 @@ export default function OrdersManagementView() {
             </div>
             <h1 className="text-xl font-black text-[#153154] tracking-tight">Đơn Hàng Online</h1>
             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
-              {CLIENT_ORDERS.length} đơn phát sinh
+              {effectiveOrders.length} đơn phát sinh
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
@@ -106,19 +124,19 @@ export default function OrdersManagementView() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredOrders.map((o) => {
-                const st = ORDER_STATUS_MAP[o.status] || ORDER_STATUS_MAP.completed;
+                const st = (o.status && ORDER_STATUS_MAP[o.status as OrderStatus]) || ORDER_STATUS_MAP.completed;
                 return (
                   <tr key={o.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-3 px-3.5 font-mono font-black text-[#153154] whitespace-nowrap">
                       {o.code}
                     </td>
                     <td className="py-3 px-3.5 whitespace-nowrap">
-                      <div className="font-bold text-[#153154]">{o.receiverName}</div>
-                      <div className="text-[10px] text-slate-400">{o.receiverPhone}</div>
+                      <div className="font-bold text-[#153154]">{o.receiverName || o.customer?.fullName || 'Khách hàng'}</div>
+                      <div className="text-[10px] text-slate-400">{o.receiverPhone || o.customer?.phone || '—'}</div>
                     </td>
                     <td className="py-3 px-3.5 whitespace-nowrap">
-                      <div className="font-bold text-[#153154]">{o.stalls?.code}</div>
-                      <div className="text-[10px] text-slate-400">{o.stalls?.name}</div>
+                      <div className="font-bold text-[#153154]">{o.stalls?.code || '—'}</div>
+                      <div className="text-[10px] text-slate-400">{o.stalls?.name || o.markets?.name || 'Sạp'}</div>
                     </td>
                     <td className="py-3 px-3.5 whitespace-nowrap">
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold ${
@@ -131,7 +149,7 @@ export default function OrdersManagementView() {
                       </span>
                     </td>
                     <td className="py-3 px-3.5 text-right whitespace-nowrap font-mono font-extrabold text-[#0B7A3A] text-sm">
-                      {o.totalAmount.toLocaleString('vi-VN')} đ
+                      {(o.totalAmount || 0).toLocaleString('vi-VN')} đ
                     </td>
                     <td className="py-3 px-3.5 whitespace-nowrap">
                       <span
@@ -145,7 +163,7 @@ export default function OrdersManagementView() {
                       {o.note || '—'}
                     </td>
                     <td className="py-3 px-3.5 whitespace-nowrap text-slate-400 font-mono text-[11px]">
-                      {o.createdAt.replace('T', ' ').slice(0, 16)}
+                      {o.createdAt ? o.createdAt.replace('T', ' ').slice(0, 16) : '—'}
                     </td>
                   </tr>
                 );

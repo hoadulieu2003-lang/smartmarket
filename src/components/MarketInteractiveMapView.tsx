@@ -167,6 +167,7 @@ export interface MarketInteractiveMapViewProps {
   selectedMarketId?: string;
   complaints?: any[];
   zones?: any[];
+  products?: any[];
 }
 
 export default function MarketInteractiveMapView({
@@ -177,6 +178,7 @@ export default function MarketInteractiveMapView({
   selectedMarketId,
   complaints,
   zones,
+  products,
 }: MarketInteractiveMapViewProps) {
   const activeMarket = useMemo(() => {
     if (selectedMarketId && selectedMarketId !== 'all') {
@@ -498,8 +500,9 @@ export default function MarketInteractiveMapView({
   // Các sản phẩm của sạp đang chọn
   const selectedStallProducts = useMemo(() => {
     if (!selectedStall) return [];
-    return CLIENT_PRODUCTS.filter((p) => p.stallId === selectedStall.id || p.stalls?.code === selectedStall.code);
-  }, [selectedStall]);
+    const sourceProducts = products && products.length > 0 ? products : CLIENT_PRODUCTS;
+    return sourceProducts.filter((p: any) => p.stallId === selectedStall.id || p.stalls?.code === selectedStall.code);
+  }, [selectedStall, products]);
 
   // Phản ánh của sạp đang chọn
   const selectedStallComplaints = useMemo(() => {

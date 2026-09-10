@@ -56,6 +56,10 @@ export default function SmartMarketHome() {
     complaints: liveComplaints,
     zones: liveZones,
     applications: liveApplications,
+    traders: liveTraders,
+    products: liveProducts,
+    orders: liveOrders,
+    notifications: liveNotifications,
     isConnected: isBackendConnected,
     isLoading: isBackendLoading,
     resolveComplaint: handleBackendResolveComplaint,
@@ -129,7 +133,14 @@ export default function SmartMarketHome() {
     }
     return URGENT_ACTIONS.pendingProfiles.totalPending;
   }, [liveApplications]);
-  const pendingOrdersCount = CLIENT_ORDERS.length;
+
+  const pendingOrdersCount = useMemo(() => {
+    if (liveOrders && liveOrders.length > 0) {
+      const pending = liveOrders.filter((o: any) => o.status === 'pending');
+      return pending.length > 0 ? pending.length : liveOrders.length;
+    }
+    return CLIENT_ORDERS.length;
+  }, [liveOrders]);
 
   const handleResolveComplaint = (codeOrId: string) => {
     setResolvedComplaintCodes((prev) => {
@@ -293,15 +304,23 @@ export default function SmartMarketHome() {
             />
           ) : currentView === 'traders' ? (
             <TradersManagementView
+              traders={liveTraders}
+              selectedMarketId={selectedMarketId}
               onNavigateToMap={(code) => {
                 setSelectedStallCodeForMap(code);
                 setCurrentView('market_map');
               }}
             />
           ) : currentView === 'products' ? (
-            <ProductsManagementView />
+            <ProductsManagementView
+              products={liveProducts}
+              selectedMarketId={selectedMarketId}
+            />
           ) : currentView === 'orders' ? (
-            <OrdersManagementView />
+            <OrdersManagementView
+              orders={liveOrders}
+              selectedMarketId={selectedMarketId}
+            />
           ) : currentView === 'complaints' ? (
             <ComplaintsManagementView
               complaints={liveComplaints}
@@ -338,6 +357,7 @@ export default function SmartMarketHome() {
               key="notifications"
               mode="notifications"
               initialTab="notifications"
+              liveNotifications={liveNotifications}
               onUnreadCountChange={setUnreadNotificationsCount}
             />
           ) : ['settings', 'audits', 'operations', 'reports'].includes(currentView) ? (
@@ -369,6 +389,8 @@ export default function SmartMarketHome() {
               stalls={liveStalls}
               zones={liveZones}
               complaints={liveComplaints}
+              traders={liveTraders}
+              products={liveProducts}
             />
           ) : (
             /* VIEW B: SƠ ĐỒ CHỢ & QUY HOẠCH MẶT BẰNG THỰC TẾ CHUẨN KIẾN TRÚC $DESIGN */
@@ -383,6 +405,7 @@ export default function SmartMarketHome() {
                 selectedMarketId={selectedMarketId}
                 complaints={liveComplaints}
                 zones={liveZones}
+                products={liveProducts}
               />
             </div>
           )}

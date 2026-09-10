@@ -60,6 +60,8 @@ interface LiveDashboardOverviewProps {
   stalls?: any[];
   zones?: any[];
   complaints?: any[];
+  traders?: any[];
+  products?: any[];
 }
 
 export interface ComplaintItem {
@@ -495,7 +497,9 @@ export default function LiveDashboardOverview({
   markets,
   stalls,
   zones,
-  complaints
+  complaints,
+  traders,
+  products
 }: LiveDashboardOverviewProps) {
   // 1. Phân giải Chợ hiện tại và Tiêu đề điều hành
   const currentMarket = useMemo(() => {
@@ -720,8 +724,37 @@ export default function LiveDashboardOverview({
   const [stallPage, setStallPage] = useState<number>(1);
   const STALLS_PER_PAGE = 8;
 
-  // 6. Danh sách Tiểu thương đồng bộ từ sạp thực tế
+  // 6. Danh sách Tiểu thương đồng bộ từ backend hoặc sạp thực tế
   const activeTraders = useMemo(() => {
+    if (traders && traders.length > 0) {
+      let sourceTraders = traders;
+      if (selectedMarketId && selectedMarketId !== 'all') {
+        const byMarket = sourceTraders.filter((t: any) =>
+          t.merchantMarketId === selectedMarketId ||
+          t.market?.id === selectedMarketId ||
+          t.marketId === selectedMarketId
+        );
+        if (byMarket.length > 0) sourceTraders = byMarket;
+      }
+      return sourceTraders.map((t: any) => {
+        const stallCode = t.stall?.code || t.stallCode || 'Chưa gán';
+        const contractDays = t.contractDaysLeft ?? 180;
+        const status = t.merchantStatus === 'active'
+          ? (contractDays <= 30 ? `Sắp hết hạn (${contractDays} ngày)` : 'Hoàn tất hồ sơ')
+          : (t.merchantStatus === 'suspended' ? 'Tạm khóa' : 'Chờ duyệt');
+        return {
+          id: t.id,
+          name: t.fullName,
+          stall: stallCode,
+          category: t.category?.name || 'Nông sản',
+          phone: t.phone ? t.phone.slice(0, 7) + ' ***' : '0908 999 ***',
+          contractDays,
+          status,
+          avatar: t.avatar,
+        };
+      });
+    }
+
     const list: any[] = [];
     const seen = new Set<string>();
     activeStalls.forEach((s: any) => {
@@ -741,7 +774,7 @@ export default function LiveDashboardOverview({
       }
     });
     return list.length > 0 ? list : SAMPLE_TRADERS;
-  }, [activeStalls]);
+  }, [traders, selectedMarketId, activeStalls]);
 
   const traderCount = useMemo(() => {
     if (currentMarket?.traderCount) return currentMarket.traderCount;

@@ -204,12 +204,14 @@ interface SystemOperationsViewProps {
   initialTab?: 'notifications' | 'settings' | 'audits' | 'operations' | 'reports';
   onUnreadCountChange?: (count: number) => void;
   mode?: 'notifications' | 'settings' | 'all';
+  liveNotifications?: any[];
 }
 
 export default function SystemOperationsView({
   initialTab = 'notifications',
   onUnreadCountChange,
-  mode = 'all'
+  mode = 'all',
+  liveNotifications
 }: SystemOperationsViewProps) {
   // Xác định tab mặc định dựa theo mode và initialTab
   const resolvedDefault = useMemo<'notifications' | 'settings' | 'audits'>(() => {
@@ -253,6 +255,54 @@ export default function SystemOperationsView({
     }
     return INITIAL_NOTIFICATIONS;
   });
+
+  // Đồng bộ thông báo thực tế từ Backend API (/admin/notifications)
+  useEffect(() => {
+    if (liveNotifications && liveNotifications.length > 0) {
+      setNotifications((prev) => {
+        const existingIds = new Set(prev.map((n) => n.id));
+        const newItems: NotificationItem[] = [];
+        liveNotifications.forEach((ln: any) => {
+          if (!existingIds.has(ln.id)) {
+            const isUrgent = ln.priority === 'urgent' || ln.priority === 'high';
+            const isOrder = ln.type === 'order';
+            const isComplaint = ln.type === 'complaint';
+            const category = isUrgent ? 'urgent' : isOrder ? 'order' : isComplaint ? 'sanitation' : 'general';
+            const categoryLabel = isUrgent ? 'Khẩn cấp' : isOrder ? 'Đơn hàng' : isComplaint ? 'Phản ánh PAKN' : 'Hệ thống';
+            const categoryColor = isUrgent
+              ? 'bg-rose-50 text-rose-700 border-rose-200'
+              : isOrder
+              ? 'bg-blue-50 text-blue-700 border-blue-200'
+              : isComplaint
+              ? 'bg-amber-50 text-amber-700 border-amber-200'
+              : 'bg-slate-50 text-slate-700 border-slate-200';
+
+            newItems.push({
+              id: ln.id,
+              title: ln.title || 'Thông báo hệ thống',
+              content: ln.content || '',
+              category,
+              categoryLabel,
+              categoryColor,
+              channel: 'sms_zalo',
+              channelLabel: 'Zalo Mini App',
+              channelIcon: 'sms_zalo',
+              scope: ln.markets?.name || 'Toàn hệ thống',
+              sender: ln.creator?.fullName || 'BQL Chợ Thông Minh',
+              createdAt: ln.createdAt ? ln.createdAt.replace('T', ' ').slice(0, 16) : 'Vừa xong',
+              isRead: false,
+              isPinned: isUrgent,
+            });
+          }
+        });
+        if (newItems.length > 0) {
+          return [...newItems, ...prev];
+        }
+        return prev;
+      });
+    }
+  }, [liveNotifications]);
+
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedNotif, setSelectedNotif] = useState<NotificationItem | null>(null);

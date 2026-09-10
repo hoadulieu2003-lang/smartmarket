@@ -382,3 +382,31 @@ export interface DashboardOverview {
   traderCasualCount?: number;
   occupiedStallChangePercent?: number;
 }
+
+export interface Notification {
+  id: string;
+  marketId?: string | null;
+  createdBy?: string | null;
+  title: string;
+  content: string;
+  type: string;
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  targetType?: string | null;
+  targetId?: string | null;
+  attachment?: any;
+  refType?: string | null;
+  refId?: string | null;
+  sentAt: string;
+  createdAt: string;
+  updatedAt?: string;
+  markets?: {
+    id: string;
+    name: string;
+  } | null;
+  creator?: {
+    id: string;
+    fullName: string;
+  } | null;
+  recipientCount?: number;
+  readCount?: number;
+}

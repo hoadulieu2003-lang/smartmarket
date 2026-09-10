@@ -10,10 +10,12 @@ import {
 } from 'lucide-react';
 
 interface TradersManagementViewProps {
+  traders?: any[];
+  selectedMarketId?: string;
   onNavigateToMap?: (stallCode: string) => void;
 }
 
-export default function TradersManagementView({ onNavigateToMap }: TradersManagementViewProps) {
+export default function TradersManagementView({ traders, selectedMarketId, onNavigateToMap }: TradersManagementViewProps) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [sellerTypeFilter, setSellerTypeFilter] = useState<string>('all');
@@ -30,13 +32,26 @@ export default function TradersManagementView({ onNavigateToMap }: TradersManage
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedTrader]);
 
+  const effectiveTraders = useMemo(() => {
+    let list = traders && traders.length > 0 ? traders : CLIENT_TRADERS;
+    if (selectedMarketId && selectedMarketId !== 'all') {
+      const byMarket = list.filter((t: any) =>
+        t.merchantMarketId === selectedMarketId ||
+        t.market?.id === selectedMarketId ||
+        t.marketId === selectedMarketId
+      );
+      if (byMarket.length > 0) return byMarket;
+    }
+    return list;
+  }, [traders, selectedMarketId]);
+
   const filteredTraders = useMemo(() => {
-    return CLIENT_TRADERS.filter((t) => {
+    return effectiveTraders.filter((t) => {
       if (statusFilter !== 'all' && t.merchantStatus !== statusFilter) return false;
       if (sellerTypeFilter !== 'all' && t.sellerType !== sellerTypeFilter) return false;
       if (search.trim()) {
         const q = search.toLowerCase();
-        const matchName = t.fullName.toLowerCase().includes(q);
+        const matchName = (t.fullName || '').toLowerCase().includes(q);
         const matchPhone = (t.phone || '').includes(q);
         const matchStall = (t.stall?.code || '').toLowerCase().includes(q);
         const matchCat = (t.category?.name || '').toLowerCase().includes(q);
@@ -44,15 +59,15 @@ export default function TradersManagementView({ onNavigateToMap }: TradersManage
       }
       return true;
     });
-  }, [search, statusFilter, sellerTypeFilter]);
+  }, [effectiveTraders, search, statusFilter, sellerTypeFilter]);
 
   const stats = useMemo(() => {
-    const total = CLIENT_TRADERS.length;
-    const active = CLIENT_TRADERS.filter((t) => t.merchantStatus === 'active').length;
-    const shop = CLIENT_TRADERS.filter((t) => t.sellerType === 'shop').length;
-    const casual = CLIENT_TRADERS.filter((t) => t.sellerType === 'casual').length;
+    const total = effectiveTraders.length;
+    const active = effectiveTraders.filter((t) => t.merchantStatus === 'active').length;
+    const shop = effectiveTraders.filter((t) => t.sellerType === 'shop').length;
+    const casual = effectiveTraders.filter((t) => t.sellerType === 'casual').length;
     return { total, active, shop, casual };
-  }, []);
+  }, [effectiveTraders]);
 
   return (
     <div className="space-y-4 font-sans text-slate-800">
@@ -65,7 +80,7 @@ export default function TradersManagementView({ onNavigateToMap }: TradersManage
             </div>
             <h1 className="text-xl font-black text-[#153154] tracking-tight">Quản Lý Tiểu Thương</h1>
             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
-              {CLIENT_TRADERS.length} hồ sơ hoạt động
+              {effectiveTraders.length} hồ sơ hoạt động
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useMemo } from 'react';
 import { CLIENT_PRODUCTS } from '@/data/clientCmsData';
@@ -8,16 +8,34 @@ import {
   Eye, CheckCircle2, AlertTriangle, ArrowRight
 } from 'lucide-react';
 
-export default function ProductsManagementView() {
+interface ProductsManagementViewProps {
+  products?: any[];
+  selectedMarketId?: string;
+}
+
+export default function ProductsManagementView({ products, selectedMarketId }: ProductsManagementViewProps = {}) {
   const [search, setSearch] = useState('');
   const [hidePrices, setHidePrices] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
+  const effectiveProducts = useMemo(() => {
+    let list = products && products.length > 0 ? products : CLIENT_PRODUCTS;
+    if (selectedMarketId && selectedMarketId !== 'all') {
+      const byMarket = list.filter((p: any) =>
+        p.stalls?.marketId === selectedMarketId ||
+        p.stalls?.markets?.id === selectedMarketId ||
+        p.marketId === selectedMarketId
+      );
+      if (byMarket.length > 0) return byMarket;
+    }
+    return list;
+  }, [products, selectedMarketId]);
+
   const filteredProducts = useMemo(() => {
-    return CLIENT_PRODUCTS.filter((p) => {
+    return effectiveProducts.filter((p: any) => {
       if (search.trim()) {
         const q = search.toLowerCase();
-        const matchName = p.name.toLowerCase().includes(q);
+        const matchName = (p.name || '').toLowerCase().includes(q);
         const matchStall = (p.stalls?.code || '').toLowerCase().includes(q);
         const matchCat = (p.categories?.name || '').toLowerCase().includes(q);
         const matchOrigin = (p.origin || '').toLowerCase().includes(q);
@@ -25,7 +43,7 @@ export default function ProductsManagementView() {
       }
       return true;
     });
-  }, [search]);
+  }, [effectiveProducts, search]);
 
   return (
     <div className="space-y-4 font-sans text-slate-800">
@@ -38,7 +56,7 @@ export default function ProductsManagementView() {
             </div>
             <h1 className="text-xl font-black text-[#153154] tracking-tight">Sản Phẩm & Hàng Hóa</h1>
             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-              {CLIENT_PRODUCTS.length} mặt hàng niêm yết
+              {effectiveProducts.length} mặt hàng niêm yết
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
@@ -99,19 +117,19 @@ export default function ProductsManagementView() {
                   <td className="py-3 px-3.5">
                     <div className="flex items-center gap-3">
                       <img
-                        src={p.images[0]?.url}
+                        src={(p.images && p.images.length > 0 && p.images[0]?.url) ? p.images[0].url : 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150'}
                         alt={p.name}
                         className="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-2xs shrink-0"
                       />
                       <div>
                         <div className="font-bold text-[#153154] max-w-[260px] truncate">{p.name}</div>
-                        <div className="text-[11px] text-slate-400">{p.categories?.name}</div>
+                        <div className="text-[11px] text-slate-400">{p.categories?.name || 'Nông sản thực phẩm'}</div>
                       </div>
                     </div>
                   </td>
                   <td className="py-3 px-3.5 whitespace-nowrap">
-                    <div className="font-bold text-[#153154]">{p.stalls?.code}</div>
-                    <div className="text-[10px] text-slate-400">{p.stalls?.name}</div>
+                    <div className="font-bold text-[#153154]">{p.stalls?.code || '—'}</div>
+                    <div className="text-[10px] text-slate-400">{p.stalls?.name || 'Sạp'}</div>
                   </td>
                   <td className="py-3 px-3.5 text-right whitespace-nowrap">
                     {hidePrices ? (
@@ -119,14 +137,14 @@ export default function ProductsManagementView() {
                     ) : (
                       <div>
                         <span className="font-extrabold text-[#0B7A3A] text-sm">
-                          {p.finalPrice?.toLocaleString('vi-VN')} đ
+                          {(p.finalPrice ?? p.price ?? 0).toLocaleString('vi-VN')} đ
                         </span>
-                        <span className="text-[10px] text-slate-400">/{p.unit}</span>
+                        <span className="text-[10px] text-slate-400">/{p.unit || 'kg'}</span>
                       </div>
                     )}
                   </td>
                   <td className="py-3 px-3.5 text-right whitespace-nowrap font-mono font-bold text-slate-700">
-                    {p.quantity} {p.unit}
+                    {p.quantity ?? 0} {p.unit || 'kg'}
                   </td>
                   <td className="py-3 px-3.5 whitespace-nowrap text-slate-600">
                     <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-medium">
@@ -142,9 +160,9 @@ export default function ProductsManagementView() {
                   <td className="py-3 px-3.5 text-right whitespace-nowrap font-bold text-amber-600">
                     <span className="inline-flex items-center gap-1">
                       <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      {p.ratingAvg.toFixed(1)}
+                      {(p.ratingAvg ?? 5).toFixed(1)}
                     </span>
-                    <span className="text-[10px] text-slate-400 ml-1">({p.reviewCount})</span>
+                    <span className="text-[10px] text-slate-400 ml-1">({p.reviewCount ?? 0})</span>
                   </td>
                 </tr>
               ))}
