@@ -35,23 +35,39 @@ describe('CMS Client Integration Views', () => {
     expect(screen.getByText('0912 345 601')).toBeDefined();
   });
 
-  it('renders ProductsManagementView and toggles price visibility', () => {
+  it('renders ProductsManagementView, opens product detail modal and toggles price', () => {
     render(<ProductsManagementView />);
 
     expect(screen.getByText(/Sản Phẩm & Hàng Hóa/i)).toBeDefined();
-    expect(screen.getByText(/Thịt bò thăn hoa tươi/i)).toBeDefined();
+    const productRow = screen.getByText(/Thịt bò thăn hoa tươi/i);
+    expect(productRow).toBeDefined();
+
+    // Click row opens modal
+    fireEvent.click(productRow);
+    expect(screen.getByRole('dialog')).toBeDefined();
+    expect(screen.getByText(/Nguồn gốc & Truy xuất/i)).toBeDefined();
+
+    // Close modal
+    const closeBtn = screen.getByRole('button', { name: /^Đóng$/i });
+    fireEvent.click(closeBtn);
+    expect(screen.queryByRole('dialog')).toBeNull();
 
     const toggleBtn = screen.getByRole('button', { name: /Đang ẩn giá bán|Hiển thị giá bán/i });
     fireEvent.click(toggleBtn);
     expect(screen.getByText(/Đang ẩn giá bán/i)).toBeDefined();
   });
 
-  it('renders OrdersManagementView with order list and amounts', () => {
+  it('renders OrdersManagementView with order list and displays empty state when not found', () => {
     render(<OrdersManagementView />);
 
     expect(screen.getByText(/Đơn Hàng Online/i)).toBeDefined();
     expect(screen.getByText('DH-20260908-01')).toBeDefined();
     expect(screen.getByText('Nguyễn Hồng Anh')).toBeDefined();
+
+    // Search non-existent order
+    const searchInput = screen.getByPlaceholderText(/Tìm mã đơn/i);
+    fireEvent.change(searchInput, { target: { value: 'NONEXISTENT_ORDER_CODE_XYZ' } });
+    expect(screen.getByText(/Không tìm thấy đơn hàng nào khớp với điều kiện lọc hoặc tìm kiếm/i)).toBeDefined();
   });
 
   it('renders ComplaintsManagementView and allows marking as resolved', () => {

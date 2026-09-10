@@ -28,6 +28,8 @@ const TYPE_MAP: Record<ComplaintType, string> = {
   other: 'Trật tự & Mặt bằng'
 };
 
+const EMPTY_RESOLVED_CODES: string[] = [];
+
 interface ComplaintsManagementViewProps {
   onNavigateToMap?: (stallCode: string) => void;
   resolvedCodes?: string[];
@@ -38,7 +40,7 @@ interface ComplaintsManagementViewProps {
 
 export default function ComplaintsManagementView({
   onNavigateToMap,
-  resolvedCodes = [],
+  resolvedCodes = EMPTY_RESOLVED_CODES,
   onResolveComplaint,
   complaints: propComplaints,
   selectedMarketId
@@ -48,6 +50,8 @@ export default function ComplaintsManagementView({
     if (!selectedMarketId || selectedMarketId === 'all') return raw;
     return raw.filter((c: any) => c.marketId === selectedMarketId);
   }, [propComplaints, selectedMarketId]);
+
+  const resolvedCodesKey = useMemo(() => resolvedCodes.join(','), [resolvedCodes]);
 
   const getNormalizedComplaints = (list: any[]) => {
     const localResolved: string[] = typeof window !== 'undefined'
@@ -80,7 +84,7 @@ export default function ComplaintsManagementView({
 
   useEffect(() => {
     setComplaints(getNormalizedComplaints(displaySource));
-  }, [propComplaints, resolvedCodes]);
+  }, [displaySource, resolvedCodesKey]);
   const [search, setSearch] = useState('');
   const [severityFilter, setSeverityFilter] = useState<'all' | 'P0' | 'P1' | 'P2' | 'resolved'>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');

@@ -123,10 +123,17 @@ export default function OrdersManagementView({ orders, selectedMarketId }: Order
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredOrders.map((o) => {
-                const st = (o.status && ORDER_STATUS_MAP[o.status as OrderStatus]) || ORDER_STATUS_MAP.completed;
-                return (
-                  <tr key={o.id} className="hover:bg-slate-50/80 transition-colors">
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-8 text-center text-slate-400">
+                    Không tìm thấy đơn hàng nào khớp với điều kiện lọc hoặc tìm kiếm.
+                  </td>
+                </tr>
+              ) : (
+                filteredOrders.map((o) => {
+                  const st = (o.status && ORDER_STATUS_MAP[o.status as OrderStatus]) || ORDER_STATUS_MAP.completed;
+                  return (
+                    <tr key={o.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-3 px-3.5 font-mono font-black text-[#153154] whitespace-nowrap">
                       {o.code}
                     </td>
@@ -167,8 +174,9 @@ export default function OrdersManagementView({ orders, selectedMarketId }: Order
                     </td>
                   </tr>
                 );
-              })}
-            </tbody>
+              })
+            )}
+          </tbody>
           </table>
         </div>
       </div>
