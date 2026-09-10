@@ -66,6 +66,7 @@ export default function SmartMarketHome() {
     approveApplication,
     rejectApplication,
     requestApplicationInfo,
+    sendBroadcastNotification,
   } = useBackendSync(selectedMarketId);
 
   // 2. Navigation & Shell Layout
@@ -450,6 +451,11 @@ export default function SmartMarketHome() {
               initialTab="notifications"
               liveNotifications={liveNotifications}
               onUnreadCountChange={setUnreadNotificationsCount}
+              selectedMarketId={selectedMarketId}
+              markets={liveMarkets}
+              zones={liveZones}
+              currentUser={currentUser}
+              onSendBroadcast={sendBroadcastNotification}
             />
           ) : ['settings', 'audits', 'operations', 'reports'].includes(currentView) ? (
             <SystemOperationsView
@@ -457,6 +463,11 @@ export default function SmartMarketHome() {
               mode="settings"
               initialTab={currentView === 'audits' ? 'audits' : 'settings'}
               onUnreadCountChange={setUnreadNotificationsCount}
+              selectedMarketId={selectedMarketId}
+              markets={liveMarkets}
+              zones={liveZones}
+              currentUser={currentUser}
+              onSendBroadcast={sendBroadcastNotification}
             />
           ) : currentView === 'overview' ? (
             /* VIEW C: TỔNG QUAN VẬN HÀNH (ĐỒNG BỘ 100% GIAO DIỆN LIVE CMS QL.CHOTHONGMINH.TOP) */

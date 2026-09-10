@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { CLIENT_AUDITS } from '@/data/clientCmsData';
 import {
   Bell, Settings, ScrollText, Plus, Search, Filter, CheckCircle2,
   Clock, AlertTriangle, ShieldAlert, Send, Radio, Megaphone, Trash2,
   Pin, PinOff, Eye, EyeOff, Save, RotateCcw, Building, Users,
   Calendar, ShieldCheck, KeyRound, ExternalLink, X, Smartphone,
-  Volume2, Check, Sparkles, Phone, Mail, UserCheck
+  Volume2, VolumeX, DollarSign, Check, Sparkles, Phone, Mail, UserCheck
 } from 'lucide-react';
+import type { SessionUser } from '@/types/backend';
 
 export interface NotificationItem {
   id: string;
@@ -120,33 +121,33 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   },
   {
     id: 'notif-4',
-    title: 'Tăng cường kiểm soát nguồn gốc thực phẩm tươi sống & rã đông gia cầm',
-    content: 'Sau đợt kiểm tra hiện trường ngày 08/09, BQL yêu cầu các hộ tươi sống Khu A tuyệt đối không rã đông gia cầm trên sàn xi măng, phải có khay inox cách mặt sàn tối thiểu 20cm và xuất trình hóa đơn kiểm dịch thú y hợp lệ.',
+    title: 'Lịch phun thuốc tiêu độc khử trùng toàn bộ khu vực thực phẩm tươi sống',
+    content: 'Tổ vệ sinh môi trường sẽ thực hiện phun thuốc khử trùng vào 21h30 tối thứ Bảy (12/09). Yêu cầu tiểu thương ngành hàng Thịt, Thủy hải sản, Rau củ che đậy vật dụng, dọn sạch rác thải trước giờ quy định.',
     category: 'sanitation',
     categoryLabel: 'ATTP & Kiểm dịch',
     categoryColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     channel: 'loudspeaker',
-    channelLabel: 'Loa phát thanh chợ',
+    channelLabel: 'Hệ thống loa chợ',
     channelIcon: 'loudspeaker',
-    scope: 'Khu A · Tươi sống',
-    sender: 'Tổ Thú y & Vệ sinh ATTP - Vũ Văn Cường',
+    scope: 'Khu A & Khu B',
+    sender: 'Tổ trưởng Vệ sinh ATTP - Hoàng Văn Cường',
     createdAt: '08/09/2026 10:00',
     isRead: true,
     isPinned: false
   },
   {
     id: 'notif-5',
-    title: 'Lịch bảo trì máy phát điện dự phòng & hệ thống bơm tăng áp cấp nước',
-    content: 'Hệ thống điện dự phòng sẽ được nổ máy kiểm tra tải trong khung giờ từ 21h45 đến 22h30 đêm nay sau giờ đóng cửa chợ. Các sạp kinh doanh đồ khô vui lòng ngắt cầu dao tổng trước khi ra về.',
+    title: 'Giải tỏa vi phạm lấn chiếm hành lang thoát hiểm & lối đi chung Khu D',
+    content: 'Tổ Kiểm tra trật tự phát hiện 3 trường hợp bày hàng hóa vượt vạch ranh giới kẻ vàng. Đã lập biên bản nhắc nhở lần 1. Nếu tái phạm sẽ tạm đình chỉ kinh doanh theo nội quy số 14/QĐ-BQL.',
     category: 'order',
-    categoryLabel: 'Hạ tầng kỹ thuật',
+    categoryLabel: 'Trật tự mặt bằng',
     categoryColor: 'bg-purple-50 text-purple-700 border-purple-200',
     channel: 'sms_zalo',
-    channelLabel: 'Tin nhắn Zalo',
+    channelLabel: 'Zalo Mini App',
     channelIcon: 'sms_zalo',
-    scope: 'Toàn bộ 5 phân khu',
-    sender: 'Tổ Kỹ thuật Hạ tầng - Phạm Thanh Tùng',
-    createdAt: '07/09/2026 16:20',
+    scope: 'Khu D · Quần áo',
+    sender: 'Đội Trật tự Đô thị & Mặt bằng - Bùi Đức Hiếu',
+    createdAt: '07/09/2026 16:45',
     isRead: true,
     isPinned: false
   }
@@ -205,13 +206,32 @@ interface SystemOperationsViewProps {
   onUnreadCountChange?: (count: number) => void;
   mode?: 'notifications' | 'settings' | 'all';
   liveNotifications?: any[];
+  selectedMarketId?: string;
+  markets?: any[];
+  zones?: any[];
+  currentUser?: SessionUser | null;
+  onSendBroadcast?: (payload: {
+    marketId: string;
+    title: string;
+    content: string;
+    type?: string;
+    priority?: 'low' | 'normal' | 'high' | 'urgent';
+    targetType?: 'market' | 'zone' | 'category' | 'user';
+    targetId?: string | null;
+    channel?: string;
+  }) => Promise<any> | void;
 }
 
 export default function SystemOperationsView({
   initialTab = 'notifications',
   onUnreadCountChange,
   mode = 'all',
-  liveNotifications
+  liveNotifications,
+  selectedMarketId,
+  markets,
+  zones,
+  currentUser,
+  onSendBroadcast,
 }: SystemOperationsViewProps) {
   // Xác định tab mặc định dựa theo mode và initialTab
   const resolvedDefault = useMemo<'notifications' | 'settings' | 'audits'>(() => {
@@ -303,6 +323,138 @@ export default function SystemOperationsView({
     }
   }, [liveNotifications]);
 
+  // Xác định chợ mục tiêu cho phát thông báo
+  const effectiveMarketId = useMemo(() => {
+    if (selectedMarketId && selectedMarketId !== 'all') return selectedMarketId;
+    return markets?.[0]?.id || 'm-dongxuan';
+  }, [selectedMarketId, markets]);
+
+  const [targetMarketId, setTargetMarketId] = useState<string>(effectiveMarketId);
+
+  useEffect(() => {
+    if (selectedMarketId && selectedMarketId !== 'all') {
+      setTargetMarketId(selectedMarketId);
+    }
+  }, [selectedMarketId]);
+
+  // Lọc danh sách phân khu (Zones) theo chợ đang chọn
+  const availableZones = useMemo(() => {
+    if (!zones || zones.length === 0) return [];
+    const filtered = zones.filter((z: any) => z.marketId === targetMarketId);
+    return filtered.length > 0 ? filtered : zones;
+  }, [zones, targetMarketId]);
+
+  // Web Audio API Synthesizer: Âm chuông phát thanh công cộng Ding-Dong (Public Address Chime)
+  const playBroadcastChime = useCallback(() => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+
+      // Nốt 1: D5 (587.33Hz) lúc t=0
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(587.33, ctx.currentTime);
+      gain1.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(ctx.currentTime);
+      osc1.stop(ctx.currentTime + 0.6);
+
+      // Nốt 2: A5 (880Hz) lúc t=0.35s
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(880, ctx.currentTime + 0.35);
+      gain2.gain.setValueAtTime(0.25, ctx.currentTime + 0.35);
+      gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.1);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(ctx.currentTime + 0.35);
+      osc2.stop(ctx.currentTime + 1.1);
+    } catch (err) {
+      console.warn('Web Audio PA chime not supported:', err);
+    }
+  }, []);
+
+  // Web Speech API: Đọc tiêu đề phát thanh bằng giọng nói tiếng Việt
+  const speakAnnouncement = useCallback((text: string) => {
+    try {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'vi-VN';
+        utterance.rate = 0.95;
+        utterance.pitch = 1.05;
+        window.speechSynthesis.speak(utterance);
+      }
+    } catch (err) {
+      console.warn('Speech synthesis error:', err);
+    }
+  }, []);
+
+  const stopAnnouncementSpeech = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Trạng thái phát thanh loa thời gian thực
+  const [activeLoudspeakerBroadcast, setActiveLoudspeakerBroadcast] = useState<{
+    id: string;
+    title: string;
+    scope: string;
+    startedAt: string;
+  } | null>(null);
+
+  const handleStopLoudspeaker = () => {
+    stopAnnouncementSpeech();
+    setActiveLoudspeakerBroadcast(null);
+    showToast('Đã dừng phát thanh trên hệ thống loa chợ');
+  };
+
+  // Mẫu thông báo nghiệp vụ nhanh 1-click
+  const QUICK_TEMPLATES = [
+    {
+      id: 'pccc',
+      name: 'PCCC & Cứu nạn',
+      category: 'urgent' as const,
+      channel: 'all' as const,
+      title: 'Kiểm tra nguồn điện & phòng chống cháy nổ cuối ngày',
+      content: 'Ban Quản lý Chợ yêu cầu 100% các hộ kinh doanh ngắt toàn bộ aptomat nguồn điện tủ đông, bếp đun trước khi rời sạp. Đội bảo vệ sẽ kiểm tra và niêm phong lúc 21h30.'
+    },
+    {
+      id: 'fee',
+      name: 'Đôn đốc nộp phí & nợ',
+      category: 'fee' as const,
+      channel: 'sms_zalo' as const,
+      title: 'Đôn đốc quyết toán nợ phí dịch vụ & tiền thuê sạp',
+      content: 'Đề nghị các hộ tiểu thương còn nợ phí sạp và tiền điện nước nhanh chóng đối soát và quét mã VietQR thanh toán trước 17h00 hôm nay để bảo đảm quyền lợi kinh doanh.'
+    },
+    {
+      id: 'sanitation',
+      name: 'Tổng vệ sinh & ATTP',
+      category: 'sanitation' as const,
+      channel: 'loudspeaker' as const,
+      title: 'Tổng vệ sinh, thu gom rác thải & phun khử trùng định kỳ',
+      content: '18h00 chiều nay toàn chợ thực hiện tổng dọn dẹp quầy sạp, che đậy hàng hóa thực phẩm và phối hợp cùng tổ vệ sinh môi trường khử khuẩn mặt sàn.'
+    },
+    {
+      id: 'order',
+      name: 'Trật tự & An ninh',
+      category: 'order' as const,
+      channel: 'all' as const,
+      title: 'Tăng cường cảnh giác phòng chống trộm cắp & lấn chiếm lối đi',
+      content: 'Nhắc nhở bà con tiểu thương và khách mua sắm tự bảo quản tư trang tài sản cá nhân, tuyệt đối không bày hàng tràn ra lối thoát hiểm công cộng.'
+    }
+  ];
+
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedNotif, setSelectedNotif] = useState<NotificationItem | null>(null);
@@ -313,7 +465,7 @@ export default function SystemOperationsView({
   const [newContent, setNewContent] = useState('');
   const [newCategory, setNewCategory] = useState<'urgent' | 'order' | 'fee' | 'sanitation' | 'general'>('urgent');
   const [newChannel, setNewChannel] = useState<'loudspeaker' | 'sms_zalo' | 'bulletin' | 'all'>('all');
-  const [newScope, setNewScope] = useState('Toàn chợ (50 sạp)');
+  const [newScope, setNewScope] = useState('all');
   const [isBroadcasting, setIsBroadcasting] = useState(false);
 
   // Số lượng thông báo chưa đọc
@@ -335,6 +487,7 @@ export default function SystemOperationsView({
         if (filterCategory === 'urgent') return n.category === 'urgent';
         if (filterCategory === 'fee') return n.category === 'fee';
         if (filterCategory === 'sanitation') return n.category === 'sanitation';
+        if (filterCategory === 'order') return n.category === 'order';
         return true;
       })
       .filter((n) => {
@@ -382,51 +535,92 @@ export default function SystemOperationsView({
   };
 
   // Hành động: Phát thông báo mới
-  const handleSendBroadcast = (e: React.FormEvent) => {
+  const handleSendBroadcast = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !newContent.trim()) return;
 
     setIsBroadcasting(true);
-    setTimeout(() => {
-      const categoryMap = {
-        urgent: { label: 'Khẩn cấp', color: 'bg-rose-50 text-rose-700 border-rose-200' },
-        fee: { label: 'Thu phí & Công nợ', color: 'bg-amber-50 text-amber-700 border-amber-200' },
-        sanitation: { label: 'ATTP & Kiểm dịch', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-        order: { label: 'Trật tự mặt bằng', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-        general: { label: 'Thông báo chung', color: 'bg-blue-50 text-blue-700 border-blue-200' }
-      };
 
-      const channelLabelMap = {
-        loudspeaker: 'Loa phát thanh',
-        sms_zalo: 'Tin nhắn SMS/Zalo',
-        bulletin: 'Bảng tin điện tử',
-        all: 'Loa + SMS + Bảng tin'
-      };
+    const categoryMap = {
+      urgent: { label: 'Khẩn cấp', color: 'bg-rose-50 text-rose-700 border-rose-200' },
+      fee: { label: 'Thu phí & Công nợ', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+      sanitation: { label: 'ATTP & Kiểm dịch', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+      order: { label: 'Trật tự mặt bằng', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+      general: { label: 'Thông báo chung', color: 'bg-blue-50 text-blue-700 border-blue-200' }
+    };
 
-      const newNotifItem: NotificationItem = {
-        id: `notif-${Date.now()}`,
-        title: newTitle.trim(),
-        content: newContent.trim(),
-        category: newCategory,
-        categoryLabel: categoryMap[newCategory].label,
-        categoryColor: categoryMap[newCategory].color,
-        channel: newChannel,
-        channelLabel: channelLabelMap[newChannel],
-        channelIcon: newChannel === 'loudspeaker' ? 'loudspeaker' : newChannel === 'sms_zalo' ? 'sms_zalo' : 'bulletin',
-        scope: newScope,
-        sender: 'Ban Quản Lý Chợ Đồng Xuân',
-        createdAt: 'Vừa xong',
-        isRead: true,
-        isPinned: newCategory === 'urgent'
-      };
+    const channelLabelMap = {
+      loudspeaker: 'Loa phát thanh',
+      sms_zalo: 'Tin nhắn SMS/Zalo',
+      bulletin: 'Bảng tin điện tử',
+      all: 'Loa + SMS + Bảng tin'
+    };
 
-      setNotifications((prev) => [newNotifItem, ...prev]);
-      setIsBroadcasting(false);
-      setIsBroadcastModalOpen(false);
-      setNewTitle('');
-      setNewContent('');
-      showToast(`Đã phát thông báo thành công tới ${newScope}!`);
-    }, 400);
+    const currentMarketObj = (markets || []).find((m: any) => m.id === targetMarketId) || { name: 'Chợ Đồng Xuân', stallCount: 50 };
+    const isTargetZone = newScope !== 'all';
+    const selectedZoneObj = availableZones.find((z: any) => z.id === newScope);
+    const scopeLabel = isTargetZone && selectedZoneObj
+      ? `${selectedZoneObj.code ? selectedZoneObj.code + ' · ' : ''}${selectedZoneObj.name}`
+      : `Toàn chợ ${currentMarketObj.name} (${currentMarketObj.stallCount || 50} sạp)`;
+
+    const senderName = currentUser?.fullName
+      ? `${currentUser.fullName} (${currentUser.role === 'super_admin' ? 'Super Admin' : 'BQL Chợ'})`
+      : `Ban Quản Lý ${currentMarketObj.name}`;
+
+    const newNotifItem: NotificationItem = {
+      id: `notif-${Date.now()}`,
+      title: newTitle.trim(),
+      content: newContent.trim(),
+      category: newCategory,
+      categoryLabel: categoryMap[newCategory].label,
+      categoryColor: categoryMap[newCategory].color,
+      channel: newChannel,
+      channelLabel: channelLabelMap[newChannel],
+      channelIcon: newChannel === 'loudspeaker' ? 'loudspeaker' : newChannel === 'sms_zalo' ? 'sms_zalo' : 'bulletin',
+      scope: scopeLabel,
+      sender: senderName,
+      createdAt: 'Vừa xong',
+      isRead: false,
+      isPinned: newCategory === 'urgent'
+    };
+
+    // Kết nối Backend API
+    if (onSendBroadcast) {
+      try {
+        await onSendBroadcast({
+          marketId: targetMarketId,
+          title: newTitle.trim(),
+          content: newContent.trim(),
+          type: newCategory === 'sanitation' ? 'general' : newCategory,
+          priority: newCategory === 'urgent' ? 'urgent' : 'normal',
+          targetType: isTargetZone ? 'zone' : 'market',
+          targetId: isTargetZone ? newScope : null,
+          channel: newChannel,
+        });
+      } catch (err) {
+        console.warn('Lỗi đồng bộ thông báo lên backend:', err);
+      }
+    }
+
+    setNotifications((prev) => [newNotifItem, ...prev]);
+
+    // Kích hoạt loa phát thanh nếu kênh phát có Loa
+    if (newChannel === 'loudspeaker' || newChannel === 'all') {
+      playBroadcastChime();
+      speakAnnouncement(`Ban Quản Lý Chợ xin thông báo: ${newTitle.trim()}`);
+      setActiveLoudspeakerBroadcast({
+        id: newNotifItem.id,
+        title: newNotifItem.title,
+        scope: scopeLabel,
+        startedAt: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      });
+    }
+
+    setIsBroadcasting(false);
+    setIsBroadcastModalOpen(false);
+    setNewTitle('');
+    setNewContent('');
+    showToast(`Đã phát thông báo thành công tới ${scopeLabel}!`);
   };
 
   // =========================================================================
@@ -628,6 +822,59 @@ export default function SystemOperationsView({
       {/* ========================================================================= */}
       {(mode === 'notifications' || (mode === 'all' && activeMainTab === 'notifications')) && (
         <div className="space-y-4">
+          {/* BANNER PHÁT THANH TRÊN HỆ THỐNG LOA (LIVE ON-AIR BANNER) */}
+          {activeLoudspeakerBroadcast && (
+            <div className="bg-amber-500 text-slate-950 p-3.5 sm:p-4 rounded-2xl shadow-lg border border-amber-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in slide-in-from-top-3">
+              <div className="flex items-center gap-3">
+                <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-950 text-amber-400 shrink-0">
+                  <Megaphone className="w-5 h-5 animate-pulse" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-rose-500 animate-ping" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-rose-500" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-950 text-amber-300 tracking-wider">
+                      ON AIR · ĐANG PHÁT THANH TRÊN LOA
+                    </span>
+                    <span className="text-xs font-bold text-slate-900/80">
+                      Bắt đầu lúc {activeLoudspeakerBroadcast.startedAt}
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-black text-slate-950 mt-0.5 line-clamp-1">
+                    {activeLoudspeakerBroadcast.title}
+                  </h4>
+                  <p className="text-xs font-medium text-slate-900/90">
+                    Phạm vi: {activeLoudspeakerBroadcast.scope}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 self-end sm:self-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    playBroadcastChime();
+                    speakAnnouncement(activeLoudspeakerBroadcast.title);
+                    showToast('Đang phát lại thông báo trên loa');
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-slate-950/15 hover:bg-slate-950/25 text-slate-950 text-xs font-black flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Phát lại chuông và lời đọc"
+                >
+                  <Volume2 className="w-3.5 h-3.5" />
+                  <span>Phát lại</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStopLoudspeaker}
+                  className="px-3 py-1.5 rounded-xl bg-slate-950 text-amber-400 hover:bg-slate-900 text-xs font-black flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                >
+                  <VolumeX className="w-3.5 h-3.5" />
+                  <span>Dừng phát loa</span>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Thanh công cụ lọc & tìm kiếm */}
           <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             {/* Tab lọc trạng thái */}
@@ -676,6 +923,28 @@ export default function SystemOperationsView({
                 }`}
               >
                 Thu phí
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterCategory('sanitation')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap cursor-pointer transition-colors ${
+                  filterCategory === 'sanitation'
+                    ? 'bg-teal-600 text-white'
+                    : 'bg-teal-50 text-teal-700 hover:bg-teal-100'
+                }`}
+              >
+                Vệ sinh & ATTP
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterCategory('order')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap cursor-pointer transition-colors ${
+                  filterCategory === 'order'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
+                }`}
+              >
+                Trật tự
               </button>
             </div>
 
@@ -758,6 +1027,28 @@ export default function SystemOperationsView({
 
                   {/* Hành động nhanh trên thẻ */}
                   <div className="flex items-center gap-1.5 self-end md:self-center shrink-0">
+                    {(n.channel === 'loudspeaker' || n.channel === 'all') && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          playBroadcastChime();
+                          speakAnnouncement(`Ban Quản Lý Chợ xin thông báo: ${n.title}`);
+                          setActiveLoudspeakerBroadcast({
+                            id: n.id,
+                            title: n.title,
+                            scope: n.scope,
+                            startedAt: 'Hiện tại',
+                          });
+                          showToast('Đang phát lại thông báo trên loa');
+                        }}
+                        className="p-2 rounded-lg border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 text-xs font-bold cursor-pointer transition-colors"
+                        title="Phát lại thông báo trên loa"
+                      >
+                        <Volume2 className="w-3.5 h-3.5 text-amber-700" />
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       onClick={(e) => handleTogglePin(n.id, e)}
@@ -1207,13 +1498,35 @@ export default function SystemOperationsView({
 
             <div className="pt-2 flex items-center justify-between border-t border-slate-100 text-xs text-slate-500">
               <span>Người phát: <strong className="text-slate-800 font-bold">{selectedNotif.sender}</strong></span>
-              <button
-                type="button"
-                onClick={() => setSelectedNotif(null)}
-                className="min-h-11 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold cursor-pointer"
-              >
-                Đóng
-              </button>
+              <div className="flex items-center gap-2">
+                {(selectedNotif.channel === 'loudspeaker' || selectedNotif.channel === 'all') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playBroadcastChime();
+                      speakAnnouncement(`Ban Quản Lý Chợ xin thông báo: ${selectedNotif.title}`);
+                      setActiveLoudspeakerBroadcast({
+                        id: selectedNotif.id,
+                        title: selectedNotif.title,
+                        scope: selectedNotif.scope,
+                        startedAt: 'Hiện tại',
+                      });
+                      showToast('Đang phát lại thông báo trên loa');
+                    }}
+                    className="min-h-11 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                  >
+                    <Volume2 className="w-4 h-4" />
+                    <span>Phát loa lại</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setSelectedNotif(null)}
+                  className="min-h-11 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold cursor-pointer"
+                >
+                  Đóng
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1242,6 +1555,36 @@ export default function SystemOperationsView({
               </button>
             </div>
 
+            {/* MẪU THÔNG BÁO NGHIỆP VỤ NHANH (QUICK ANNOUNCEMENT TEMPLATES) */}
+            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  Mẫu thông báo nghiệp vụ nhanh
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">Bấm để tự điền mẫu</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {QUICK_TEMPLATES.map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => {
+                      setNewTitle(tpl.title);
+                      setNewContent(tpl.content);
+                      setNewCategory(tpl.category);
+                      setNewChannel(tpl.channel);
+                    }}
+                    className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-amber-50 hover:border-amber-300 text-left transition-all cursor-pointer group"
+                  >
+                    <span className="text-[11px] font-black leading-tight line-clamp-1 text-slate-700 group-hover:text-amber-800">
+                      {tpl.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="space-y-3 text-xs">
               <div>
                 <label className="font-black text-slate-800 block mb-1">
@@ -1260,12 +1603,52 @@ export default function SystemOperationsView({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="font-black text-slate-800 block mb-1">
+                    Chợ mục tiêu:
+                  </label>
+                  <select
+                    value={targetMarketId}
+                    onChange={(e) => {
+                      setTargetMarketId(e.target.value);
+                      setNewScope('all');
+                    }}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:border-[#0B7A3A]"
+                  >
+                    {((markets && markets.length > 0) ? markets : [{ id: 'm-dongxuan', name: 'Chợ Đồng Xuân' }]).map((m: any) => (
+                      <option key={m.id} value={m.id}>{m.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-black text-slate-800 block mb-1">
+                    Phạm vi phát tin:
+                  </label>
+                  <select
+                    value={newScope}
+                    onChange={(e) => setNewScope(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:border-[#0B7A3A]"
+                  >
+                    <option value="all">
+                      {`Toàn bộ chợ (${(markets || []).find((m: any) => m.id === targetMarketId)?.stallCount || 50} sạp)`}
+                    </option>
+                    {availableZones.map((z: any) => (
+                      <option key={z.id} value={z.id}>
+                        {z.code ? `${z.code} · ` : ''}{z.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="font-black text-slate-800 block mb-1">
                     Phân loại nghiệp vụ:
                   </label>
                   <select
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value as any)}
-                    className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white"
+                    className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:border-[#0B7A3A]"
                   >
                     <option value="urgent">Khẩn cấp (PCCC / Sự cố)</option>
                     <option value="fee">Thu phí & Đôn đốc nộp tiền</option>
@@ -1282,7 +1665,7 @@ export default function SystemOperationsView({
                   <select
                     value={newChannel}
                     onChange={(e) => setNewChannel(e.target.value as any)}
-                    className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white"
+                    className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:border-[#0B7A3A]"
                   >
                     <option value="all">Loa phát thanh + SMS + Bảng tin</option>
                     <option value="loudspeaker">Chỉ hệ thống Loa phát thanh</option>
@@ -1292,23 +1675,14 @@ export default function SystemOperationsView({
                 </div>
               </div>
 
-              <div>
-                <label className="font-black text-slate-800 block mb-1">
-                  Phạm vi phát tin:
-                </label>
-                <select
-                  value={newScope}
-                  onChange={(e) => setNewScope(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white"
-                >
-                  <option value="Toàn chợ (50 sạp)">Toàn bộ chợ (50 sạp)</option>
-                  <option value="Khu A · Thực phẩm tươi sống">Khu A · Thực phẩm tươi sống</option>
-                  <option value="Khu B · Nông sản khô & Gia vị">Khu B · Nông sản khô & Gia vị</option>
-                  <option value="Khu C · Ẩm thực & Đồ uống">Khu C · Ẩm thực & Đồ uống</option>
-                  <option value="Khu D · Bách hóa & Đặc sản">Khu D · Bách hóa & Đặc sản</option>
-                  <option value="Khu E · Vải sợi & Quà lưu niệm">Khu E · Vải sợi & Quà lưu niệm</option>
-                </select>
-              </div>
+              {(newChannel === 'loudspeaker' || newChannel === 'all') && (
+                <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 flex items-center gap-2 animate-in fade-in">
+                  <Megaphone className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>
+                    Hệ thống sẽ tự động phát chuông Ding-Dong công cộng và đọc phát thanh qua loa khi gửi.
+                  </span>
+                </div>
+              )}
 
               <div>
                 <label className="font-black text-slate-800 block mb-1">

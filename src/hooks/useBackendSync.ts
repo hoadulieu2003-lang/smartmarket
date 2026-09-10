@@ -444,6 +444,73 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
     [state.isConnected]
   );
 
+  // Hành động phát thông báo toàn chợ / phân khu (kết nối Backend API POST /admin/notifications)
+  const sendBroadcastNotification = useCallback(
+    async (payload: {
+      marketId: string;
+      title: string;
+      content: string;
+      type?: string;
+      priority?: 'low' | 'normal' | 'high' | 'urgent';
+      targetType?: 'market' | 'zone' | 'category' | 'user';
+      targetId?: string | null;
+      channel?: string;
+    }) => {
+      let createdItem: any = null;
+
+      if (state.isConnected) {
+        try {
+          const res = await api.post<any>('/admin/notifications', {
+            marketId: payload.marketId,
+            title: payload.title,
+            content: payload.content,
+            type: payload.type || 'general',
+            priority: payload.priority === 'high' ? 'urgent' : (payload.priority || 'normal'),
+            targetType: payload.targetType || 'market',
+            targetId: payload.targetId || null,
+            send: true,
+          });
+          if (res) {
+            createdItem = (res as any).data || res;
+          }
+        } catch (e) {
+          console.warn('[useBackendSync] Không thể tạo thông báo lên backend:', e);
+        }
+      }
+
+      const targetMarket = state.markets.find((m) => m.id === payload.marketId) || state.markets[0];
+      const notificationToAdd: Notification = createdItem?.id
+        ? {
+            ...createdItem,
+            markets: createdItem.markets || (targetMarket ? { id: targetMarket.id, name: targetMarket.name } : null),
+          }
+        : {
+            id: `notif-${Date.now()}`,
+            marketId: payload.marketId,
+            title: payload.title,
+            content: payload.content,
+            type: payload.type || 'general',
+            priority: (payload.priority as any) || 'normal',
+            targetType: payload.targetType || 'market',
+            targetId: payload.targetId || null,
+            sentAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            markets: targetMarket ? { id: targetMarket.id, name: targetMarket.name } : null,
+            recipientCount: 50,
+            readCount: 0,
+          };
+
+      setState((prev) => ({
+        ...prev,
+        notifications: [notificationToAdd, ...prev.notifications],
+      }));
+
+      return notificationToAdd;
+    },
+    [state.isConnected, state.markets]
+  );
+
   return {
     ...state,
     refetch: syncData,
@@ -451,6 +518,7 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
     approveApplication,
     rejectApplication,
     requestApplicationInfo,
+    sendBroadcastNotification,
   };
 }
 
