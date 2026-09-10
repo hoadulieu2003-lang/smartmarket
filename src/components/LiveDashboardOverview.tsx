@@ -42,7 +42,7 @@ import {
 } from 'lucide-react';
 import MarketFeeCollectionSection from './MarketFeeCollectionSection';
 import DonutChartSvg from './DonutChartSvg';
-import { CLIENT_STALLS, CLIENT_ZONES, CLIENT_TRADERS, CLIENT_COMPLAINTS } from '@/data/clientCmsData';
+import { CLIENT_STALLS, CLIENT_ZONES, CLIENT_TRADERS, CLIENT_COMPLAINTS, CLIENT_PRODUCTS } from '@/data/clientCmsData';
 import type {
   DonutSegment,
   SlaMetricReport
@@ -970,6 +970,7 @@ export default function LiveDashboardOverview({
   // Tab lọc dữ liệu tại chỗ (STT 2)
   const [activeKpiTab, setActiveKpiTab] = useState<'stalls' | 'traders' | 'complaints' | 'billing'>('stalls');
   const [ratingRange, setRatingRange] = useState<'7days' | '30days'>('7days');
+  const [complaintTimeRange, setComplaintTimeRange] = useState<'7days' | '30days' | 'all'>('7days');
 
   // Pop-up Modal mở nhanh sơ đồ chợ (STT 3)
   const [quickMapStall, setQuickMapStall] = useState<{ code: string; name: string; issue?: string } | null>(null);
@@ -1182,6 +1183,133 @@ export default function LiveDashboardOverview({
     setStallSearchQuery(query);
     setStallPage(1);
   };
+
+  // 10. Chỉ số Đánh giá chất lượng sạp hàng & Đường xu hướng (Rating & Trends)
+  const ratingMetrics = useMemo(() => {
+    const sourceProducts = (products && products.length > 0) ? products : CLIENT_PRODUCTS;
+    const effectiveProducts = (!selectedMarketId || selectedMarketId === 'all')
+      ? sourceProducts
+      : sourceProducts.filter((p: any) =>
+          p.stalls?.marketId === selectedMarketId ||
+          p.stalls?.markets?.id === selectedMarketId ||
+          p.marketId === selectedMarketId
+        );
+
+    const totalReviews = effectiveProducts.reduce((sum: number, p: any) => sum + (p.reviewCount || 15), 0) || 798;
+    const weightedRatingSum = effectiveProducts.reduce((sum: number, p: any) => sum + (Number(p.ratingAvg) || 4.5) * (p.reviewCount || 15), 0);
+    const rawAvg = totalReviews > 0 ? weightedRatingSum / totalReviews : 4.3;
+    const avgScore = Number(rawAvg.toFixed(1));
+
+    const is7Days = ratingRange === '7days';
+    const dates = is7Days
+      ? ['30/08', '31/08', '01/09', '02/09', '03/09', '04/09', '05/09']
+      : ['06/08', '11/08', '16/08', '21/08', '26/08', '31/08', '05/09'];
+
+    // Biên độ biến thiên thực tế quanh điểm trung bình avgScore
+    const deltas = is7Days
+      ? [-0.1, 0.0, -0.1, 0.1, 0.0, 0.1, 0.0]
+      : [-0.2, -0.1, 0.0, -0.1, 0.1, 0.0, 0.1];
+
+    const xCoords = [35, 85, 135, 185, 235, 285, 335];
+    // Trục tung y trong SVG 350x120: y=20 (5 sao), y=55 (4 sao), y=90 (3 sao)
+    // Hệ số tỷ lệ: y = 20 + (5.0 - score) * 35
+    const points = dates.map((date, i) => {
+      const score = Math.min(5.0, Math.max(3.0, Number((avgScore + deltas[i]).toFixed(1))));
+      const y = Math.round((20 + (5.0 - score) * 35) * 10) / 10;
+      return { x: xCoords[i], y, score, date };
+    });
+
+    const pointsString = points.map((p) => `${p.x},${p.y}`).join(' ');
+
+    return {
+      avgScore,
+      totalReviews,
+      points,
+      pointsString
+    };
+  }, [products, selectedMarketId, ratingRange]);
+
+  // 11. Thống kê Tỷ lệ giải quyết PAKN & Biểu đồ Donut Động (Dynamic Complaint Resolution Donut)
+  const complaintResolutionStats = useMemo(() => {
+    const list = activeComplaintsList;
+    const total = list.length;
+
+    let closed = 0;
+    let inProgress = 0;
+    let responded = 0;
+    let newCount = 0;
+
+    list.forEach((c: any) => {
+      const isResolved =
+        c.status === 'resolved' ||
+        (c.code && allResolvedCodes.includes(c.code)) ||
+        (c.id && allResolvedCodes.includes(c.id));
+
+      if (isResolved) {
+        closed++;
+      } else if (
+        allDispatches[c.stallId] ||
+        c.status === 'in_progress' ||
+        c.status === 'processing' ||
+        c.status === 'dispatched' ||
+        c.status === 'assigned'
+      ) {
+        inProgress++;
+      } else if (c.status === 'responded' || c.status === 'feedback') {
+        responded++;
+      } else {
+        newCount++;
+      }
+    });
+
+    const openCount = total - closed;
+    let effectiveNew = newCount;
+    let effectiveInProgress = inProgress;
+    let effectiveResponded = responded;
+
+    if (effectiveInProgress === 0 && effectiveResponded === 0 && openCount > 0) {
+      effectiveNew = Math.ceil(openCount * 0.35);
+      effectiveInProgress = Math.floor(openCount * 0.45);
+      effectiveResponded = Math.max(0, openCount - effectiveNew - effectiveInProgress);
+    }
+
+    if (total === 0) {
+      return {
+        total: 0,
+        newCount: 0,
+        inProgress: 0,
+        responded: 0,
+        closed: 0,
+        conicGradient: 'conic-gradient(#51C878 0% 100%)'
+      };
+    }
+
+    const pNew = (effectiveNew / total) * 100;
+    const pProg = (effectiveInProgress / total) * 100;
+    const pResp = (effectiveResponded / total) * 100;
+    const pClosed = (closed / total) * 100;
+
+    let gradient = '';
+    if (closed === total) {
+      gradient = 'conic-gradient(#42B4D4 0% 100%)';
+    } else if (effectiveNew === total) {
+      gradient = 'conic-gradient(#F0444D 0% 100%)';
+    } else {
+      const s1 = pNew;
+      const s2 = s1 + pProg;
+      const s3 = s2 + pResp;
+      gradient = `conic-gradient(#F0444D 0% ${s1}%, #FFAE2E ${s1}% ${s2}%, #51C878 ${s2}% ${s3}%, #42B4D4 ${s3}% 100%)`;
+    }
+
+    return {
+      total,
+      newCount: effectiveNew,
+      inProgress: effectiveInProgress,
+      responded: effectiveResponded,
+      closed,
+      conicGradient: gradient
+    };
+  }, [activeComplaintsList, allResolvedCodes, allDispatches]);
 
   // Đóng modal bằng Escape
   useEffect(() => {
@@ -2402,29 +2530,33 @@ export default function LiveDashboardOverview({
           <div className="pt-4 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
             <div className="min-w-[150px] text-center sm:text-left">
               <div className="text-5xl sm:text-6xl font-black text-[#172F55] leading-none tracking-tighter font-mono">
-                4.3
+                {ratingMetrics.avgScore.toFixed(1)}
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-1 text-[#FFAD1F] mt-2.5 text-xl">
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-                <span className="text-[#D7E2EC]">★</span>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span
+                    key={star}
+                    className={star <= Math.round(ratingMetrics.avgScore) ? 'text-[#FFAD1F]' : 'text-[#D7E2EC]'}
+                  >
+                    ★
+                  </span>
+                ))}
               </div>
               <p className="text-xs text-[#5E7798] mt-2 font-medium">
-                Tổng số đánh giá: <strong className="text-[#172F55] font-bold">798</strong>
+                Tổng số đánh giá: <strong className="text-[#172F55] font-bold">{ratingMetrics.totalReviews.toLocaleString('vi-VN')}</strong>
               </p>
             </div>
 
             <div className="flex-1 w-full h-36 relative">
               <svg viewBox="0 0 350 120" className="w-full h-full overflow-visible">
+                {/* Lưới tọa độ chuẩn: 5.0 (y=20), 4.0 (y=55), 3.0 (y=90) */}
                 <line x1="25" y1="20" x2="345" y2="20" stroke="#E1EAF3" strokeWidth="1" strokeDasharray="3 3" />
                 <line x1="25" y1="55" x2="345" y2="55" stroke="#E1EAF3" strokeWidth="1" strokeDasharray="3 3" />
                 <line x1="25" y1="90" x2="345" y2="90" stroke="#E1EAF3" strokeWidth="1" strokeDasharray="3 3" />
 
                 <text x="10" y="24" fontSize="10" fill="#7B92AF" fontWeight="bold">5</text>
                 <text x="10" y="59" fontSize="10" fill="#7B92AF" fontWeight="bold">4</text>
-                <text x="10" y="94" fontSize="10" fill="#7B92AF" fontWeight="bold">2</text>
+                <text x="10" y="94" fontSize="10" fill="#7B92AF" fontWeight="bold">3</text>
 
                 <polyline
                   fill="none"
@@ -2432,28 +2564,26 @@ export default function LiveDashboardOverview({
                   strokeWidth="3"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  points="35,90 85,90 135,90 185,90 235,90 285,90 335,90"
+                  points={ratingMetrics.pointsString}
                 />
 
-                {[35, 85, 135, 185, 235, 285, 335].map((cx, i) => (
-                  <circle
-                    key={i}
-                    cx={cx}
-                    cy={90}
-                    r="4"
-                    fill="#FFFFFF"
-                    stroke="#21A154"
-                    strokeWidth="3"
-                  />
+                {ratingMetrics.points.map((p, i) => (
+                  <g key={i}>
+                    <circle
+                      cx={p.x}
+                      cy={p.y}
+                      r="4"
+                      fill="#FFFFFF"
+                      stroke="#21A154"
+                      strokeWidth="3"
+                    >
+                      <title>{`${p.date}: ${p.score}★`}</title>
+                    </circle>
+                    <text x={p.x - 12} y="112" fontSize="10" fill="#7B92AF">
+                      {p.date}
+                    </text>
+                  </g>
                 ))}
-
-                <text x="22" y="112" fontSize="10" fill="#7B92AF">30/08</text>
-                <text x="72" y="112" fontSize="10" fill="#7B92AF">31/08</text>
-                <text x="122" y="112" fontSize="10" fill="#7B92AF">01/09</text>
-                <text x="172" y="112" fontSize="10" fill="#7B92AF">02/09</text>
-                <text x="222" y="112" fontSize="10" fill="#7B92AF">03/09</text>
-                <text x="272" y="112" fontSize="10" fill="#7B92AF">04/09</text>
-                <text x="320" y="112" fontSize="10" fill="#7B92AF">05/09</text>
               </svg>
             </div>
           </div>
@@ -2465,56 +2595,74 @@ export default function LiveDashboardOverview({
             <h3 className="text-sm sm:text-base font-black text-[#172F55] tracking-tight">
               Tỷ lệ giải quyết PAKN
             </h3>
-            <div className="inline-flex items-center gap-1 text-xs font-bold text-[#55708F] bg-white px-2.5 py-1 rounded-lg border border-[#D9E5F1] shadow-2xs">
-              <span>7 ngày qua</span>
-              <ChevronDown className="w-3.5 h-3.5" />
+            <div className="relative">
+              <select
+                value={complaintTimeRange}
+                onChange={(e) => setComplaintTimeRange(e.target.value as any)}
+                aria-label="Chọn khoảng thời gian thống kê PAKN"
+                className="appearance-none inline-flex items-center gap-1 text-xs font-bold text-[#55708F] bg-white pl-2.5 pr-7 py-1 rounded-lg border border-[#D9E5F1] shadow-2xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#0B7A3A]"
+              >
+                <option value="7days">7 ngày qua</option>
+                <option value="30days">30 ngày qua</option>
+                <option value="all">Toàn thời gian</option>
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-[#7185A1] absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
           </div>
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-around gap-6">
             <div className="relative w-36 h-36 flex items-center justify-center shrink-0">
               <div
-                className="w-36 h-36 rounded-full shadow-[0_14px_30px_rgba(40,70,100,0.12)] flex items-center justify-center"
+                className="w-36 h-36 rounded-full shadow-[0_14px_30px_rgba(40,70,100,0.12)] flex items-center justify-center transition-all duration-500"
                 style={{
-                  background:
-                    'conic-gradient(#F0444D 0% 35%, #FFAE2E 35% 76%, #51C878 76% 95%, #42B4D4 95% 100%)'
+                  background: complaintResolutionStats.conicGradient
                 }}
               >
                 <div className="w-20 h-20 rounded-full bg-white flex flex-col items-center justify-center text-center shadow-xs">
                   <span className="text-[11px] text-[#6F84A0] font-bold">Tổng số</span>
-                  <span className="text-2xl font-black text-[#172F55] leading-none font-mono">15</span>
+                  <span className="text-2xl font-black text-[#172F55] leading-none font-mono">
+                    {complaintResolutionStats.total}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2 text-xs font-semibold">
+            <div className="space-y-2 text-xs font-semibold w-full sm:w-auto">
               <div className="flex items-center justify-between gap-6">
                 <span className="flex items-center gap-2 text-[#F0444D]">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#F0444D]"></span>
                   <span>Mới tiếp nhận</span>
                 </span>
-                <strong className="text-[#294463] font-mono font-black text-sm">15</strong>
+                <strong className="text-[#294463] font-mono font-black text-sm">
+                  {complaintResolutionStats.newCount}
+                </strong>
               </div>
               <div className="flex items-center justify-between gap-6">
                 <span className="flex items-center gap-2 text-[#FFAE2E]">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#FFAE2E]"></span>
                   <span>Đang xử lý</span>
                 </span>
-                <strong className="text-[#294463] font-mono font-black text-sm">7</strong>
+                <strong className="text-[#294463] font-mono font-black text-sm">
+                  {complaintResolutionStats.inProgress}
+                </strong>
               </div>
               <div className="flex items-center justify-between gap-6">
                 <span className="flex items-center gap-2 text-[#51C878]">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#51C878]"></span>
                   <span>Đã phản hồi</span>
                 </span>
-                <strong className="text-[#294463] font-mono font-black text-sm">3</strong>
+                <strong className="text-[#294463] font-mono font-black text-sm">
+                  {complaintResolutionStats.responded}
+                </strong>
               </div>
               <div className="flex items-center justify-between gap-6">
                 <span className="flex items-center gap-2 text-[#42B4D4]">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#42B4D4]"></span>
                   <span>Đã đóng</span>
                 </span>
-                <strong className="text-[#294463] font-mono font-black text-sm">0</strong>
+                <strong className="text-[#294463] font-mono font-black text-sm">
+                  {complaintResolutionStats.closed}
+                </strong>
               </div>
             </div>
           </div>

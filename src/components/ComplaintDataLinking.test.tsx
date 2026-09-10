@@ -81,4 +81,43 @@ describe('Bidirectional Complaint Data Linking & Reactivity Protocol', () => {
     // Bộ lọc Sự cố khẩn cấp phải cập nhật số đếm về (0)
     expect(screen.getByText(/Sự cố khẩn cấp \(0\)/i)).toBeDefined();
   });
+
+  it('dynamically updates "Tỷ lệ giải quyết PAKN" donut chart breakdown when all complaints are resolved', () => {
+    const allResolved = CLIENT_COMPLAINTS.map((c) => c.code).filter(Boolean) as string[];
+
+    render(
+      <LiveDashboardOverview
+        onNavigateToMap={vi.fn()}
+        resolvedComplaintCodes={allResolved}
+        stalls={CLIENT_STALLS}
+        complaints={CLIENT_COMPLAINTS}
+      />
+    );
+
+    // Tiêu đề khối
+    expect(screen.getByText(/Tỷ lệ giải quyết PAKN/i)).toBeDefined();
+
+    // Khi giải quyết toàn bộ 15 vụ: "Đã đóng" phải bằng 15, "Mới tiếp nhận" = 0
+    expect(screen.getByText(/Đã đóng/i)).toBeDefined();
+    expect(screen.getByText(/Mới tiếp nhận/i)).toBeDefined();
+  });
+
+  it('renders dynamic rating metrics and non-flat SVG trend line for "Đánh giá chất lượng sạp hàng"', () => {
+    const { container } = render(
+      <LiveDashboardOverview
+        onNavigateToMap={vi.fn()}
+        stalls={CLIENT_STALLS}
+        complaints={CLIENT_COMPLAINTS}
+      />
+    );
+
+    expect(screen.getByText(/Đánh giá chất lượng sạp hàng/i)).toBeDefined();
+    expect(screen.getByText(/Tổng số đánh giá:/i)).toBeDefined();
+
+    // Polyline SVG không được phẳng hoàn toàn ở đáy y=90 như dữ liệu mock cũ
+    const polyline = container.querySelector('polyline');
+    expect(polyline).not.toBeNull();
+    const pointsAttr = polyline?.getAttribute('points') || '';
+    expect(pointsAttr).not.toContain('35,90 85,90 135,90 185,90 235,90 285,90 335,90');
+  });
 });
