@@ -243,18 +243,18 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
   // Hành động phê duyệt hồ sơ tiểu thương (kết nối Backend API POST /admin/merchant-approvals/:id/approve)
   const approveApplication = useCallback(
     async (applicationId: string, stallId?: string, adminNote: string = 'BQL Chợ đã phê duyệt hồ sơ') => {
-      let targetStallId = stallId;
-      if (!targetStallId) {
-        const app = state.applications.find((a) => a.id === applicationId);
-        const marketStalls = state.stalls.filter((s) => !app?.marketId || s.marketId === app.marketId);
-        const candidateStall = marketStalls.find((s) => s.status === 'vacant') || marketStalls[0];
-        targetStallId = candidateStall?.id || state.stalls[0]?.id;
+      const targetApp = state.applications.find((a) => a.id === applicationId);
+      let targetStall = state.stalls.find((s) => s.id === stallId || s.code === stallId);
+      if (!targetStall) {
+        const marketStalls = state.stalls.filter((s) => !targetApp?.marketId || s.marketId === targetApp.marketId);
+        targetStall = marketStalls.find((s) => s.status === 'vacant') || marketStalls[0] || state.stalls[0];
       }
+      const finalStallId = targetStall?.id || stallId;
 
-      if (state.isConnected && targetStallId) {
+      if (state.isConnected && finalStallId) {
         try {
           await api.post(`/admin/merchant-approvals/${applicationId}/approve`, {
-            stallId: targetStallId,
+            stallId: finalStallId,
             adminNote,
           });
         } catch (e) {
@@ -262,15 +262,88 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
         }
       }
 
-      // Cập nhật state cục bộ ngay lập tức
-      setState((prev) => ({
-        ...prev,
-        applications: prev.applications.map((a) =>
+      const merchantName = targetApp?.fullName || targetApp?.applicant?.fullName || 'Tiểu thương mới';
+      const merchantPhone = targetApp?.phone || targetApp?.applicant?.phone || '0908 888 999';
+      const merchantAvatar = targetApp?.applicant?.avatar || null;
+      const merchantId = targetApp?.applicant?.id || `m-${Date.now()}`;
+
+      // Cập nhật state cục bộ ngay lập tức (sạp chuyển sang occupied, thêm tiểu thương mới, tái tạo canonicalDoc)
+      setState((prev) => {
+        const updatedApplications = prev.applications.map((a) =>
           a.id === applicationId ? { ...a, status: 'approved' as const, adminNote } : a
-        ),
-      }));
+        );
+
+        const updatedStalls = prev.stalls.map((s) => {
+          if (s.id === finalStallId || (targetStall?.code && s.code === targetStall.code)) {
+            return {
+              ...s,
+              status: 'occupied' as const,
+              currentContract: {
+                id: `contract-${Date.now()}`,
+                startDate: new Date().toISOString(),
+                endDate: new Date(Date.now() + 180 * 86400000).toISOString(),
+                daysLeft: 180,
+                fee: (s as any).basePrice || 3500000,
+                merchant: {
+                  id: merchantId,
+                  fullName: merchantName,
+                  phone: merchantPhone,
+                  avatar: merchantAvatar,
+                },
+              },
+            };
+          }
+          return s;
+        });
+
+        const newTrader: Trader = {
+          id: merchantId,
+          fullName: merchantName,
+          phone: merchantPhone,
+          avatar: merchantAvatar,
+          email: null,
+          merchantStatus: 'active',
+          merchantJoinedAt: new Date().toISOString(),
+          merchantMarketId: targetStall?.marketId || prev.markets[0]?.id || null,
+          sellerType: 'shop',
+          market: prev.markets.find((m) => m.id === targetStall?.marketId) || prev.markets[0] || null,
+          stall: targetStall ? { id: targetStall.id, code: targetStall.code, name: targetStall.name } : null,
+          category: targetStall?.categories || null,
+          ratingAvg: 5.0,
+          openComplaintCount: 0,
+        };
+
+        const existingTraderIdx = prev.traders.findIndex((t) => t.id === merchantId || t.phone === merchantPhone);
+        const updatedTraders = existingTraderIdx >= 0
+          ? prev.traders.map((t, idx) => (idx === existingTraderIdx ? { ...t, ...newTrader } : t))
+          : [newTrader, ...prev.traders];
+
+        const currentMarket = prev.markets.find((m) => m.id === targetMarketId) || prev.markets[0] || (CLIENT_MARKETS[0] as Market);
+        const marketStalls = updatedStalls.filter((s) => s.marketId === currentMarket.id);
+        const stallsToRender = marketStalls.length > 0 ? marketStalls : updatedStalls;
+
+        const canonicalDoc = adaptBackendToCanonicalDocument({
+          market: currentMarket,
+          zones: prev.zones,
+          stalls: stallsToRender,
+          complaints: prev.complaints,
+        });
+
+        return {
+          ...prev,
+          applications: updatedApplications,
+          stalls: updatedStalls,
+          traders: updatedTraders,
+          canonicalDoc,
+        };
+      });
+
+      return {
+        stallId: finalStallId,
+        stallCode: targetStall?.code || 'A01',
+      };
     },
-    [state.isConnected, state.applications, state.stalls]
+    [state.isConnected, state.applications, state.stalls, targetMarketId]
   );
 
   // Hành động từ chối hồ sơ (kết nối Backend API POST /admin/merchant-approvals/:id/reject)

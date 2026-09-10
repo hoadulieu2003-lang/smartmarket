@@ -7,13 +7,16 @@ import {
   ShieldAlert, AlertTriangle, CheckCircle2, Clock,
   DollarSign, Users, Search, Filter, Info, Phone,
   QrCode, ExternalLink, ChevronRight, X, Layers,
-  Compass, Eye, Wrench, ArrowRight
+  Compass, Eye, Wrench, ArrowRight, Building2,
+  Radio, ShoppingBag, ShieldCheck, Check, Loader2
 } from 'lucide-react';
 import {
   CLIENT_STALLS, CLIENT_ZONES, CLIENT_MARKETS,
   CLIENT_PRODUCTS, CLIENT_COMPLAINTS, CLIENT_TRADERS
 } from '@/data/clientCmsData';
 import type { Stall, Zone, Product, Complaint } from '@/types/clientTypes';
+
+export type OperationalDutyMode = 'leasing' | 'incidents' | 'commerce' | 'safety';
 
 export type ToolType =
   | 'inspect'
@@ -168,6 +171,10 @@ export interface MarketInteractiveMapViewProps {
   complaints?: any[];
   zones?: any[];
   products?: any[];
+  applications?: any[];
+  onApproveApplication?: (applicationId: string, stallId?: string) => Promise<any> | void;
+  onResolveComplaint?: (codeOrId: string) => void;
+  onQuickDispatch?: (stallId: string, teamName: string) => void;
 }
 
 export default function MarketInteractiveMapView({
@@ -179,6 +186,10 @@ export default function MarketInteractiveMapView({
   complaints,
   zones,
   products,
+  applications,
+  onApproveApplication,
+  onResolveComplaint,
+  onQuickDispatch,
 }: MarketInteractiveMapViewProps) {
   const activeMarket = useMemo(() => {
     if (selectedMarketId && selectedMarketId !== 'all') {
@@ -231,10 +242,14 @@ export default function MarketInteractiveMapView({
     return createDefaultSpatialGrid();
   });
 
+  const [dutyMode, setDutyMode] = useState<OperationalDutyMode>('leasing');
   const [currentTool, setCurrentTool] = useState<ToolType>('inspect');
   const [selectedZoneFilter, setSelectedZoneFilter] = useState<string>('all');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [assigningAppId, setAssigningAppId] = useState<string | null>(null);
+
   const [selectedStall, setSelectedStall] = useState<Stall | null>(() => {
     if (initialSelectedStallCode && stallsByCode.has(initialSelectedStallCode)) {
       return stallsByCode.get(initialSelectedStallCode) || null;
@@ -242,11 +257,23 @@ export default function MarketInteractiveMapView({
     return null;
   });
 
+  // Tự động đồng bộ và làm mới sạp đang chọn khi dữ liệu sạp toàn cục thay đổi
   useEffect(() => {
     if (initialSelectedStallCode && stallsByCode.has(initialSelectedStallCode)) {
       setSelectedStall(stallsByCode.get(initialSelectedStallCode) || null);
+    } else if (selectedStall && stallsByCode.has(selectedStall.code)) {
+      const freshStall = stallsByCode.get(selectedStall.code);
+      if (freshStall && (freshStall.status !== selectedStall.status || freshStall.currentContract !== selectedStall.currentContract)) {
+        setSelectedStall(freshStall);
+      }
     }
-  }, [initialSelectedStallCode, stallsByCode]);
+  }, [initialSelectedStallCode, stallsByCode, selectedStall]);
+
+  // Danh sách hồ sơ Zalo đang chờ phê duyệt
+  const pendingApplications = useMemo(() => {
+    if (!applications || applications.length === 0) return [];
+    return applications.filter((app: any) => app.status === 'pending');
+  }, [applications]);
 
   const [isSimulating, setIsSimulating] = useState(false);
   const [npcs, setNpcs] = useState<SimNpc[]>([]);
@@ -406,6 +433,44 @@ export default function MarketInteractiveMapView({
       localStorage.removeItem('smartmarket_master_floor_grid');
       showToast('🔄 Đã khôi phục sơ đồ quy hoạch chuẩn!');
     }
+  };
+
+  // Phê duyệt và gán hồ sơ tiểu thương Zalo vào sạp đang chọn
+  const handleApproveAndAssign = async (applicationId: string) => {
+    if (!selectedStall) return;
+    setAssigningAppId(applicationId);
+    try {
+      if (onApproveApplication) {
+        await onApproveApplication(applicationId, selectedStall.id);
+      }
+      const app = applications?.find((a: any) => a.id === applicationId);
+      const merchantName = app?.applicantName || 'Tiểu thương';
+      showToast(`🎉 Đã duyệt hồ sơ của ${merchantName} và bố trí vào sạp ${selectedStall.code} thành công!`);
+      setIsAssignModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      showToast('⚠️ Gặp sự cố khi phê duyệt và gán hồ sơ vào sạp');
+    } finally {
+      setAssigningAppId(null);
+    }
+  };
+
+  // Xử lý phản ánh trực tiếp từ sơ đồ
+  const handleResolveComplaintLocal = (complaintCodeOrId: string) => {
+    if (onResolveComplaint) {
+      onResolveComplaint(complaintCodeOrId);
+      showToast(`✅ Đã giải quyết & đóng hồ sơ phản ánh [${complaintCodeOrId}]`);
+    } else {
+      showToast(`✅ Đã giải quyết phản ánh [${complaintCodeOrId}]`);
+    }
+  };
+
+  // Điều động tổ trật tự hỗ trợ hiện trường
+  const handleDispatchLocal = (stallId: string, teamName: string) => {
+    if (onQuickDispatch) {
+      onQuickDispatch(stallId, teamName);
+    }
+    showToast(`🚨 Đã điều động khẩn cấp ${teamName} tới xử lý hiện trường sạp!`);
   };
 
   // Vòng lặp mô phỏng luồng khách hàng ghé chợ thực tế
@@ -632,7 +697,108 @@ export default function MarketInteractiveMapView({
         </div>
       </div>
 
-      {/* 2. SECONDARY FILTER & TOOL STRIP */}
+      {/* 2. OPERATIONAL MULTI-WORKFLOW DUTY SELECTOR */}
+      <div className="bg-slate-900 text-white px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+            <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+            <span className="hidden sm:inline">Chế độ tác chiến:</span>
+          </span>
+          <div className="inline-flex rounded-xl p-1 bg-slate-800/90 border border-slate-700/80 gap-1 overflow-x-auto max-w-full">
+            <button
+              type="button"
+              onClick={() => setDutyMode('leasing')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                dutyMode === 'leasing'
+                  ? 'bg-[#0B7A3A] text-white shadow-sm font-black ring-1 ring-emerald-400'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-700/60'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Quy hoạch & Thuê sạp</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                dutyMode === 'leasing' ? 'bg-emerald-950 text-emerald-300' : 'bg-slate-700 text-slate-300'
+              }`}>
+                {metrics.vacant} trống
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDutyMode('incidents')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                dutyMode === 'incidents'
+                  ? 'bg-rose-600 text-white shadow-sm font-black ring-1 ring-rose-400'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-700/60'
+              }`}
+            >
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span>Hiện trường & PAKN</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                metrics.complaint > 0
+                  ? 'bg-red-950 text-red-300 animate-pulse'
+                  : 'bg-slate-700 text-slate-300'
+              }`}>
+                {metrics.complaint} điểm
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDutyMode('commerce')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                dutyMode === 'commerce'
+                  ? 'bg-amber-600 text-white shadow-sm font-black ring-1 ring-amber-400'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-700/60'
+              }`}
+            >
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span>Ngành hàng & Hàng QR</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                dutyMode === 'commerce' ? 'bg-amber-950 text-amber-200' : 'bg-slate-700 text-slate-300'
+              }`}>
+                {products?.length || CLIENT_PRODUCTS.length} SP
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDutyMode('safety')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                dutyMode === 'safety'
+                  ? 'bg-teal-600 text-white shadow-sm font-black ring-1 ring-teal-400'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-700/60'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>PCCC & Cân đối chứng</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                dutyMode === 'safety' ? 'bg-teal-950 text-teal-200' : 'bg-slate-700 text-slate-300'
+              }`}>
+                {metrics.safetyScore}/100
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Duty Mode Context Helper */}
+        <div className="text-[11px] text-slate-400 hidden xl:flex items-center gap-1.5 font-medium">
+          {dutyMode === 'leasing' && (
+            <span>🏢 Sạp trống viền nét đứt màu ngọc. Click vào sạp trống để mở hồ sơ Zalo và gán tiểu thương.</span>
+          )}
+          {dutyMode === 'incidents' && (
+            <span className="text-rose-300">🚨 Đang theo dõi các sạp phát sinh phản ánh người tiêu dùng để điều động trật tự.</span>
+          )}
+          {dutyMode === 'commerce' && (
+            <span className="text-amber-300">🛒 Hiển thị phân loại mặt hàng, tem QR truy xuất và phân khu nông sản OCOP.</span>
+          )}
+          {dutyMode === 'safety' && (
+            <span className="text-teal-300">🧯 Làm nổi bật trụ cứu hỏa PCCC, lối thoát hiểm và cụm cân đối chứng minh bạch.</span>
+          )}
+        </div>
+      </div>
+
+      {/* 3. SECONDARY FILTER & TOOL STRIP */}
       <div className="bg-slate-100/90 border-b border-slate-200 px-4 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0">
         
         {/* Zone Filters */}
@@ -827,10 +993,23 @@ export default function MarketInteractiveMapView({
                     (stall?.currentContract?.merchant.fullName || '').toLowerCase().includes(searchQuery.toLowerCase())
                   );
 
-                  const isDimmed = !zoneMatch || !searchMatch;
+                  // Kiểm tra độ mờ theo chế độ tác chiến nghiệp vụ
+                  let isDutyDimmed = false;
+                  if (dutyMode === 'incidents' && cell.type === 'stall') {
+                    isDutyDimmed = (stall?.openComplaintCount ?? 0) === 0 && !isSelected;
+                  } else if (dutyMode === 'safety' && cell.type === 'stall') {
+                    isDutyDimmed = !isSelected;
+                  }
+
+                  const isDimmed = !zoneMatch || !searchMatch || isDutyDimmed;
 
                   // Màu phân khu
                   const zoneColor = stall?.zones?.code ? ZONE_COLORS[stall.zones.code] : null;
+
+                  // Số sản phẩm của sạp
+                  const stallProductCount = cell.stallCode && products
+                    ? products.filter((p: any) => p.stallId === stall?.id || p.stalls?.code === cell.stallCode).length
+                    : 0;
 
                   return (
                     <div
@@ -844,20 +1023,26 @@ export default function MarketInteractiveMapView({
                           handleCellClick(r, c);
                         }
                       }}
-                      className={`relative flex flex-col items-center justify-center rounded-xl cursor-pointer transition-all duration-150 ${
-                        isSelected ? 'ring-3 ring-[#0B7A3A] ring-offset-2 ring-offset-white z-20 scale-105 shadow-xl' : ''
-                      } ${isDimmed ? 'opacity-20 grayscale' : 'opacity-100 hover:scale-102 shadow-xs'}`}
+                      className={`relative flex flex-col items-center justify-center rounded-xl cursor-pointer transition-all duration-200 ${
+                        isSelected
+                          ? 'ring-4 ring-[#0B7A3A] ring-offset-2 ring-offset-white z-30 scale-110 shadow-2xl'
+                          : ''
+                      } ${
+                        dutyMode === 'safety' && (cell.type === 'fire_extinguisher' || cell.type === 'emergency_exit' || cell.type === 'scale')
+                          ? 'ring-2 ring-teal-400 scale-105 z-10 shadow-md'
+                          : ''
+                      } ${isDimmed ? 'opacity-30 grayscale-[40%]' : 'opacity-100 hover:scale-105 shadow-xs'}`}
                       style={{
                         width: CELL_SIZE,
                         height: CELL_SIZE,
                         backgroundColor:
                           cell.type === 'stall' && stall
                             ? stall.status === 'vacant'
-                              ? '#FFFFFF'
+                              ? dutyMode === 'leasing' ? '#ECFDF5' : '#FFFFFF'
                               : stall.status === 'maintenance'
                               ? '#F1F5F9'
                               : (stall.openComplaintCount ?? 0) > 0
-                              ? '#FEF2F2'
+                              ? '#FEE2E2'
                               : zoneColor?.bg || '#FFFFFF'
                             : cell.type === 'walkway'
                             ? '#F8FAFC'
@@ -873,9 +1058,11 @@ export default function MarketInteractiveMapView({
                         border:
                           cell.type === 'stall' && stall
                             ? stall.status === 'vacant'
-                              ? '1.5px dashed #CBD5E1'
+                              ? dutyMode === 'leasing'
+                                ? '2px dashed #059669'
+                                : '1.5px dashed #CBD5E1'
                               : (stall.openComplaintCount ?? 0) > 0
-                              ? '2px solid #EF4444'
+                              ? '2.5px solid #EF4444'
                               : stall.displayStatus === 'expiring_soon'
                               ? '2px solid #F59E0B'
                               : `1.5px solid ${zoneColor?.border || '#10B981'}`
@@ -904,29 +1091,49 @@ export default function MarketInteractiveMapView({
                         <div className="text-center w-full px-0.5 pointer-events-none">
                           <div
                             className="text-[10px] font-black font-mono leading-tight truncate"
-                            style={{ color: (stall.openComplaintCount ?? 0) > 0 ? '#DC2626' : zoneColor?.text || '#0F172A' }}
+                            style={{
+                              color:
+                                (stall.openComplaintCount ?? 0) > 0
+                                  ? '#DC2626'
+                                  : stall.status === 'vacant' && dutyMode === 'leasing'
+                                  ? '#065F46'
+                                  : zoneColor?.text || '#0F172A'
+                            }}
                           >
                             {stall.code}
                           </div>
+                          
+                          {/* Label / Subtitle */}
                           <div className="text-[7.5px] font-bold text-slate-600 leading-tight truncate">
-                            {stall.status === 'vacant'
-                              ? 'TRỐNG'
-                              : stall.status === 'maintenance'
-                              ? 'BẢO TRÌ'
-                              : stall.currentContract?.merchant.fullName.split(' ').pop()}
+                            {stall.status === 'vacant' ? (
+                              <span className={dutyMode === 'leasing' ? 'text-[#059669] font-black' : 'text-slate-500'}>
+                                TRỐNG
+                              </span>
+                            ) : stall.status === 'maintenance' ? (
+                              'BẢO TRÌ'
+                            ) : dutyMode === 'commerce' && stallProductCount > 0 ? (
+                              <span className="text-amber-700 font-bold">{stallProductCount} SP QR</span>
+                            ) : (
+                              stall.currentContract?.merchant.fullName.split(' ').pop()
+                            )}
                           </div>
 
                           {/* Radar Ping for Complaint */}
                           {(stall.openComplaintCount ?? 0) > 0 && (
-                            <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600 border-2 border-white shadow-xs"></span>
+                            <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-85"></span>
+                              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-600 border-2 border-white shadow-xs"></span>
                             </span>
                           )}
 
                           {/* Expiring Soon Indicator */}
                           {stall.displayStatus === 'expiring_soon' && (
                             <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5 rounded-full bg-amber-400 border-2 border-white shadow-xs" />
+                          )}
+
+                          {/* Vacant Badge in Leasing Mode */}
+                          {dutyMode === 'leasing' && stall.status === 'vacant' && (
+                            <span className="absolute -bottom-1 -right-1 flex h-2.5 w-2.5 rounded-full bg-emerald-500 border border-white shadow-xs" />
                           )}
                         </div>
                       )}
@@ -1048,10 +1255,45 @@ export default function MarketInteractiveMapView({
                     </p>
                   </div>
                 </div>
+
+                {/* Trader Profile Link */}
+                {onOpenTraderProfile && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (selectedStall.currentContract?.merchant?.id) {
+                        onOpenTraderProfile(selectedStall.currentContract.merchant.id);
+                      } else {
+                        onOpenTraderProfile('trader-001');
+                      }
+                    }}
+                    className="w-full mt-1 py-1.5 px-2.5 rounded-lg bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-xs font-bold text-slate-700 hover:text-[#0B7A3A] transition-all flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <span>Xem Hồ Sơ Số Hóa Tiểu Thương</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                )}
               </div>
             ) : (
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">
-                Sạp đang để trống · Sẵn sàng mở hồ sơ xét duyệt thuê
+              <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-2.5 text-center">
+                <div>
+                  <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-[#065F46] uppercase tracking-wider mb-1">
+                    SẠP ĐANG TRỐNG
+                  </span>
+                  <p className="text-xs text-slate-600 font-medium">
+                    Sẵn sàng tiếp nhận & mở phê duyệt hồ sơ từ Zalo Mini App
+                  </p>
+                </div>
+
+                {/* Action CTA: Assign Merchant */}
+                <button
+                  type="button"
+                  onClick={() => setIsAssignModalOpen(true)}
+                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#0B7A3A] to-emerald-600 hover:from-emerald-700 hover:to-emerald-800 text-white text-xs font-black transition-all shadow-md shadow-emerald-700/20 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                >
+                  <Users className="w-4 h-4" />
+                  <span>Gán hồ sơ tiểu thương Zalo ({pendingApplications.length})</span>
+                </button>
               </div>
             )}
 
@@ -1094,17 +1336,46 @@ export default function MarketInteractiveMapView({
 
             {/* Complaint Warning Box (nếu có) */}
             {selectedStallComplaints.length > 0 && (
-              <div className="p-3 rounded-xl bg-red-50 border border-red-200 space-y-2">
-                <div className="flex items-center gap-1.5 text-red-700 font-bold text-xs">
-                  <AlertTriangle className="w-4 h-4 shrink-0" />
-                  <span>Cảnh báo PAKN đang xử lý</span>
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 space-y-2.5">
+                <div className="flex items-center justify-between text-red-700 font-bold text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 shrink-0 animate-bounce" />
+                    <span>Cảnh báo PAKN đang xử lý ({selectedStallComplaints.length})</span>
+                  </div>
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-red-100 text-red-800">
+                    KHẨN CẤP
+                  </span>
                 </div>
+
                 {selectedStallComplaints.map((c) => (
-                  <div key={c.id} className="text-[11px] text-red-900 leading-relaxed bg-white p-2 rounded-lg border border-red-200">
-                    <p className="font-semibold text-red-950">{c.content}</p>
-                    <p className="text-[10px] text-red-600 mt-1">Người báo cáo: {c.reporter?.fullName}</p>
+                  <div key={c.id} className="text-[11px] text-red-900 leading-relaxed bg-white p-2.5 rounded-lg border border-red-200 space-y-1.5 shadow-xs">
+                    <p className="font-bold text-red-950">{c.content}</p>
+                    <div className="flex items-center justify-between text-[10px] text-red-600">
+                      <span>Người báo cáo: {c.reporter?.fullName || 'Khách hàng'}</span>
+                      <span className="font-mono">{c.code || c.id}</span>
+                    </div>
+
+                    {/* Quick Resolve Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleResolveComplaintLocal(c.code || c.id)}
+                      className="w-full mt-1 py-1 px-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-3 h-3" />
+                      <span>Đóng & Giải Quyết Phản Ánh</span>
+                    </button>
                   </div>
                 ))}
+
+                {/* Dispatch Security Patrol Team */}
+                <button
+                  type="button"
+                  onClick={() => handleDispatchLocal(selectedStall.id, 'Tổ Trật tự Hiện trường')}
+                  className="w-full py-1.5 px-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-black transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span>Điều Động Tổ Trật Tự Hiện Trường</span>
+                </button>
               </div>
             )}
 
@@ -1165,6 +1436,122 @@ export default function MarketInteractiveMapView({
           </aside>
         )}
       </div>
+
+      {/* MODAL: GÁN HỒ SƠ TIỂU THƯƠNG ZALO VÀO SẠP */}
+      {isAssignModalOpen && selectedStall && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-emerald-800 to-[#0B7A3A] text-white p-4 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white border border-white/20">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-black tracking-wide">
+                    GÁN HỒ SƠ TIỂU THƯƠNG VÀO SẠP {selectedStall.code}
+                  </h3>
+                  <p className="text-[11px] text-emerald-100 font-medium">
+                    {selectedStall.zones?.name || 'Phân khu chợ'} · Diện tích: {selectedStall.acreage} m² · Hồ sơ Zalo chờ duyệt ({pendingApplications.length})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAssignModalOpen(false)}
+                className="p-1 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 overflow-y-auto space-y-3 flex-1">
+              <div className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center justify-between">
+                <span>Chọn một hồ sơ đăng ký kinh doanh dưới đây để phê duyệt và bàn giao sạp:</span>
+                <span className="font-bold text-[#0B7A3A]">{pendingApplications.length} hồ sơ</span>
+              </div>
+
+              {pendingApplications.length > 0 ? (
+                <div className="space-y-2.5">
+                  {pendingApplications.map((app: any) => (
+                    <div
+                      key={app.id}
+                      className="p-3.5 rounded-xl border border-slate-200 hover:border-emerald-400 bg-white hover:bg-emerald-50/30 transition-all shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    >
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-[#065F46] font-black text-sm flex items-center justify-center shrink-0 border border-emerald-200">
+                          {app.applicantName ? app.applicantName.charAt(0) : 'T'}
+                        </div>
+                        <div className="min-w-0 space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-black text-slate-900 truncate">
+                              {app.applicantName}
+                            </span>
+                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-mono">
+                              {app.applicationCode || app.id}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-600 flex items-center gap-1">
+                            <Phone className="w-3 h-3 text-[#0B7A3A]" />
+                            <span>{app.phone}</span>
+                            <span className="mx-1 text-slate-300">·</span>
+                            <span>{app.productCategory || 'Nông sản thực phẩm'}</span>
+                          </p>
+                          <p className="text-[10px] text-slate-500 truncate">
+                            Kinh nghiệm: {app.experienceYears ?? 5} năm · Nguyện vọng sạp: {app.preferredStallCode || 'Bất kỳ'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Action Button */}
+                      <button
+                        type="button"
+                        disabled={assigningAppId === app.id}
+                        onClick={() => handleApproveAndAssign(app.id)}
+                        className="sm:self-center py-2 px-3.5 rounded-xl bg-[#0B7A3A] hover:bg-emerald-700 text-white text-xs font-black transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+                      >
+                        {assigningAppId === app.id ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Đang kích hoạt...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Duyệt & Gán sạp {selectedStall.code}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-slate-500 space-y-2">
+                  <Store className="w-10 h-10 text-slate-300 mx-auto" />
+                  <p className="text-xs font-bold text-slate-700">
+                    Không có hồ sơ nào đang chờ xét duyệt
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    Toàn bộ hồ sơ gửi từ Zalo Mini App đã được xử lý hoặc sạp đã được bố trí đầy đủ.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsAssignModalOpen(false)}
+                className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 4. FOOTER STATUS BAR */}
       <footer className="bg-white border-t border-slate-200 px-4 py-2 text-[11px] text-slate-600 flex flex-wrap items-center justify-between gap-2 shrink-0">

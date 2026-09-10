@@ -15,7 +15,7 @@ interface PendingProfilesViewProps {
   applications?: any[];
   stalls?: any[];
   selectedMarketId?: string;
-  onApproveApplication?: (id: string, stallId?: string, note?: string) => Promise<void> | void;
+  onApproveApplication?: (id: string, stallId?: string, note?: string) => Promise<any> | void;
   onRejectApplication?: (id: string, reason?: string) => Promise<void> | void;
   onRequestSupplement?: (id: string, note?: string) => Promise<void> | void;
 }
@@ -148,8 +148,17 @@ export default function PendingProfilesView({
 }: PendingProfilesViewProps) {
   const [filterType, setFilterType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [actionNotice, setActionNotice] = useState<string | null>(null);
+  const [actionNotice, setActionNotice] = useState<{ message: string; stallCode?: string } | null>(null);
   const [selectedProfile, setSelectedProfile] = useState<PendingProfile | null>(null);
+  const [selectedStallCode, setSelectedStallCode] = useState<string>('');
+
+  const vacantStalls = useMemo(() => {
+    if (!stalls || stalls.length === 0) return [];
+    if (selectedMarketId && selectedMarketId !== 'all') {
+      return stalls.filter((s) => s.status === 'vacant' && s.marketId === selectedMarketId);
+    }
+    return stalls.filter((s) => s.status === 'vacant');
+  }, [stalls, selectedMarketId]);
 
   // Đóng modal bằng phím Escape
   useEffect(() => {
@@ -390,10 +399,18 @@ export default function PendingProfilesView({
     setProfiles(initialProfiles);
   }, [initialProfiles]);
 
-  const handleApprove = async (item: PendingProfile) => {
+  const handleApprove = async (item: PendingProfile, customStallCode?: string) => {
+    const allocatedCode = customStallCode || selectedStallCode || item.stallCode;
+    const targetStall = stalls?.find((s) => s.code === allocatedCode || s.id === allocatedCode);
+    const targetStallId = targetStall?.id;
+
     if (onApproveApplication) {
       try {
-        await onApproveApplication(item.id);
+        if (targetStallId) {
+          await onApproveApplication(item.id, targetStallId);
+        } else {
+          await onApproveApplication(item.id);
+        }
       } catch (e) {
         console.warn('onApproveApplication error:', e);
       }
@@ -403,9 +420,10 @@ export default function PendingProfilesView({
         p.id === item.id
           ? {
               ...p,
+              stallCode: allocatedCode,
               status: 'approved',
               statusLabel: 'Đã phê duyệt',
-              notes: `${p.notes} • BQL đã ký duyệt hồ sơ vào ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} hôm nay.`
+              notes: `${p.notes} • BQL đã ký duyệt hồ sơ & cấp sạp ${allocatedCode} vào ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} hôm nay.`
             }
           : p
       )
@@ -413,13 +431,17 @@ export default function PendingProfilesView({
     if (selectedProfile && selectedProfile.id === item.id) {
       setSelectedProfile((prev) => prev ? {
         ...prev,
+        stallCode: allocatedCode,
         status: 'approved',
         statusLabel: 'Đã phê duyệt',
-        notes: `${prev.notes} • BQL đã ký duyệt hồ sơ vào ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} hôm nay.`
+        notes: `${prev.notes} • BQL đã ký duyệt hồ sơ & cấp sạp ${allocatedCode} vào ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} hôm nay.`
       } : null);
     }
-    setActionNotice(`Đã phê duyệt thành công hồ sơ ${item.id} cho tiểu thương ${item.applicant}! Đã cấp quyền sử dụng sạp ${item.stallCode}.`);
-    setTimeout(() => setActionNotice(null), 4000);
+    setActionNotice({
+      message: `Đã phê duyệt thành công hồ sơ ${item.id} cho tiểu thương ${item.applicant}! Đã cấp quyền sử dụng sạp ${allocatedCode}.`,
+      stallCode: allocatedCode,
+    });
+    setTimeout(() => setActionNotice(null), 8000);
   };
 
   const handleRequestSupplement = async (item: PendingProfile) => {
@@ -450,8 +472,8 @@ export default function PendingProfilesView({
         notes: `${prev.notes} • Đã gửi yêu cầu bổ sung giấy tờ qua Zalo lúc ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}.`
       } : null);
     }
-    setActionNotice(`Đã phát thông báo yêu cầu bổ sung hồ sơ ${item.id} tới SĐT ${item.phone} của tiểu thương ${item.applicant}.`);
-    setTimeout(() => setActionNotice(null), 4000);
+    setActionNotice({ message: `Đã phát thông báo yêu cầu bổ sung hồ sơ ${item.id} tới SĐT ${item.phone} của tiểu thương ${item.applicant}.` });
+    setTimeout(() => setActionNotice(null), 5000);
   };
 
   const filtered = profiles.filter((p) => {
@@ -472,6 +494,26 @@ export default function PendingProfilesView({
 
   return (
     <div className="max-w-full overflow-hidden rounded border border-slate-200 bg-white p-4 text-xs shadow-xs font-sans">
+      {/* Thông báo hành động kèm nút xem sạp trên sơ đồ */}
+      {actionNotice && (
+        <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 p-3.5 text-xs text-emerald-950 shadow-md animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2.5 font-medium">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+            <span>{actionNotice.message}</span>
+          </div>
+          {actionNotice.stallCode && onNavigateToMap && (
+            <button
+              type="button"
+              onClick={() => onNavigateToMap(actionNotice.stallCode!)}
+              className="px-3.5 py-1.5 rounded-lg bg-[#0B7A3A] hover:bg-[#075A2B] text-white font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs shrink-0"
+            >
+              <MapPin className="h-3.5 w-3.5" />
+              <span>Xem sạp {actionNotice.stallCode} trên sơ đồ chợ</span>
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="mb-4 flex flex-col gap-3 border-b border-slate-200 pb-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
           <button
@@ -551,19 +593,31 @@ export default function PendingProfilesView({
       </div>
 
       {actionNotice && (
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-emerald-900 font-bold shadow-xs animate-in fade-in">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-emerald-900 font-bold shadow-xs animate-in fade-in">
           <span className="flex min-w-0 items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" aria-hidden="true" />
-            <span>{actionNotice}</span>
+            <span>{actionNotice.message}</span>
           </span>
-          <button
-            type="button"
-            onClick={() => setActionNotice(null)}
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-emerald-800 hover:bg-emerald-100 cursor-pointer"
-            aria-label="Đóng thông báo xử lý hồ sơ"
-          >
-            <XCircle className="h-4 w-4" aria-hidden="true" />
-          </button>
+          <div className="flex items-center gap-2">
+            {actionNotice.stallCode && onNavigateToMap && (
+              <button
+                type="button"
+                onClick={() => onNavigateToMap(actionNotice.stallCode!)}
+                className="px-3 py-1 rounded-lg bg-[#0B7A3A] hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1"
+              >
+                <span>Xem sạp {actionNotice.stallCode} trên sơ đồ</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setActionNotice(null)}
+              className="flex min-h-8 min-w-8 items-center justify-center rounded-lg text-emerald-800 hover:bg-emerald-100 cursor-pointer"
+              aria-label="Đóng thông báo xử lý hồ sơ"
+            >
+              <XCircle className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
         </div>
       )}
 
@@ -840,6 +894,40 @@ export default function PendingProfilesView({
                     </div>
                   </div>
                 )}
+
+                {/* LỰA CHỌN SẠP THỰC TẾ PHÂN BỔ TRƯỚC KHI DUYỆT */}
+                {selectedProfile.status !== 'approved' && (
+                  <div className="pt-3 border-t border-slate-200 bg-emerald-50/60 p-3 rounded-xl border border-emerald-200">
+                    <label className="text-xs font-bold text-[#153154] flex items-center justify-between mb-1.5">
+                      <span className="flex items-center gap-1.5">
+                        <Store className="w-4 h-4 text-[#0B7A3A]" />
+                        <span>Chỉ định sạp kinh doanh trên sơ đồ chợ:</span>
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                        {vacantStalls.length} sạp trống sẵn sàng
+                      </span>
+                    </label>
+                    <select
+                      value={selectedStallCode || selectedProfile.stallCode}
+                      onChange={(e) => setSelectedStallCode(e.target.value)}
+                      className="w-full text-xs font-bold py-2 px-3 rounded-lg border border-emerald-300 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0B7A3A]"
+                    >
+                      <option value={selectedProfile.stallCode}>
+                        Sạp mặc định: {selectedProfile.stallCode} ({selectedProfile.stallZone})
+                      </option>
+                      {vacantStalls
+                        .filter((s) => s.code !== selectedProfile.stallCode)
+                        .map((s) => (
+                          <option key={s.id} value={s.code}>
+                            Sạp {s.code} — {s.name || s.zones?.name || 'Sạp trống'} ({s.acreage || 12} m² - {s.basePrice ? `${(s.basePrice/1000000).toFixed(1)} tr/tháng` : 'Tiêu chuẩn'})
+                          </option>
+                        ))}
+                    </select>
+                    <p className="text-[10px] text-slate-500 mt-1">
+                      Sau khi phê duyệt, tiểu thương sẽ lập tức xuất hiện tại vị trí sạp này trên sơ đồ mặt bằng tương tác.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* KHỐI 3: DANH MỤC HỒ SƠ & GIẤY TỜ THẨM ĐỊNH PHÁP LÝ */}
@@ -928,10 +1016,26 @@ export default function PendingProfilesView({
                 </a>
 
                 {selectedProfile.status === 'approved' ? (
-                  <span className="px-4 py-2 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span>Hồ sơ đã được phê duyệt</span>
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-3.5 py-2 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span>Hồ sơ đã phê duyệt</span>
+                    </span>
+                    {onNavigateToMap && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const code = selectedProfile.stallCode;
+                          setSelectedProfile(null);
+                          onNavigateToMap(code);
+                        }}
+                        className="px-4 py-2 rounded-xl bg-[#0B7A3A] hover:bg-[#075A2B] text-white text-xs font-black flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                      >
+                        <MapPin className="w-4 h-4" />
+                        <span>Xem sạp {selectedProfile.stallCode} trên sơ đồ</span>
+                      </button>
+                    )}
+                  </div>
                 ) : (
                   <>
                     <button

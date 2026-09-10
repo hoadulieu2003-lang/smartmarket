@@ -406,6 +406,13 @@ export default function SmartMarketHome() {
                 complaints={liveComplaints}
                 zones={liveZones}
                 products={liveProducts}
+                applications={liveApplications}
+                onApproveApplication={approveApplication}
+                onResolveComplaint={(codeOrId) => {
+                  handleResolveComplaint(codeOrId);
+                  handleBackendResolveComplaint(codeOrId);
+                }}
+                onQuickDispatch={handleQuickDispatch}
               />
             </div>
           )}
