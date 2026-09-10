@@ -321,5 +321,119 @@ describe('LiveDashboardOverview Command Center Integration', () => {
     // Check pending count badge
     expect(screen.getAllByText(/vụ tồn đọng/i).length).toBeGreaterThan(0);
   });
+
+  it('calculates dynamic fee metrics and renders live stall debts based on active stalls and market', () => {
+    const customStalls = [
+      {
+        id: 's-custom-01',
+        marketId: 'm-test',
+        code: 'TEST-01',
+        name: 'Sạp Trái Cây Miền Tây',
+        status: 'occupied',
+        categories: { name: 'Nông sản sạch' },
+        zones: { name: 'Khu A · Trái Cây' },
+        currentContract: {
+          fee: 5000000,
+          daysLeft: 10,
+          merchant: { fullName: 'Trần Thị Thúy', phone: '0901 112 233' }
+        }
+      },
+      {
+        id: 's-custom-02',
+        marketId: 'm-test',
+        code: 'TEST-02',
+        name: 'Sạp Rau Sạch Đà Lạt',
+        status: 'occupied',
+        categories: { name: 'Nông sản sạch' },
+        zones: { name: 'Khu B · Rau Củ' },
+        currentContract: {
+          fee: 3000000,
+          daysLeft: 100,
+          merchant: { fullName: 'Nguyễn Văn Minh', phone: '0902 334 455' }
+        }
+      }
+    ];
+
+    render(
+      <LiveDashboardOverview
+        onNavigateToMap={vi.fn()}
+        onNavigateToProfiles={vi.fn()}
+        stalls={customStalls}
+        selectedMarketId="m-test"
+      />
+    );
+
+    // Switch to Billing tab
+    const billingCard = screen.getByRole('button', { name: /Thẻ chỉ số thu phí/i });
+    fireEvent.click(billingCard);
+
+    // Verify dynamic stall plan count
+    expect(screen.getByText('Kế hoạch thu định mức 2 sạp')).toBeDefined();
+
+    // Switch to "Tất cả" filter to view all stalls regardless of debt status
+    const allFilterBtn = screen.getByRole('button', { name: /Tất cả/i });
+    fireEvent.click(allFilterBtn);
+
+    // Verify custom stalls are rendered in the operational table
+    expect(screen.getByText('TEST-01')).toBeDefined();
+    expect(screen.getByText('Sạp Trái Cây Miền Tây')).toBeDefined();
+    expect(screen.getByText('Trần Thị Thúy')).toBeDefined();
+    expect(screen.getByText('TEST-02')).toBeDefined();
+    expect(screen.getByText('Sạp Rau Sạch Đà Lạt')).toBeDefined();
+  });
+
+  it('allows collecting fee and updating stall payment status in real time', () => {
+    const customStalls = [
+      {
+        id: 's-debt-01',
+        marketId: 'm-test',
+        code: 'DEBT-01',
+        name: 'Sạp Đang Nợ Phí',
+        status: 'occupied',
+        displayStatus: 'expiring_soon',
+        categories: { name: 'Bách hóa' },
+        zones: { name: 'Khu A' },
+        currentContract: {
+          fee: 4000000,
+          daysLeft: 10,
+          merchant: { fullName: 'Phạm Văn Nợ', phone: '0909 888 777' }
+        }
+      }
+    ];
+
+    render(
+      <LiveDashboardOverview
+        onNavigateToMap={vi.fn()}
+        onNavigateToProfiles={vi.fn()}
+        stalls={customStalls}
+        selectedMarketId="m-test"
+      />
+    );
+
+    // Switch to Billing tab
+    const billingCard = screen.getByRole('button', { name: /Thẻ chỉ số thu phí/i });
+    fireEvent.click(billingCard);
+
+    // Click "Thu tiền" button for DEBT-01
+    const collectBtn = screen.getByRole('button', { name: /Thu tiền/i });
+    fireEvent.click(collectBtn);
+
+    // Expect modal to show
+    expect(screen.getByText(/Ghi Nhận Thu Phí & Quyết Toán Sạp DEBT-01/i)).toBeDefined();
+
+    // Confirm payment with VietQR
+    const confirmBtn = screen.getByRole('button', { name: /Tiểu Thương Đã Quét Mã & Thanh Toán Thành Công/i });
+    fireEvent.click(confirmBtn);
+
+    // Toast check
+    expect(screen.getByText(/Đã ghi nhận thu thành công 4.000.000đ cho sạp DEBT-01/i)).toBeDefined();
+
+    // Switch to "Đã hoàn tất" filter to see paid stall
+    const paidFilterBtn = screen.getByRole('button', { name: /Đã hoàn tất/i });
+    fireEvent.click(paidFilterBtn);
+
+    expect(screen.getByText('Đã nộp đủ')).toBeDefined();
+    expect(screen.getByText('DEBT-01')).toBeDefined();
+  });
 });
 

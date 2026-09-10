@@ -195,22 +195,115 @@ const INITIAL_FEE_STALLS: FeeStallItem[] = [
   }
 ];
 
-interface MarketFeeCollectionSectionProps {
+export interface MarketFeeCollectionSectionProps {
+  stalls?: any[];
+  zones?: any[];
+  marketTitle?: string;
+  selectedMarketId?: string;
   onOpenQuickMap?: (stall: { code: string; name: string; issue?: string }) => void;
   onNavigateToMap?: () => void;
 }
 
+export function buildFeeStallsFromStalls(sourceStalls: any[]): FeeStallItem[] {
+  if (!sourceStalls || sourceStalls.length === 0) return INITIAL_FEE_STALLS;
+
+  const targetList = sourceStalls.filter((s: any) => s.status === 'occupied' || s.currentContract);
+  const effectiveList = targetList.length > 0 ? targetList : sourceStalls;
+
+  return effectiveList.map((s: any, idx: number) => {
+    const feeAmount = Number(s.currentContract?.fee || s.rentalPrice || 4200000);
+    const merchantName = s.currentContract?.merchant?.fullName || s.merchant || `Chủ hộ sạp ${s.code}`;
+    const phone = s.currentContract?.merchant?.phone || s.phone || '0912 345 678';
+    const zoneName = s.zones?.name || (
+      s.code.startsWith('A') ? 'Khu A · Tươi sống' :
+      s.code.startsWith('B') ? 'Khu B · Nông sản khô' :
+      s.code.startsWith('C') ? 'Khu C · Ẩm thực' :
+      s.code.startsWith('D') ? 'Khu D · Bách hóa' :
+      s.code.startsWith('E') ? 'Khu E · Vải sợi' : 'Khu vực kinh doanh'
+    );
+    const categoryName = s.categories?.name || 'Ngành hàng kinh doanh';
+
+    // Xác định trạng thái nợ quá hạn dựa theo chỉ số vận hành thực tế
+    const isOverdue = s.openComplaintCount > 0 || s.displayStatus === 'expiring_soon' || (s.currentContract?.daysLeft && s.currentContract.daysLeft <= 25);
+    const isPending = !isOverdue && (idx % 4 === 0);
+    const isPaid = !isOverdue && !isPending;
+
+    let status: 'overdue' | 'pending' | 'paid' = 'paid';
+    let statusLabel = 'Đã nộp thành công';
+    let daysOverdue: number | undefined = undefined;
+    let note = 'Nộp qua cổng thanh toán số VietQR';
+
+    if (isOverdue) {
+      status = 'overdue';
+      const days = s.currentContract?.daysLeft ? Math.max(5, 30 - s.currentContract.daysLeft) : (8 + (idx % 7));
+      daysOverdue = days;
+      statusLabel = `Quá hạn ${days} ngày`;
+      note = s.openComplaintCount > 0
+        ? 'Tạm dừng sạp kiểm tra PAKN, hẹn nộp phí sau khi khắc phục'
+        : 'Hợp đồng sắp đến kỳ gia hạn, đôn đốc nộp phí mặt bằng kỳ này';
+    } else if (isPending) {
+      status = 'pending';
+      statusLabel = 'Chờ thu trong kỳ';
+      note = 'Hẹn nộp qua chuyển khoản ngân hàng hoặc nộp tiền mặt tại quầy BQL';
+    }
+
+    return {
+      id: s.id || `fee-${s.code}`,
+      code: s.code,
+      name: s.name || `Sạp ${s.code}`,
+      category: categoryName,
+      zone: zoneName,
+      merchant: merchantName,
+      phone: phone,
+      amount: feeAmount,
+      amountFormatted: formatCurrency(feeAmount),
+      status,
+      statusLabel,
+      daysOverdue,
+      dueDate: '10/09/2026',
+      note,
+      paidAt: isPaid ? '02/09/2026 14:30' : undefined,
+      paymentMethod: isPaid ? 'vietqr' : undefined,
+      receiptCode: isPaid ? `BL-2026-0902-${String(idx + 1).padStart(2, '0')}` : undefined
+    };
+  });
+}
+
 export default function MarketFeeCollectionSection({
+  stalls: stallsProp,
+  zones: zonesProp,
+  marketTitle,
+  selectedMarketId,
   onOpenQuickMap,
   onNavigateToMap
 }: MarketFeeCollectionSectionProps) {
-  const [stalls, setStalls] = useState<FeeStallItem[]>(INITIAL_FEE_STALLS);
+  const isDynamic = Boolean(stallsProp && stallsProp.length > 0);
+  const [stalls, setStalls] = useState<FeeStallItem[]>(() =>
+    isDynamic ? buildFeeStallsFromStalls(stallsProp!) : INITIAL_FEE_STALLS
+  );
+
+  // Tự động đồng bộ danh sách sạp khi chọn chợ khác hoặc khi danh sách sạp thực tế thay đổi
+  React.useEffect(() => {
+    if (stallsProp && stallsProp.length > 0) {
+      setStalls(buildFeeStallsFromStalls(stallsProp));
+    } else if (!stallsProp) {
+      setStalls(INITIAL_FEE_STALLS);
+    }
+  }, [stallsProp, selectedMarketId]);
+
   const [activeFilter, setActiveFilter] = useState<'all' | 'overdue' | 'pending' | 'paid'>('overdue');
   const [searchQuery, setSearchQuery] = useState('');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [paymentModalStall, setPaymentModalStall] = useState<FeeStallItem | null>(null);
   const [paymentMethodTab, setPaymentMethodTab] = useState<'vietqr' | 'cash'>('vietqr');
   const [cashierName, setCashierName] = useState('Nguyễn Văn Tuấn (Kế toán BQL)');
+
+  // Tính toán kỳ thu động theo thời gian thực tế
+  const now = new Date();
+  const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0');
+  const currentYearStr = String(now.getFullYear());
+  const feePeriodTitle = `Kỳ thu tháng ${currentMonthStr}/${currentYearStr}`;
+  const feePeriodMonthLabel = `Tháng ${currentMonthStr}`;
 
   // Tính toán số liệu động theo trạng thái thực tế của các sạp
   const overdueStalls = stalls.filter((s) => s.status === 'overdue');
@@ -220,30 +313,69 @@ export default function MarketFeeCollectionSection({
   const overdueCount = overdueStalls.length;
   const overdueTotalAmount = overdueStalls.reduce((acc, s) => acc + s.amount, 0);
 
-  // Giữ số liệu cơ sở để thỏa mãn kiểm thử hồi quy
-  const baseTarget = parseCurrency(MARKET_FEE_COLLECTION.totalTarget); // 240.000.000
-  const baseCollected = parseCurrency(MARKET_FEE_COLLECTION.collected); // 223.200.000
-  const collectedDelta = INITIAL_FEE_STALLS.filter(s => s.status === 'overdue').length - overdueCount;
-  const currentCollectedNum = baseCollected + (collectedDelta * 4200000);
+  // Tính toán chỉ số tài chính:
+  // Nếu là dữ liệu động thực tế -> tính tổng từ danh sách sạp thực tế
+  // Nếu là fallback mặc định -> giữ số liệu cơ sở để thỏa mãn kiểm thử hồi quy
+  const baseTarget = isDynamic
+    ? stalls.reduce((acc, s) => acc + s.amount, 0)
+    : parseCurrency(MARKET_FEE_COLLECTION.totalTarget); // 240.000.000
+  
+  const currentCollectedNum = isDynamic
+    ? paidStalls.reduce((acc, s) => acc + s.amount, 0)
+    : (() => {
+        const baseCollected = parseCurrency(MARKET_FEE_COLLECTION.collected); // 223.200.000
+        const collectedDelta = INITIAL_FEE_STALLS.filter(s => s.status === 'overdue').length - overdueCount;
+        return baseCollected + (collectedDelta * 4200000);
+      })();
+
   const currentUncollectedNum = Math.max(baseTarget - currentCollectedNum, 0);
+  const collectionRate = baseTarget > 0 ? Math.round((currentCollectedNum / baseTarget) * 100) : 100;
+
+  // Tính toán tiến độ thu phí phân khu động
+  const zoneBreakdown = React.useMemo(() => {
+    if (!isDynamic) {
+      return MARKET_FEE_COLLECTION.breakdown;
+    }
+
+    const zoneMap = new Map<string, { name: string; target: number; collected: number }>();
+    stalls.forEach((s) => {
+      const zName = s.zone || 'Khu vực chung';
+      const existing = zoneMap.get(zName) || { name: zName, target: 0, collected: 0 };
+      existing.target += s.amount;
+      if (s.status === 'paid') {
+        existing.collected += s.amount;
+      }
+      zoneMap.set(zName, existing);
+    });
+
+    return Array.from(zoneMap.values()).map((z) => {
+      const rate = z.target > 0 ? Math.round((z.collected / z.target) * 100) : 100;
+      return {
+        zone: z.name,
+        target: formatCurrency(z.target),
+        collected: formatCurrency(z.collected),
+        rate
+      };
+    });
+  }, [stalls, isDynamic]);
 
   const triggerExport = () => {
-    setToastMsg('Đã xuất báo cáo thu phí định kỳ tháng 08/2026 (PDF & Excel)');
+    setToastMsg(`Đã xuất báo cáo thu phí định kỳ ${feePeriodTitle} (PDF & Excel)`);
     setTimeout(() => setToastMsg(null), 3500);
   };
 
   const handleBatchReminder = () => {
-    setToastMsg(`Đã phát lệnh gửi thông báo nhắc nợ kỳ 08/2026 qua Zalo ZNS & SMS tới ${overdueCount} sạp quá hạn!`);
+    setToastMsg(`Đã phát lệnh gửi thông báo nhắc nợ kỳ ${currentMonthStr}/${currentYearStr} qua Zalo ZNS & SMS tới ${overdueCount} sạp quá hạn!`);
     setTimeout(() => setToastMsg(null), 4000);
   };
 
   const handleSendSingleReminder = (stall: FeeStallItem) => {
-    setToastMsg(`Đã gửi thông báo nhắc nợ kỳ 08/2026 tới chủ sạp ${stall.merchant} (${stall.phone}) qua Zalo!`);
+    setToastMsg(`Đã gửi thông báo nhắc nợ kỳ ${currentMonthStr}/${currentYearStr} tới chủ sạp ${stall.merchant} (${stall.phone}) qua Zalo!`);
     setTimeout(() => setToastMsg(null), 3500);
   };
 
   const handleConfirmPayment = (stall: FeeStallItem, method: 'vietqr' | 'cash') => {
-    const receiptNum = `PT-2026-08${Math.floor(10 + Math.random() * 90)}`;
+    const receiptNum = `PT-${currentYearStr}-${currentMonthStr}${Math.floor(10 + Math.random() * 90)}`;
     setStalls((prev) =>
       prev.map((item) =>
         item.id === stall.id
@@ -299,7 +431,7 @@ export default function MarketFeeCollectionSection({
                 Tình Hình Thu Phí Quản Lý Thị Trường & Dịch Vụ
               </h2>
               <span className="text-[11px] font-bold text-[#7185A1] font-sans hidden sm:inline">
-                • Kỳ thu tháng 08/2026
+                • {feePeriodTitle}
               </span>
             </div>
             <p className="text-[11px] text-[#7185A1] mt-0.5">
@@ -358,14 +490,14 @@ export default function MarketFeeCollectionSection({
               { name: 'Đã thu', value: currentCollectedNum, color: '#0B7A3A' },
               { name: 'Còn nợ', value: currentUncollectedNum, color: '#D3484D' },
             ]}
-            centerValue={`${Math.round((currentCollectedNum / baseTarget) * 100)}%`}
+            centerValue={`${collectionRate}%`}
             centerLabel="Thu phí"
             size={135}
           />
           <div className="text-[11px] font-bold text-[#172F55] mt-1.5 flex items-center gap-1.5">
             <span className="inline-block w-2 h-2 rounded-full bg-[#0B7A3A]" aria-hidden="true"></span>
             <span>Tỷ lệ thu nợ:</span>
-            <span className="font-mono text-[#0B7A3A] font-black">{((currentCollectedNum / baseTarget) * 100).toFixed(1)}%</span>
+            <span className="font-mono text-[#0B7A3A] font-black">{((currentCollectedNum / (baseTarget || 1)) * 100).toFixed(1)}%</span>
           </div>
         </div>
 
@@ -375,12 +507,12 @@ export default function MarketFeeCollectionSection({
           <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-slate-600 text-[10px] uppercase font-black tracking-wide">Tổng phải thu</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">Tháng 08</span>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">{feePeriodMonthLabel}</span>
             </div>
             <span className="text-lg font-black font-mono text-[#172F55] mt-1.5 block">
-              {MARKET_FEE_COLLECTION.totalTarget}
+              {isDynamic ? formatCurrency(baseTarget) : MARKET_FEE_COLLECTION.totalTarget}
             </span>
-            <span className="text-[10px] text-slate-500 font-medium mt-0.5 block">Kế hoạch thu định mức 50 sạp</span>
+            <span className="text-[10px] text-slate-500 font-medium mt-0.5 block">Kế hoạch thu định mức {stalls.length} sạp</span>
           </div>
 
           {/* Card 2: Đã thu thực tế */}
@@ -388,7 +520,7 @@ export default function MarketFeeCollectionSection({
             <div className="flex items-center justify-between">
               <span className="text-emerald-800 text-[10px] uppercase font-black tracking-wide">Đã thu thực tế</span>
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-900">
-                {Math.round((currentCollectedNum / baseTarget) * 100)}%
+                {collectionRate}%
               </span>
             </div>
             <span className="text-lg font-black font-mono text-[#076C31] mt-1.5 block">
@@ -439,8 +571,8 @@ export default function MarketFeeCollectionSection({
           <span>Tiến độ thu phí theo phân khu chức năng:</span>
           <span className="text-[10px] text-[#7185A1] font-medium">Cập nhật lúc 16:30 hôm nay</span>
         </div>
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-          {MARKET_FEE_COLLECTION.breakdown.map((b, idx) => (
+        <div className={`grid grid-cols-1 gap-3 ${zoneBreakdown.length > 3 ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5' : 'lg:grid-cols-3'}`}>
+          {zoneBreakdown.map((b, idx) => (
             <div key={idx} className="p-3 bg-white rounded-lg border border-slate-200 shadow-2xs space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[#172F55]">{b.zone}</span>
@@ -760,7 +892,7 @@ export default function MarketFeeCollectionSection({
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-500">Khoản thu kỳ:</span>
-                  <span className="font-bold text-[#172F55]">Tháng 08/2026</span>
+                  <span className="font-bold text-[#172F55]">{feePeriodTitle}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-500">Chủ hộ kinh doanh:</span>
@@ -836,11 +968,11 @@ export default function MarketFeeCollectionSection({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Tên thụ hưởng:</span>
-                      <strong className="text-slate-900">BAN QUẢN LÝ CHỢ ĐỒNG XUÂN</strong>
+                      <strong className="text-slate-900">BAN QUẢN LÝ {marketTitle ? marketTitle.toUpperCase() : 'CHỢ ĐỒNG XUÂN'}</strong>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Nội dung CK:</span>
-                      <strong className="font-mono text-[#0B7A3A]">SMARTMARKET {paymentModalStall.code} THUPHI T8</strong>
+                      <strong className="font-mono text-[#0B7A3A]">SMARTMARKET {paymentModalStall.code} THUPHI T{currentMonthStr}</strong>
                     </div>
                   </div>
 

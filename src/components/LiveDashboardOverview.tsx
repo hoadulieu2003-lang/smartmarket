@@ -557,6 +557,53 @@ export default function LiveDashboardOverview({
     return source.filter((c: any) => c.marketId === selectedMarketId);
   }, [complaints, selectedMarketId]);
 
+  // 5. Tính toán tổng quan chỉ số Thu phí chợ theo thời gian thực (Real-time Fee Metrics)
+  const feeOverview = useMemo(() => {
+    const occupiedStalls = activeStalls.filter((s: any) => s.status === 'occupied' || s.currentContract);
+    const effectiveStalls = occupiedStalls.length > 0 ? occupiedStalls : activeStalls;
+
+    const target = effectiveStalls.reduce((sum: number, s: any) => {
+      const fee = Number(s.currentContract?.fee || s.rentalPrice || 4200000);
+      return sum + fee;
+    }, 0);
+
+    // Sạp nợ quá hạn: có khiếu nại chưa giải quyết, hoặc sắp hết hạn hợp đồng <= 25 ngày
+    const overdueStalls = effectiveStalls.filter((s: any) =>
+      s.openComplaintCount > 0 ||
+      s.displayStatus === 'expiring_soon' ||
+      (s.currentContract?.daysLeft && s.currentContract.daysLeft <= 25)
+    );
+    const overdueDebt = overdueStalls.reduce((sum: number, s: any) => {
+      return sum + Number(s.currentContract?.fee || s.rentalPrice || 4200000);
+    }, 0);
+
+    // Sạp chờ thu trong kỳ
+    const nonOverdueStalls = effectiveStalls.filter((s: any) => !overdueStalls.includes(s));
+    const paidStalls = nonOverdueStalls.filter((_: any, idx: number) => idx % 4 !== 0);
+    const collected = paidStalls.reduce((sum: number, s: any) => {
+      return sum + Number(s.currentContract?.fee || s.rentalPrice || 4200000);
+    }, 0);
+
+    const uncollected = Math.max(0, target - collected);
+    const rate = target > 0 ? Math.round((collected / target) * 100) : 100;
+
+    return {
+      target,
+      targetFormatted: `${new Intl.NumberFormat('vi-VN').format(target)}đ`,
+      collected,
+      collectedMillions: (collected / 1000000).toFixed(1),
+      collectedFormatted: `${new Intl.NumberFormat('vi-VN').format(collected)}đ`,
+      uncollected,
+      uncollectedMillions: (uncollected / 1000000).toFixed(1),
+      uncollectedFormatted: `${new Intl.NumberFormat('vi-VN').format(uncollected)}đ`,
+      overdueDebt,
+      overdueDebtFormatted: `${new Intl.NumberFormat('vi-VN').format(overdueDebt)}đ`,
+      overdueCount: overdueStalls.length,
+      rate,
+      stallCount: effectiveStalls.length
+    };
+  }, [activeStalls]);
+
   // Trạng thái giải quyết/đóng phản ánh bền vững (Persistent Resolved Complaints State)
   const [internalResolvedCodes, setInternalResolvedCodes] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
@@ -1319,7 +1366,7 @@ export default function LiveDashboardOverview({
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-lg sm:text-xl lg:text-[22px] font-black text-[#172F55] leading-none tracking-tight font-mono">
-                223.2 tr
+                {feeOverview.collectedMillions} tr
               </div>
               <div className="text-xs sm:text-[13px] font-bold text-[#637B9C] mt-1 flex items-center justify-between">
                 <span>Thu phí chợ</span>
@@ -1330,7 +1377,7 @@ export default function LiveDashboardOverview({
                 )}
               </div>
               <div className="text-[10px] sm:text-[11px] font-extrabold text-[#12934D] mt-0.5">
-                Đạt 93% (Nợ 16.8tr)
+                Đạt {feeOverview.rate}% (Nợ {feeOverview.uncollectedMillions}tr)
               </div>
             </div>
           </div>
@@ -2099,6 +2146,10 @@ export default function LiveDashboardOverview({
         {activeKpiTab === 'billing' && (
           <div className="pt-1">
             <MarketFeeCollectionSection
+              stalls={activeStalls}
+              zones={activeZones}
+              marketTitle={currentMarket?.name || marketTitle}
+              selectedMarketId={selectedMarketId}
               onOpenQuickMap={(stall) => setQuickMapStall(stall)}
               onNavigateToMap={onNavigateToMap}
             />
@@ -2138,15 +2189,17 @@ export default function LiveDashboardOverview({
               <ArrowUpRight className="w-3 h-3" />
             </span>
           </div>
-          <p className="text-[11px] text-[#7185A1] mt-1.5 min-h-[16px]">Kỳ thu, phải thu và số đã thu tháng 08/2026.</p>
+          <p className="text-[11px] text-[#7185A1] mt-1.5 min-h-[16px]">
+            Kỳ thu, phải thu và số đã thu tháng {String(new Date().getMonth() + 1).padStart(2, '0')}/{new Date().getFullYear()}.
+          </p>
           <div className="mt-3 pt-2.5 flex items-center gap-2">
             <div className="flex-1 border border-dashed border-[#D7E2EB] p-2 rounded-lg bg-[#F5FAF8]/50">
               <div className="text-[10px] text-[#7185A1] font-bold">Đã thu</div>
-              <div className="text-xs font-black text-[#0B7A3A] font-mono mt-0.5">223.200.000đ</div>
+              <div className="text-xs font-black text-[#0B7A3A] font-mono mt-0.5">{feeOverview.collectedFormatted}</div>
             </div>
             <div className="flex-1 border border-dashed border-[#D7E2EB] p-2 rounded-lg bg-[#F5FAF8]/50">
               <div className="text-[10px] text-[#7185A1] font-bold">Còn nợ</div>
-              <div className="text-xs font-black text-[#D3484D] font-mono mt-0.5">16.800.000đ</div>
+              <div className="text-xs font-black text-[#D3484D] font-mono mt-0.5">{feeOverview.uncollectedFormatted}</div>
             </div>
           </div>
         </div>
