@@ -514,14 +514,111 @@ export default function LiveDashboardOverview({
     return 'Toàn Hệ Thống Chợ';
   }, [currentMarket, markets]);
 
-  // 2. Lấy danh sách Sạp thực tế tương ứng với Chợ được chọn
+  // Trạng thái giải quyết/đóng phản ánh bền vững (Persistent Resolved Complaints State)
+  const [internalResolvedCodes, setInternalResolvedCodes] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return JSON.parse(localStorage.getItem('smartmarket_resolved_complaints') || '[]');
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  const allResolvedCodes = useMemo(() => {
+    return Array.from(
+      new Set([
+        'PAKN-2026-108',
+        'cp-13',
+        'c13',
+        ...resolvedComplaintCodes,
+        ...internalResolvedCodes
+      ])
+    );
+  }, [resolvedComplaintCodes, internalResolvedCodes]);
+
+  const isComplaintResolved = (codeOrId?: string, status?: string) => {
+    if (status === 'resolved') return true;
+    if (!codeOrId) return false;
+    return allResolvedCodes.includes(codeOrId);
+  };
+
+  const handleResolveComplaint = (codeOrId: string, altCodeOrId?: string) => {
+    setInternalResolvedCodes((prev) => {
+      const toAdd = [codeOrId, altCodeOrId].filter(Boolean) as string[];
+      const next = Array.from(new Set([...prev, ...toAdd]));
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('smartmarket_resolved_complaints', JSON.stringify(next));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      return next;
+    });
+    if (onResolveComplaint) {
+      onResolveComplaint(codeOrId);
+    }
+  };
+
+  // 2. Lấy danh sách Khiếu nại thực tế tương ứng (Chuẩn hóa trạng thái giải quyết)
+  const activeComplaintsList = useMemo(() => {
+    const source = (complaints && complaints.length > 0) ? complaints : CLIENT_COMPLAINTS;
+    const filtered = (!selectedMarketId || selectedMarketId === 'all')
+      ? source
+      : source.filter((c: any) => c.marketId === selectedMarketId);
+
+    return filtered.map((c: any) => {
+      const isResolved =
+        c.status === 'resolved' ||
+        (c.code && allResolvedCodes.includes(c.code)) ||
+        (c.id && allResolvedCodes.includes(c.id));
+      if (isResolved) {
+        return {
+          ...c,
+          status: 'resolved' as const,
+          resolvedAt: c.resolvedAt || new Date().toISOString(),
+          resolutionNote: c.resolutionNote || 'Đã kiểm tra thực tế và xử lý dứt điểm.'
+        };
+      }
+      return c;
+    });
+  }, [complaints, selectedMarketId, allResolvedCodes]);
+
+  // 3. Lấy danh sách Sạp thực tế tương ứng với Chợ được chọn (Tự động làm sạch trạng thái khi sự cố đã giải quyết)
   const activeStalls = useMemo(() => {
     const source = (stalls && stalls.length > 0) ? stalls : CLIENT_STALLS;
-    if (!selectedMarketId || selectedMarketId === 'all') return source;
-    return source.filter((s: any) => s.marketId === selectedMarketId);
-  }, [stalls, selectedMarketId]);
+    const filtered = (!selectedMarketId || selectedMarketId === 'all')
+      ? source
+      : source.filter((s: any) => s.marketId === selectedMarketId);
 
-  // 3. Lấy danh sách Phân khu thực tế tương ứng
+    return filtered.map((s: any) => {
+      const stallOpenComplaints = activeComplaintsList.filter((c: any) => {
+        const matchStall =
+          c.stallId === s.id ||
+          c.stallId === s.code ||
+          (c.stalls && (c.stalls.id === s.id || c.stalls.code === s.code)) ||
+          (c as any).stallCode === s.code;
+        return matchStall && c.status !== 'resolved';
+      });
+
+      const openComplaintCount = stallOpenComplaints.length;
+      let displayStatus = s.displayStatus;
+      if (openComplaintCount === 0 && s.displayStatus === 'has_complaint') {
+        const isExpiring = s.currentContract && s.currentContract.daysLeft != null && s.currentContract.daysLeft <= 30;
+        displayStatus = isExpiring ? 'expiring_soon' : (s.status === 'occupied' ? 'occupied' : s.status);
+      }
+
+      return {
+        ...s,
+        openComplaintCount,
+        displayStatus,
+      };
+    });
+  }, [stalls, selectedMarketId, activeComplaintsList]);
+
+  // 4. Lấy danh sách Phân khu thực tế tương ứng
   const activeZones = useMemo(() => {
     if (zones && zones.length > 0) {
       if (selectedMarketId && selectedMarketId !== 'all') {
@@ -550,13 +647,6 @@ export default function LiveDashboardOverview({
     return (!selectedMarketId || selectedMarketId === 'all') ? CLIENT_ZONES : [];
   }, [zones, selectedMarketId, activeStalls]);
 
-  // 4. Lấy danh sách Khiếu nại thực tế tương ứng
-  const activeComplaintsList = useMemo(() => {
-    const source = (complaints && complaints.length > 0) ? complaints : CLIENT_COMPLAINTS;
-    if (!selectedMarketId || selectedMarketId === 'all') return source;
-    return source.filter((c: any) => c.marketId === selectedMarketId);
-  }, [complaints, selectedMarketId]);
-
   // 5. Tính toán tổng quan chỉ số Thu phí chợ theo thời gian thực (Real-time Fee Metrics)
   const feeOverview = useMemo(() => {
     const occupiedStalls = activeStalls.filter((s: any) => s.status === 'occupied' || s.currentContract);
@@ -569,7 +659,7 @@ export default function LiveDashboardOverview({
 
     // Sạp nợ quá hạn: có khiếu nại chưa giải quyết, hoặc sắp hết hạn hợp đồng <= 25 ngày
     const overdueStalls = effectiveStalls.filter((s: any) =>
-      s.openComplaintCount > 0 ||
+      (s.openComplaintCount && s.openComplaintCount > 0) ||
       s.displayStatus === 'expiring_soon' ||
       (s.currentContract?.daysLeft && s.currentContract.daysLeft <= 25)
     );
@@ -604,53 +694,6 @@ export default function LiveDashboardOverview({
     };
   }, [activeStalls]);
 
-  // Trạng thái giải quyết/đóng phản ánh bền vững (Persistent Resolved Complaints State)
-  const [internalResolvedCodes, setInternalResolvedCodes] = useState<string[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        return JSON.parse(localStorage.getItem('smartmarket_resolved_complaints') || '[]');
-      } catch {
-        return [];
-      }
-    }
-    return [];
-  });
-
-  const allResolvedCodes = useMemo(() => {
-    return Array.from(
-      new Set([
-        'PAKN-2026-108',
-        'cp-13',
-        'c13',
-        ...resolvedComplaintCodes,
-        ...internalResolvedCodes
-      ])
-    );
-  }, [resolvedComplaintCodes, internalResolvedCodes]);
-
-  const isComplaintResolved = (codeOrId?: string) => {
-    if (!codeOrId) return false;
-    return allResolvedCodes.includes(codeOrId);
-  };
-
-  const handleResolveComplaint = (codeOrId: string, altCodeOrId?: string) => {
-    setInternalResolvedCodes((prev) => {
-      const toAdd = [codeOrId, altCodeOrId].filter(Boolean) as string[];
-      const next = Array.from(new Set([...prev, ...toAdd]));
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem('smartmarket_resolved_complaints', JSON.stringify(next));
-        } catch (e) {
-          console.error(e);
-        }
-      }
-      return next;
-    });
-    if (onResolveComplaint) {
-      onResolveComplaint(codeOrId);
-    }
-  };
-
   // Hàm phân loại ngữ nghĩa thông minh cho phản ánh PAKN (Smart Semantic Classifier)
   const classifyComplaintSemantic = (c: any) => {
     const rawContent = `${c.content || ''} ${c.title || ''}`.toLowerCase();
@@ -674,10 +717,64 @@ export default function LiveDashboardOverview({
       else cleanStallId = 'Khu vực chung';
     }
 
-    // 3. Phân loại theo Ngữ nghĩa & Loại hình
-    // TIER 1: Gian Lận & An Toàn Thực Phẩm (P0 - SLA < 15 phút)
+    // 3. Phân loại theo Cấp độ & Ngữ nghĩa
+    // Nếu có severityLevel xác định rõ (P0 / P1 / P2)
+    if (c.severityLevel === 'P0') {
+      let tag = 'An toàn thực phẩm';
+      if (rawContent.includes('giá') || rawContent.includes('cân') || rawType === 'weighing_fraud' || rawType === 'price_issue') {
+        tag = 'Niêm yết giá & Cân';
+      } else if (rawContent.includes('bảo quản') || rawContent.includes('cũ') || rawContent.includes('ôi thiu') || rawType === 'product_quality') {
+        tag = 'Chất lượng hàng hóa';
+      }
+      return {
+        tier: 'food_safety_fraud' as const,
+        severityLevel: 'P0' as const,
+        severityLabel: 'Khẩn cấp' as const,
+        tagLabel: tag,
+        cleanTitle,
+        cleanStallId
+      };
+    }
+
+    if (c.severityLevel === 'P1') {
+      let tag = 'Trật tự lối đi';
+      if (rawContent.includes('thái độ') || rawContent.includes('quát') || rawContent.includes('phục vụ') || rawType === 'service_attitude') {
+        tag = 'Thái độ phục vụ';
+      } else if (rawContent.includes('pccc') || rawContent.includes('chữa cháy')) {
+        tag = 'An toàn PCCC & Lối đi';
+      } else if (rawContent.includes('test') || rawContent.includes('kiểm tra')) {
+        tag = 'Giám sát điều hành';
+      }
+      return {
+        tier: 'order_space' as const,
+        severityLevel: 'P1' as const,
+        severityLabel: 'Trật tự' as const,
+        tagLabel: tag,
+        cleanTitle,
+        cleanStallId
+      };
+    }
+
+    if (c.severityLevel === 'P2') {
+      let tag = 'Cơ sở hạ tầng';
+      if (rawContent.includes('đọng nước') || rawContent.includes('rác') || rawContent.includes('vệ sinh') || rawContent.includes('mùi')) {
+        tag = 'Vệ sinh môi trường';
+      } else if (rawContent.includes('pccc') || rawContent.includes('cháy')) {
+        tag = 'An toàn PCCC';
+      }
+      return {
+        tier: 'sanitation_infra' as const,
+        severityLevel: 'P2' as const,
+        severityLabel: 'Cơ sở hạ tầng' as const,
+        tagLabel: tag,
+        cleanTitle,
+        cleanStallId
+      };
+    }
+
+    // Fallback cho phản ánh tự do không có severityLevel
+    // TIER 1: Gian Lận & An Toàn Thực Phẩm
     const isFoodSafetyOrFraud =
-      c.severityLevel === 'P0' ||
       rawType === 'food_safety' ||
       rawType === 'product_quality' ||
       rawType === 'weighing_fraud' ||
@@ -712,9 +809,8 @@ export default function LiveDashboardOverview({
       };
     }
 
-    // TIER 3: Vệ Sinh & Cơ Sở Hạ Tầng (P2 - SLA < 2 giờ)
+    // TIER 3: Vệ Sinh & Cơ Sở Hạ Tầng
     const isSanitationOrInfra =
-      c.severityLevel === 'P2' ||
       rawType === 'infrastructure' ||
       rawContent.includes('đọng nước') ||
       rawContent.includes('nước tràn') ||
@@ -728,8 +824,6 @@ export default function LiveDashboardOverview({
       rawContent.includes('sàn trơn') ||
       rawContent.includes('bóng đèn') ||
       rawContent.includes('mái che') ||
-      rawContent.includes('pccc') ||
-      rawContent.includes('cháy') ||
       rawContent.includes('thoát sàn');
 
     if (isSanitationOrInfra) {
@@ -749,7 +843,7 @@ export default function LiveDashboardOverview({
       };
     }
 
-    // TIER 2: Trật Tự & Lấn Chiếm Lối Đi (P1 - SLA < 30 phút)
+    // TIER 2: Trật Tự & Quy Chế Mặt Bằng
     let tag = 'Trật tự lối đi';
     if (rawContent.includes('thái độ') || rawContent.includes('quát') || rawContent.includes('phục vụ') || rawType === 'service_attitude') {
       tag = 'Thái độ phục vụ';
@@ -768,9 +862,10 @@ export default function LiveDashboardOverview({
 
   // 5. Cấu trúc nhóm phản ánh PAKN động theo phân loại ngữ nghĩa thông minh
   const dynamicComplaintGroups = useMemo(() => {
-    if (complaints && complaints.length > 0) {
+    if (activeComplaintsList && activeComplaintsList.length > 0) {
       const mappedComplaints = activeComplaintsList.map((c: any) => {
         const classified = classifyComplaintSemantic(c);
+        const resolved = isComplaintResolved(c.code, c.status) || isComplaintResolved(c.id, c.status);
         return {
           id: c.id,
           code: c.code || `PAKN-${(c.id || '').slice(0, 6).toUpperCase()}`,
@@ -786,6 +881,7 @@ export default function LiveDashboardOverview({
           categoryLabel: classified.tagLabel,
           reporter: c.reporter?.fullName || 'Người tiêu dùng',
           time: c.createdAt ? new Date(c.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'Hôm nay',
+          status: resolved ? 'resolved' : (c.status || 'new'),
           coordinator: {
             name: 'Ban Quản Lý Chợ',
             role: 'Tổ cơ động',
@@ -799,6 +895,10 @@ export default function LiveDashboardOverview({
       const p1Items = mappedComplaints.filter((item: any) => item.tier === 'order_space');
       const p2Items = mappedComplaints.filter((item: any) => item.tier === 'sanitation_infra');
 
+      const p0Open = p0Items.filter((i: any) => !isComplaintResolved(i.code, i.status) && !isComplaintResolved(i.id, i.status));
+      const p1Open = p1Items.filter((i: any) => !isComplaintResolved(i.code, i.status) && !isComplaintResolved(i.id, i.status));
+      const p2Open = p2Items.filter((i: any) => !isComplaintResolved(i.code, i.status) && !isComplaintResolved(i.id, i.status));
+
       return [
         {
           id: 'food_safety_fraud',
@@ -807,33 +907,33 @@ export default function LiveDashboardOverview({
           icon: Flame,
           badgeColor: 'bg-rose-50 text-rose-700 border-rose-200',
           priorityTag: 'Khẩn cấp',
-          count: p0Items.length,
+          count: p0Open.length,
           items: p0Items
         },
         {
           id: 'order_space',
-          title: 'Trật Tự & Lấn Chiếm Lối Đi',
+          title: 'Trật Tự & Quy Chế Mặt Bằng',
           subtitle: 'Mức trật tự (SLA < 30 phút)',
           icon: ShieldAlert,
           badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
           priorityTag: 'Trật tự',
-          count: p1Items.length,
+          count: p1Open.length,
           items: p1Items
         },
         {
           id: 'sanitation_infra',
-          title: 'Vệ Sinh & Cơ Sở Hạ Tầng',
+          title: 'Hạ Tầng & Vệ Sinh Môi Trường',
           subtitle: 'Mức hạ tầng (SLA < 2 giờ)',
           icon: Wrench,
           badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
           priorityTag: 'Hạ tầng',
-          count: p2Items.length,
+          count: p2Open.length,
           items: p2Items
         }
       ];
     }
     return COMPLAINT_GROUPS;
-  }, [complaints, activeComplaintsList]);
+  }, [activeComplaintsList, allResolvedCodes]);
 
   const activeComplaintCount = useMemo(() => {
     return dynamicComplaintGroups.reduce((acc, group) => {
@@ -1151,15 +1251,23 @@ export default function LiveDashboardOverview({
             className="bg-white/10 hover:bg-white/18 border border-white/20 rounded-lg p-2.5 transition-colors cursor-pointer flex items-center justify-between gap-2"
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
-                {criticalComplaintCount}
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-xs shrink-0 shadow-xs ${
+                criticalComplaintCount > 0 ? 'bg-rose-500 text-white' : 'bg-emerald-400 text-slate-950'
+              }`}>
+                {criticalComplaintCount > 0 ? criticalComplaintCount : '✓'}
               </div>
               <div>
-                <div className="text-xs font-extrabold text-white">{criticalComplaintCount} Phản ánh khẩn cấp</div>
-                <div className="text-[10px] text-white/80">Gian lận & ATTP cần xử lý ngay</div>
+                <div className="text-xs font-extrabold text-white">
+                  {criticalComplaintCount > 0 ? `${criticalComplaintCount} Phản ánh khẩn cấp` : '0 Phản ánh khẩn cấp'}
+                </div>
+                <div className="text-[10px] text-white/80">
+                  {criticalComplaintCount > 0 ? 'Gian lận & ATTP cần xử lý ngay' : 'ATTP & Cân đo đã kiểm soát tốt'}
+                </div>
               </div>
             </div>
-            <span className="text-[11px] font-black text-[#B9F4CA] underline shrink-0">Xử lý ngay →</span>
+            <span className="text-[11px] font-black text-[#B9F4CA] underline shrink-0">
+              {criticalComplaintCount > 0 ? 'Xử lý ngay →' : '✓ Ổn định'}
+            </span>
           </div>
 
           {/* TO-DO 2: SỰ CỐ HẠ TẦNG & TRẬT TỰ */}
@@ -1171,15 +1279,27 @@ export default function LiveDashboardOverview({
             className="bg-white/10 hover:bg-white/18 border border-white/20 rounded-lg p-2.5 transition-colors cursor-pointer flex items-center justify-between gap-2"
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
-                {infrastructureComplaintCount}
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-xs shrink-0 shadow-xs ${
+                (infrastructureComplaintCount + orderComplaintCount) > 0 ? 'bg-amber-400 text-slate-900' : 'bg-emerald-400 text-slate-950'
+              }`}>
+                {(infrastructureComplaintCount + orderComplaintCount) > 0 ? (infrastructureComplaintCount + orderComplaintCount) : '✓'}
               </div>
               <div>
-                <div className="text-xs font-extrabold text-white">{infrastructureComplaintCount} Vấn đề hạ tầng & {orderComplaintCount} Trật tự</div>
-                <div className="text-[10px] text-white/80">Bảo trì & Trật tự trong ca</div>
+                <div className="text-xs font-extrabold text-white">
+                  {(infrastructureComplaintCount + orderComplaintCount) > 0
+                    ? `${infrastructureComplaintCount} Vấn đề hạ tầng & ${orderComplaintCount} Trật tự`
+                    : '0 Vấn đề hạ tầng & trật tự'}
+                </div>
+                <div className="text-[10px] text-white/80">
+                  {(infrastructureComplaintCount + orderComplaintCount) > 0
+                    ? 'Bảo trì & Trật tự trong ca'
+                    : 'Hạ tầng và luồng đi thông suốt'}
+                </div>
               </div>
             </div>
-            <span className="text-[11px] font-black text-[#B9F4CA] underline shrink-0">Điều phối →</span>
+            <span className="text-[11px] font-black text-[#B9F4CA] underline shrink-0">
+              {(infrastructureComplaintCount + orderComplaintCount) > 0 ? 'Điều phối →' : '✓ Thông suốt'}
+            </span>
           </div>
 
           {/* TO-DO 3: THU PHÍ & CÔNG NỢ */}

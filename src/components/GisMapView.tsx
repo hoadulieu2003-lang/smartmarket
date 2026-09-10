@@ -34,6 +34,8 @@ import type { Stall } from '@/types/clientTypes';
 
 export interface GisMapViewProps {
   onNavigateToMarketMap: (marketId?: string, stallCode?: string) => void;
+  complaints?: any[];
+  resolvedCodes?: string[];
 }
 
 // =============================================================================
@@ -83,13 +85,11 @@ function getProjectedStallCoords(marketLat: number, marketLng: number, stall: St
   const zoneId = stall.zoneId;
   let latDelta = 0;
   let lngDelta = 0;
-
-  const itemIdx = index % 10;
-  const row = Math.floor(itemIdx / 5);
-  const col = itemIdx % 5;
+  const row = Math.floor(index / 5);
+  const col = index % 5;
 
   if (zoneId === 'z-a') {
-    // Khu A: Tây Bắc [-0.00035, -0.00030]
+    // Khu A: Tây Bắc [0.00015, -0.00030]
     latDelta = 0.00015 + row * 0.00012;
     lngDelta = -0.00045 + col * 0.00018;
   } else if (zoneId === 'z-b') {
@@ -113,7 +113,7 @@ function getProjectedStallCoords(marketLat: number, marketLng: number, stall: St
   return [marketLat + latDelta, marketLng + lngDelta];
 }
 
-export default function GisMapView({ onNavigateToMarketMap }: GisMapViewProps) {
+export default function GisMapView({ onNavigateToMarketMap, complaints, resolvedCodes = [] }: GisMapViewProps) {
   const [selectedMarketId, setSelectedMarketId] = useState<string>('m-dongxuan');
   const [activeLayer, setActiveLayer] = useState<BaseLayerKey>('satellite');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -132,17 +132,30 @@ export default function GisMapView({ onNavigateToMarketMap }: GisMapViewProps) {
     [selectedMarketId]
   );
 
-  // Danh sách sự cố theo mã sạp để làm nổi bật
+  // Danh sách sự cố theo mã sạp để làm nổi bật (Đã loại trừ các khiếu nại đã đóng)
   const complaintsByStall = useMemo(() => {
     const map = new Map<string, string>();
-    CLIENT_COMPLAINTS.forEach((c) => {
-      const stallCode = c.stalls?.code || '';
-      if (stallCode && c.status !== 'resolved') {
+    const localResolved: string[] = typeof window !== 'undefined'
+      ? (() => {
+          try {
+            return JSON.parse(localStorage.getItem('smartmarket_resolved_complaints') || '[]');
+          } catch {
+            return [];
+          }
+        })()
+      : [];
+    const allResolved = new Set([...resolvedCodes, ...localResolved]);
+
+    const source = (complaints && complaints.length > 0) ? complaints : CLIENT_COMPLAINTS;
+    source.forEach((c: any) => {
+      const stallCode = c.stalls?.code || (c as any).stallCode || '';
+      const isResolved = c.status === 'resolved' || (c.code && allResolved.has(c.code)) || (c.id && allResolved.has(c.id));
+      if (stallCode && !isResolved) {
         map.set(stallCode, c.code || c.id);
       }
     });
     return map;
-  }, []);
+  }, [complaints, resolvedCodes]);
 
   // Lọc danh sách sạp
   const filteredStalls = useMemo(() => {

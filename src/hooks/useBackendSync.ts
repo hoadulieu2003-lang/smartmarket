@@ -215,24 +215,80 @@ export function useBackendSync(targetMarketId: string = 'm-dongxuan') {
         }
       }
 
-      // Cập nhật state cục bộ ngay lập tức
+      // Cập nhật state cục bộ ngay lập tức với đầy đủ tính phản ứng (Bidirectional Reactivity)
       setState((prev) => {
         const updatedComplaints = prev.complaints.map((c) =>
           c.id === realId || c.code === complaintIdOrCode
             ? { ...c, status: 'resolved' as const, resolutionNote, resolvedAt: new Date().toISOString() }
             : c
         );
-        const currentMarket = prev.markets[0] || (CLIENT_MARKETS[0] as Market);
+
+        // Cập nhật danh sách sạp: tính toán lại openComplaintCount & displayStatus cho từng sạp
+        const updatedStalls = prev.stalls.map((s) => {
+          const stallOpenComplaints = updatedComplaints.filter((c) => {
+            const matchStall =
+              c.stallId === s.id ||
+              c.stallId === s.code ||
+              (c.stalls && (c.stalls.id === s.id || c.stalls.code === s.code)) ||
+              (c as any).stallCode === s.code;
+            return matchStall && c.status !== 'resolved';
+          });
+          const openComplaintCount = stallOpenComplaints.length;
+          let displayStatus = s.displayStatus;
+          if (openComplaintCount === 0 && s.displayStatus === 'has_complaint') {
+            displayStatus = s.status === 'occupied' ? 'occupied' : s.status;
+          }
+          return {
+            ...s,
+            openComplaintCount,
+            displayStatus,
+          };
+        });
+
+        // Cập nhật danh sách tiểu thương: tính toán lại openComplaintCount
+        const updatedTraders = prev.traders.map((t) => {
+          const traderStallId = t.stall?.id || t.stall?.code;
+          const traderOpenComplaints = updatedComplaints.filter((c) => {
+            const matchTrader =
+              (c.userId && c.userId === t.id) ||
+              (traderStallId && (
+                c.stallId === traderStallId ||
+                (c.stalls && (c.stalls.id === traderStallId || c.stalls.code === traderStallId)) ||
+                (c as any).stallCode === traderStallId
+              ));
+            return matchTrader && c.status !== 'resolved';
+          });
+          return {
+            ...t,
+            openComplaintCount: traderOpenComplaints.length,
+          };
+        });
+
+        // Cập nhật danh sách chợ: tính toán lại openComplaintCount
+        const updatedMarkets = prev.markets.map((m) => {
+          const marketOpenComplaints = updatedComplaints.filter((c) => {
+            return c.marketId === m.id && c.status !== 'resolved';
+          });
+          return {
+            ...m,
+            openComplaintCount: marketOpenComplaints.length,
+          };
+        });
+
+        const currentMarket = updatedMarkets[0] || (CLIENT_MARKETS[0] as Market);
         const canonicalDoc = adaptBackendToCanonicalDocument({
           market: currentMarket,
           zones: prev.zones,
-          stalls: prev.stalls,
+          stalls: updatedStalls,
           complaints: updatedComplaints,
         });
 
         return {
           ...prev,
           complaints: updatedComplaints,
+          stalls: updatedStalls,
+          traders: updatedTraders,
+          markets: updatedMarkets,
           canonicalDoc,
         };
       });

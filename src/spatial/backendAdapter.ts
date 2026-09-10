@@ -203,7 +203,13 @@ export function adaptBackendStallToCanonical(
   displayIndex: number,
   complaints: Complaint[] = []
 ): StallEntity {
-  const stallComplaints = complaints.filter((c) => c.stallId === stall.id);
+  const stallComplaints = complaints.filter(
+    (c) =>
+      c.stallId === stall.id ||
+      c.stallId === stall.code ||
+      (c.stalls && (c.stalls.id === stall.id || c.stalls.code === stall.code)) ||
+      (c as any).stallCode === stall.code
+  );
   const { geometry, boundingBox } = calculateStallGeometry(displayIndex, zoneIndex, zone.gridColumns || 5);
   const operationalState = deriveStallOperationalState(stall, stallComplaints, stall.currentContract);
 
