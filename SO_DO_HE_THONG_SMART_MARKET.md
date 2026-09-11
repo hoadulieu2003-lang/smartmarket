@@ -37,13 +37,15 @@ graph TD
 
 ---
 
-## 2. BẢNG TRA CỨU DỊCH VỤ & KHO LƯU TRỮ (`REPOSITORY MATRIX`)
+## 2. BẢNG TRA CỨU DỊCH VỤ & KHO LƯU TRỮ TRÊN GITHUB (`UNIFIED REPOSITORY MATRIX`)
 
-| STT | Phân hệ (`Service`) | Công nghệ (`Stack`) | Thư mục cục bộ (`Local Directory`) | Cổng (`Port`) | Kho GitHub (`Remote Repository`) |
-| :---: | :--- | :--- | :--- | :---: | :--- |
-| **1** | **Web CMS Ban Quản Lý** | Next.js 16, React 19, Tailwind CSS, Turbopack | `c:\Users\game\Documents\app\Smartmarket` | `3001` | [`hoadulieu2003-lang/smartmarket`](https://github.com/hoadulieu2003-lang/smartmarket) |
-| **2** | **Core Backend API** | Node.js, Express, Prisma ORM, Swagger OpenAPI | `c:\Users\game\Documents\app\Smartmarket - Nguyen\backend-main\backend-main` | `3000` | [`hoadulieu2003-lang/smartmarket-backend`](https://github.com/hoadulieu2003-lang/smartmarket-backend) |
-| **3** | **Zalo Mini App** | Vite, React, Tailwind CSS, Zalo SDK | `c:\Users\game\Documents\app\Smartmarket - Nguyen\app-zalo-main (1)\app-zalo-main` | `5173` | [`hoadulieu2003-lang/smartmarket-zalo-miniapp`](https://github.com/hoadulieu2003-lang/smartmarket-zalo-miniapp) |
+> **Kho lưu trữ trung tâm duy nhất (`Single Repository`):** [https://github.com/hoadulieu2003-lang/smartmarket](https://github.com/hoadulieu2003-lang/smartmarket)
+
+| STT | Phân hệ (`Service`) | Công nghệ (`Stack`) | Thư mục cục bộ (`Local Directory`) | Cổng (`Port`) | Nhánh GitHub (`Git Branch`) | Đường dẫn trực tiếp (`Direct URL`) |
+| :---: | :--- | :--- | :--- | :---: | :---: | :--- |
+| **1** | **Web CMS Ban Quản Lý** | Next.js 16, React 19, Tailwind CSS | `c:\Users\game\Documents\app\Smartmarket` | `3001` | `main` | [Nhánh main](https://github.com/hoadulieu2003-lang/smartmarket/tree/main) |
+| **2** | **Core Backend API** | Node.js, Express, Prisma ORM, Swagger | `c:\Users\game\Documents\app\Smartmarket - Nguyen\backend-main\backend-main` | `3000` | `backend` | [Nhánh backend](https://github.com/hoadulieu2003-lang/smartmarket/tree/backend) |
+| **3** | **Zalo Mini App** | Vite, React, Tailwind CSS, Zalo SDK | `c:\Users\game\Documents\app\Smartmarket - Nguyen\app-zalo-main (1)\app-zalo-main` | `5173` | `zalo-miniapp` | [Nhánh zalo-miniapp](https://github.com/hoadulieu2003-lang/smartmarket/tree/zalo-miniapp) |
 
 > [!NOTE]
 > Khi cần khởi chạy từng dịch vụ riêng biệt phục vụ môi trường kiểm thử cục bộ (`Local Development`):
