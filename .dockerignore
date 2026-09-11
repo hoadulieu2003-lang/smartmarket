@@ -1,0 +1,12 @@
+node_modules
+dist
+uploads
+npm-debug.log*
+# KHÔNG bake secrets vào image — .env inject lúc chạy (env_file / -e).
+.env
+.env.*
+.git
+.claude
+CLAUDE.md
+*.md
+tests

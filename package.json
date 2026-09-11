@@ -1,0 +1,51 @@
+{
+  "name": "smart-market-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Smart Market Backend API - MVP",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "migrate:runtime": "node dist/scripts/apply-runtime-migrations.js",
+    "seed": "tsx prisma/seed.ts",
+    "s3:public-read": "tsx scripts/configure-s3-public-read.ts",
+    "images:download": "tsx scripts/download-images.ts",
+    "images:sync": "tsx scripts/sync-images.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1086.0",
+    "@prisma/client": "^6.10.0",
+    "axios": "^1.7.9",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.7",
+    "exceljs": "^4.4.0",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^11.0.5",
+    "yaml": "^2.9.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.10.5",
+    "@types/node-cron": "^3.0.11",
+    "@types/swagger-ui-express": "^4.1.8",
+    "prisma": "^6.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

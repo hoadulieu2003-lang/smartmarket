@@ -1,0 +1,1711 @@
+{
+  "ranAt": "2026-07-11T06:16:23.798Z",
+  "total": 213,
+  "passed": 213,
+  "results": [
+    {
+      "module": "health",
+      "name": "GET /healthz",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "health",
+      "name": "GET /readyz (DB)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "Login Super Admin",
+      "pass": true,
+      "expected": "token",
+      "got": "token",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "Login Province Admin (HCM)",
+      "pass": true,
+      "expected": "token",
+      "got": "token",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "Login Market Manager 1",
+      "pass": true,
+      "expected": "token",
+      "got": "token",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "Login Market Manager 2",
+      "pass": true,
+      "expected": "token",
+      "got": "token",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "Login sai mật khẩu → 401",
+      "pass": true,
+      "expected": "401/AUTH_INVALID_CREDENTIALS",
+      "got": "401/AUTH_INVALID_CREDENTIALS",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "Zalo login buyer1 (mock)",
+      "pass": true,
+      "expected": "token+isMerchant=false",
+      "got": "isMerchant=false",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "Zalo login merchant1 → isMerchant + sạp A-01",
+      "pass": true,
+      "expected": "isMerchant=true,stall=A-01",
+      "got": "isMerchant=true,stall=A-01",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "Zalo login lần đầu tự tạo user",
+      "pass": true,
+      "expected": "user mới",
+      "got": "Người Mới",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "GET /auth/me không token → 401",
+      "pass": true,
+      "expected": "401/AUTH_TOKEN_INVALID",
+      "got": "401/AUTH_TOKEN_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "GET /auth/me buyer1",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "POST /auth/refresh",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "Đổi mật khẩu với role buyer → 403",
+      "pass": true,
+      "expected": "403/PERM_DENIED",
+      "got": "403/PERM_DENIED",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "PUT /users/me (bank info)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "PUT /users/me/selected-market",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "auth",
+      "name": "Chọn chợ không tồn tại → 404",
+      "pass": true,
+      "expected": "404/NOT_FOUND",
+      "got": "404/NOT_FOUND",
+      "detail": ""
+    },
+    {
+      "module": "catalog",
+      "name": "GET /provinces = 34",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "catalog",
+      "name": "GET /categories = 10",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "catalog",
+      "name": "GET /settings/public có product_units",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "catalog",
+      "name": "MM tạo tỉnh → 403",
+      "pass": true,
+      "expected": "403/PERM_DENIED",
+      "got": "403/PERM_DENIED",
+      "detail": ""
+    },
+    {
+      "module": "catalog",
+      "name": "SA tạo ngành hàng",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "catalog",
+      "name": "SA xóa ngành hàng vừa tạo",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "catalog",
+      "name": "Xóa tỉnh đang có chợ → 409",
+      "pass": true,
+      "expected": "409/",
+      "got": "409/STATE_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "markets-app",
+      "name": "POST /markets/nearby → Chợ Trung Tâm gần nhất",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "markets-app",
+      "name": "GET /markets?search=Trung",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "markets-app",
+      "name": "GET /markets/:id + thống kê",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "markets-app",
+      "name": "GET /markets/:id/traders (sạp A-01, có rating)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "markets-app",
+      "name": "GET /markets/:id/home (featured + sale)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "SA thấy 2 chợ",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "MM1 chỉ thấy chợ của mình",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "PA HCM chỉ thấy chợ trong tỉnh",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "MM1 xem chợ ngoài phạm vi → 403",
+      "pass": true,
+      "expected": "403/PERM_OUT_OF_SCOPE",
+      "got": "403/PERM_OUT_OF_SCOPE",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "PA xem chợ ngoài tỉnh → 403",
+      "pass": true,
+      "expected": "403/PERM_OUT_OF_SCOPE",
+      "got": "403/PERM_OUT_OF_SCOPE",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "MM tạo chợ → 403",
+      "pass": true,
+      "expected": "403/PERM_DENIED",
+      "got": "403/PERM_DENIED",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "SA tạo chợ mới",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "Tạo chợ trùng mã → 409",
+      "pass": true,
+      "expected": "409/DUPLICATE_CODE",
+      "got": "409/DUPLICATE_CODE",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "PATCH chợ inactive",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "Buyer không thấy chợ inactive → 404",
+      "pass": true,
+      "expected": "404/NOT_FOUND",
+      "got": "404/NOT_FOUND",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "PUT map_link (sơ đồ chợ)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "Gán quản lý cho chợ",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "Bỏ gán quản lý",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "markets-admin",
+      "name": "SA xóa chợ chưa có dữ liệu",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "MM1 xem khu của chợ (3+)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "MM1 tạo khu mới",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "Tạo khu trùng mã trong chợ → 409",
+      "pass": true,
+      "expected": "409/DUPLICATE_CODE",
+      "got": "409/DUPLICATE_CODE",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "MM1 tạo khu ở chợ khác → 403",
+      "pass": true,
+      "expected": "403/PERM_OUT_OF_SCOPE",
+      "got": "403/PERM_OUT_OF_SCOPE",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "Tạo sạp hàng loạt D-01..D-05",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "Bulk trùng mã → 409 kèm danh sách",
+      "pass": true,
+      "expected": "409/DUPLICATE_CODE",
+      "got": "409/DUPLICATE_CODE",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "Sắp xếp lại thứ tự sạp",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "Đổi trạng thái sạp → maintenance",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "DS sạp M1 có displayStatus",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "Đổi trạng thái sạp đang thuê → 409",
+      "pass": true,
+      "expected": "409/STATE_INVALID",
+      "got": "409/STATE_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "Drawer chi tiết sạp A-01",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "Xóa sạp trống chưa có dữ liệu",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "Xóa sạp có hợp đồng → 409 (R7)",
+      "pass": true,
+      "expected": "409/STATE_INVALID",
+      "got": "409/STATE_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "Xóa khu còn sạp → 409 (R8)",
+      "pass": true,
+      "expected": "409/STATE_INVALID",
+      "got": "409/STATE_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "zones-stalls",
+      "name": "GET /stalls/:id public (buyer)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "contracts",
+      "name": "Gán sạp cho user chưa duyệt → 409 (R5)",
+      "pass": true,
+      "expected": "409/STATE_INVALID",
+      "got": "409/STATE_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "contracts",
+      "name": "Gán tiểu thương đang có sạp khác → 409",
+      "pass": true,
+      "expected": "409/STATE_INVALID",
+      "got": "409/STATE_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "contracts",
+      "name": "Gán đè sạp đang thuê → 409",
+      "pass": true,
+      "expected": "409/STALL_OCCUPIED",
+      "got": "409/STALL_OCCUPIED",
+      "detail": ""
+    },
+    {
+      "module": "contracts",
+      "name": "Lịch sử hợp đồng sạp A-01",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "contracts",
+      "name": "Hợp đồng sắp hết hạn (≤30 ngày)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "contracts",
+      "name": "MM2 xem lịch sử hợp đồng chợ M1 → 403",
+      "pass": true,
+      "expected": "403/PERM_OUT_OF_SCOPE",
+      "got": "403/PERM_OUT_OF_SCOPE",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "Applicant nộp hồ sơ khi đang có hồ sơ → 409",
+      "pass": true,
+      "expected": "409/APPLICATION_EXISTS",
+      "got": "409/APPLICATION_EXISTS",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "GET /my/merchant-application",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "MM1 DS hồ sơ pending",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "MM2 xem hồ sơ chợ M1 → 403",
+      "pass": true,
+      "expected": "403/PERM_OUT_OF_SCOPE",
+      "got": "403/PERM_OUT_OF_SCOPE",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "MM1 đánh dấu reviewing",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "MM1 yêu cầu bổ sung",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "Applicant cập nhật hồ sơ → pending",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "MM1 duyệt hồ sơ + gán sạp C-01",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "Applicant thành seller sạp C-01",
+      "pass": true,
+      "expected": "isMerchant=true,C-01",
+      "got": "true,C-01",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "Duyệt lại hồ sơ đã approved → 409",
+      "pass": true,
+      "expected": "409/STATE_INVALID",
+      "got": "409/STATE_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "Buyer2 nộp hồ sơ mới",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "Từ chối không nhập lý do → 400",
+      "pass": true,
+      "expected": "400/VALIDATION_ERROR",
+      "got": "400/VALIDATION_ERROR",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "Từ chối có lý do",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "Buyer2 nộp lại sau khi bị từ chối",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "applications",
+      "name": "Buyer2 tự hủy hồ sơ",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "GET /seller/stall (A-01 + hợp đồng)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "PUT /seller/stall (mô tả, giờ bán)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "GET /seller/dashboard đủ KPI",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "Tab hết hàng có Khoai tây",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "Buyer2 (chưa gán sạp) vào seller → 403",
+      "pass": true,
+      "expected": "403/SELLER_NOT_ACTIVE",
+      "got": "403/SELLER_NOT_ACTIVE",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "Tạo SP đơn vị sai → 400",
+      "pass": true,
+      "expected": "400/VALIDATION_ERROR",
+      "got": "400/VALIDATION_ERROR",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "Tạo SP giá 0 → 400",
+      "pass": true,
+      "expected": "400/VALIDATION_ERROR",
+      "got": "400/VALIDATION_ERROR",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "Seller tạo sản phẩm mới",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "Seller sửa giá bán",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "KM % ngoài 1-100 → 400",
+      "pass": true,
+      "expected": "400/VALIDATION_ERROR",
+      "got": "400/VALIDATION_ERROR",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "KM 20% → finalPrice 10400",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "KM giá cố định > giá gốc → 400",
+      "pass": true,
+      "expected": "400/VALIDATION_ERROR",
+      "got": "400/VALIDATION_ERROR",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "KM giá cố định 9.000đ",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "Gỡ khuyến mãi → về giá gốc",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "Ẩn sản phẩm",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "Buyer xem SP bị ẩn → 404",
+      "pass": true,
+      "expected": "404/NOT_FOUND",
+      "got": "404/NOT_FOUND",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "Hiện lại sản phẩm",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "seller",
+      "name": "Seller khác không sửa được SP của sạp khác",
+      "pass": true,
+      "expected": "404/NOT_FOUND",
+      "got": "404/NOT_FOUND",
+      "detail": ""
+    },
+    {
+      "module": "products-buyer",
+      "name": "GET /products theo chợ",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "products-buyer",
+      "name": "Filter onSale có Cà chua 22.500đ + Cam 6.000đ",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "products-buyer",
+      "name": "SP hết hàng vẫn hiện + stockStatus",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "products-buyer",
+      "name": "Sort giá tăng dần",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "products-buyer",
+      "name": "Chi tiết SP + tiểu thương + liên quan",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "products-buyer",
+      "name": "SP ẩn → 404",
+      "pass": true,
+      "expected": "404/NOT_FOUND",
+      "got": "404/NOT_FOUND",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Seller C-01 tạo SP (chuẩn bị test đa sạp)",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Checkout sai giá → 409 PRICE_CHANGED",
+      "pass": true,
+      "expected": "409/PRICE_CHANGED",
+      "got": "409/PRICE_CHANGED",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Checkout quá tồn kho → 409",
+      "pass": true,
+      "expected": "409/STOCK_NOT_ENOUGH",
+      "got": "409/STOCK_NOT_ENOUGH",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Checkout SP chợ khác → 409",
+      "pass": true,
+      "expected": "409/PRODUCT_UNAVAILABLE",
+      "got": "409/PRODUCT_UNAVAILABLE",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Checkout delivery → 400 (MVP pickup)",
+      "pass": true,
+      "expected": "400/VALIDATION_ERROR",
+      "got": "400/VALIDATION_ERROR",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Checkout đa sạp → 2 đơn cùng nhóm",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Snapshot giá đúng (55.000 + 40.000)",
+      "pass": true,
+      "expected": "orderA+orderC",
+      "got": "55000,40000",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Kho trừ đúng sau checkout (Cà chua 50→48)",
+      "pass": true,
+      "expected": "48",
+      "got": "48",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Buyer xem DS đơn",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Buyer xem chi tiết đơn",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Buyer khác xem đơn → 404",
+      "pass": true,
+      "expected": "404/NOT_FOUND",
+      "got": "404/NOT_FOUND",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Seller thấy đơn pending",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Seller chuyển sai thứ tự (pending→ready) → 409",
+      "pass": true,
+      "expected": "409/STATE_INVALID",
+      "got": "409/STATE_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Seller chuyển confirmed",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Seller chuyển preparing",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Seller chuyển ready",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Seller chuyển completed",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Timeline đơn đủ timestamps",
+      "pass": true,
+      "expected": "đủ 4 mốc",
+      "got": "{\"confirmedAt\":true,\"preparingAt\":true,\"readyAt\":true,\"completedAt\":true}",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Buyer hủy đơn completed → 409",
+      "pass": true,
+      "expected": "409/STATE_INVALID",
+      "got": "409/STATE_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Buyer hủy đơn pending",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Hoàn kho sau hủy (48 giữ nguyên)",
+      "pass": true,
+      "expected": "48",
+      "got": "48",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Seller hủy không lý do → 400",
+      "pass": true,
+      "expected": "400/VALIDATION_ERROR",
+      "got": "400/VALIDATION_ERROR",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Seller hủy có lý do",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "MM1 xem DS đơn của chợ",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "MM2 không thấy đơn chợ M1",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "orders",
+      "name": "Admin hủy đơn",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "reviews",
+      "name": "Chưa mua mà đánh giá → 403",
+      "pass": true,
+      "expected": "403/REVIEW_NOT_PURCHASED",
+      "got": "403/REVIEW_NOT_PURCHASED",
+      "detail": ""
+    },
+    {
+      "module": "reviews",
+      "name": "Buyer1 đánh giá SP đã mua (Rau cải 4★)",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "reviews",
+      "name": "Đánh giá trùng SP → 409",
+      "pass": true,
+      "expected": "409/DUPLICATE_CODE",
+      "got": "409/DUPLICATE_CODE",
+      "detail": ""
+    },
+    {
+      "module": "reviews",
+      "name": "rating_avg cập nhật = 4",
+      "pass": true,
+      "expected": "4/1",
+      "got": "4/1",
+      "detail": ""
+    },
+    {
+      "module": "reviews",
+      "name": "Sửa đánh giá → 3★",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "reviews",
+      "name": "rating_avg cập nhật lại = 3",
+      "pass": true,
+      "expected": "3",
+      "got": "3",
+      "detail": ""
+    },
+    {
+      "module": "reviews",
+      "name": "DS đánh giá của SP",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "reviews",
+      "name": "GET /my/reviews",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "reviews",
+      "name": "Xóa đánh giá",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "reviews",
+      "name": "review_count về 0 sau xóa",
+      "pass": true,
+      "expected": "0",
+      "got": "0",
+      "detail": ""
+    },
+    {
+      "module": "complaints",
+      "name": "Buyer tạo phản ánh (VSATTP, sạp A-01)",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "complaints",
+      "name": "Phản ánh sạp không thuộc chợ → 400",
+      "pass": true,
+      "expected": "400/VALIDATION_ERROR",
+      "got": "400/VALIDATION_ERROR",
+      "detail": ""
+    },
+    {
+      "module": "complaints",
+      "name": "GET /my/complaints",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "complaints",
+      "name": "MM1 DS phản ánh trạng thái new",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "complaints",
+      "name": "MM2 không thấy phản ánh chợ M1",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "complaints",
+      "name": "PA chuyển processing → 403 (chỉ escalate)",
+      "pass": true,
+      "expected": "403/PERM_DENIED",
+      "got": "403/PERM_DENIED",
+      "detail": ""
+    },
+    {
+      "module": "complaints",
+      "name": "MM1 chuyển processing",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "complaints",
+      "name": "MM1 resolve có nội dung",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "complaints",
+      "name": "Đổi trạng thái phản ánh đã resolved → 409",
+      "pass": true,
+      "expected": "409/STATE_INVALID",
+      "got": "409/STATE_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "complaints",
+      "name": "Buyer xem được phản hồi xử lý",
+      "pass": true,
+      "expected": "có resolutionNote",
+      "got": "có",
+      "detail": ""
+    },
+    {
+      "module": "complaints",
+      "name": "PA escalate phản ánh seed (new)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "Buyer feed có thông báo đơn hàng + broadcast",
+      "pass": true,
+      "expected": "order + broadcast",
+      "got": "order=true,broadcast=true",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "unread-count > 0",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "Đánh dấu đã đọc 1 thông báo",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "Đọc broadcast (lazy upsert)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "Đọc tất cả",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "unread-count = 0 sau read-all",
+      "pass": true,
+      "expected": "0",
+      "got": "0",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "MM2 gửi thông báo cho chợ M1 → 403",
+      "pass": true,
+      "expected": "403/PERM_OUT_OF_SCOPE",
+      "got": "403/PERM_OUT_OF_SCOPE",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "MM1 gửi broadcast chợ (send ngay)",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "Tiểu thương nhận được broadcast",
+      "pass": true,
+      "expected": "có",
+      "got": "có",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "Gửi theo khu A",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "Khu A → đúng 1 người nhận (merchant1)",
+      "pass": true,
+      "expected": "1",
+      "got": "1",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "Lưu nháp thông báo",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "Sửa nháp",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "Gửi nháp",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "Sửa thông báo đã gửi → 409",
+      "pass": true,
+      "expected": "409/STATE_INVALID",
+      "got": "409/STATE_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "Xóa nháp",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "notifications",
+      "name": "DS thông báo admin có recipient/read count",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "traders",
+      "name": "MM1 DS tiểu thương",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "traders",
+      "name": "Chi tiết tiểu thương",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "traders",
+      "name": "Tạm khóa tiểu thương",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "traders",
+      "name": "Seller bị khóa vào /seller → 403",
+      "pass": true,
+      "expected": "403/SELLER_NOT_ACTIVE",
+      "got": "403/SELLER_NOT_ACTIVE",
+      "detail": ""
+    },
+    {
+      "module": "traders",
+      "name": "SP sạp bị khóa ẩn khỏi app",
+      "pass": true,
+      "expected": "ẩn",
+      "got": "ẩn",
+      "detail": ""
+    },
+    {
+      "module": "traders",
+      "name": "Kích hoạt lại tiểu thương",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "traders",
+      "name": "SP hiện lại sau kích hoạt + unhide",
+      "pass": true,
+      "expected": "hiện",
+      "got": "hiện",
+      "detail": ""
+    },
+    {
+      "module": "traders",
+      "name": "Admin ẩn SP vi phạm (kèm lý do)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "traders",
+      "name": "Admin hiện lại SP",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "dashboard-reports",
+      "name": "Overview SA đủ KPI",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "dashboard-reports",
+      "name": "Overview MM1 scope 1 chợ",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "dashboard-reports",
+      "name": "Charts 7 ngày đủ 7 điểm",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "dashboard-reports",
+      "name": "Pending tasks",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "dashboard-reports",
+      "name": "Report revenue theo ngày",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "dashboard-reports",
+      "name": "Report stalls (tỷ lệ lấp đầy)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "dashboard-reports",
+      "name": "Report traders (top doanh thu có merchant1)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "dashboard-reports",
+      "name": "Report complaints theo loại/trạng thái",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "dashboard-reports",
+      "name": "Report approvals theo trạng thái",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "settings-users",
+      "name": "SA xem toàn bộ settings",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "settings-users",
+      "name": "MM đọc 1 setting theo key",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "settings-users",
+      "name": "MM sửa setting → 403",
+      "pass": true,
+      "expected": "403/PERM_DENIED",
+      "got": "403/PERM_DENIED",
+      "detail": ""
+    },
+    {
+      "module": "settings-users",
+      "name": "SA sửa setting",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "settings-users",
+      "name": "SA khôi phục setting = 30",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "settings-users",
+      "name": "SA tạo tài khoản MM mới",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "settings-users",
+      "name": "PA tạo tài khoản → 403",
+      "pass": true,
+      "expected": "403/PERM_DENIED",
+      "got": "403/PERM_DENIED",
+      "detail": ""
+    },
+    {
+      "module": "settings-users",
+      "name": "Tài khoản mới đăng nhập được",
+      "pass": true,
+      "expected": "token",
+      "got": "token",
+      "detail": ""
+    },
+    {
+      "module": "settings-users",
+      "name": "PA xem DS quản lý trong tỉnh",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "settings-users",
+      "name": "SA khóa tài khoản MM mới",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "settings-users",
+      "name": "Tài khoản bị khóa đăng nhập → 403",
+      "pass": true,
+      "expected": "403/AUTH_ACCOUNT_LOCKED",
+      "got": "403/AUTH_ACCOUNT_LOCKED",
+      "detail": ""
+    },
+    {
+      "module": "settings-users",
+      "name": "SA reset mật khẩu",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "settings-users",
+      "name": "SA tự khóa mình → 403",
+      "pass": true,
+      "expected": "403/PERM_DENIED",
+      "got": "403/PERM_DENIED",
+      "detail": ""
+    },
+    {
+      "module": "uploads",
+      "name": "Upload ảnh PNG → 201 + url",
+      "pass": true,
+      "expected": "201+url",
+      "got": "201+url",
+      "detail": ""
+    },
+    {
+      "module": "uploads",
+      "name": "Ảnh upload truy cập được",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "uploads",
+      "name": "Upload file text → 415",
+      "pass": true,
+      "expected": "415/UPLOAD_TYPE_INVALID",
+      "got": "415/UPLOAD_TYPE_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "audits",
+      "name": "SA xem audit log (có thao tác admin)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "audits",
+      "name": "MM chỉ thấy audit của mình",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "jobs",
+      "name": "Chạy job cảnh báo hợp đồng",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "jobs",
+      "name": "Chạy lại job → không gửi trùng (sent=0)",
+      "pass": true,
+      "expected": "200",
+      "got": "200",
+      "detail": ""
+    },
+    {
+      "module": "jobs",
+      "name": "Tiểu thương nhận cảnh báo hết hạn hợp đồng",
+      "pass": true,
+      "expected": "có",
+      "got": "có",
+      "detail": ""
+    },
+    {
+      "module": "jobs",
+      "name": "MM chạy job → 403",
+      "pass": true,
+      "expected": "403/PERM_DENIED",
+      "got": "403/PERM_DENIED",
+      "detail": ""
+    },
+    {
+      "module": "guards",
+      "name": "Buyer vào /admin → 403",
+      "pass": true,
+      "expected": "403/PERM_DENIED",
+      "got": "403/PERM_DENIED",
+      "detail": ""
+    },
+    {
+      "module": "guards",
+      "name": "Không token vào /orders → 401",
+      "pass": true,
+      "expected": "401/AUTH_TOKEN_INVALID",
+      "got": "401/AUTH_TOKEN_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "guards",
+      "name": "Token rác → 401",
+      "pass": true,
+      "expected": "401/AUTH_TOKEN_INVALID",
+      "got": "401/AUTH_TOKEN_INVALID",
+      "detail": ""
+    },
+    {
+      "module": "guards",
+      "name": "CMS role gọi API app-only (nộp hồ sơ) → 403",
+      "pass": true,
+      "expected": "403/PERM_DENIED",
+      "got": "403/PERM_DENIED",
+      "detail": ""
+    },
+    {
+      "module": "guards",
+      "name": "CMS role vẫn dùng được /uploads (fix mount)",
+      "pass": true,
+      "expected": "201",
+      "got": "201",
+      "detail": ""
+    },
+    {
+      "module": "guards",
+      "name": "Đường dẫn lạ → 404 chuẩn envelope",
+      "pass": true,
+      "expected": "404/NOT_FOUND",
+      "got": "404/NOT_FOUND",
+      "detail": ""
+    }
+  ]
+}

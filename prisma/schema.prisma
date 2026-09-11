@@ -1,0 +1,584 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model app_settings {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique @db.VarChar(100)
+  value       Json
+  description String
+  updated_at  DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+}
+
+model categories {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  name                  String                  @db.VarChar(255)
+  description           String?
+  display_order         Int                     @default(0)
+  parent_id             String?                 @db.Uuid
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime                @default(now()) @updatedAt @db.Timestamptz(6)
+  // Phân cấp: parent = null → ngành hàng (gán sạp); parent != null → loại mặt hàng (gán sản phẩm)
+  parent                categories?             @relation("category_subcategories", fields: [parent_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_categories_parent_id__categories_id")
+  subcategories         categories[]            @relation("category_subcategories")
+  merchant_applications merchant_applications[]
+  products              products[]
+  stalls                stalls[]
+  users                 users[]
+  zones                 zones[]
+}
+
+model complaints {
+  id                String           @id @default(uuid()) @db.Uuid
+  user_id           String?          @db.Uuid
+  market_id         String           @db.Uuid
+  stall_id          String?          @db.Uuid
+  product_id        String?          @db.Uuid
+  public_token      String?          @db.VarChar(100)
+  reporter_contact  String?          @db.VarChar(100)
+  order_id          String?          @db.Uuid
+  payment_transaction_id String?     @db.Uuid
+  type              complaint_type
+  content           String
+  images            Json[]           @default([])
+  status            complaint_status
+  resolution_note   String?
+  resolution_images Json[]           @default([])
+  resolved_at       DateTime?        @db.Timestamptz(6)
+  created_at        DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime         @default(now()) @updatedAt @db.Timestamptz(6)
+  markets           markets          @relation(fields: [market_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_complaints_market_id__markets_id")
+  products          products?        @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_complaints_product_id__products_id")
+  stalls            stalls?          @relation(fields: [stall_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_complaints_stall_id__stalls_id")
+  users             users?           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_complaints_user_id__users_id")
+
+  @@index([market_id, status], map: "idx_complaints_market_id_status")
+  @@index([stall_id], map: "idx_complaints_stall_id")
+  @@index([user_id], map: "idx_complaints_user_id")
+}
+
+model contracts {
+  id                                 String    @id @default(uuid()) @db.Uuid
+  stall_id                           String    @db.Uuid
+  merchant_id                        String    @db.Uuid
+  start_date                         DateTime  @db.Date
+  end_date                           DateTime? @db.Date
+  fee                                Decimal   @db.Decimal(14, 0)
+  content                            String?
+  end_reason                         String?
+  ended_at                           DateTime? @db.Timestamptz(6)
+  created_by                         String?   @db.Uuid
+  created_at                         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                         DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  users_contracts_created_byTousers  users?    @relation("contracts_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_contracts_created_by__users_id")
+  users_contracts_merchant_idTousers users     @relation("contracts_merchant_idTousers", fields: [merchant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_contracts_merchant_id__users_id")
+  stalls                             stalls    @relation(fields: [stall_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_contracts_stall_id__stalls_id")
+
+  @@index([merchant_id], map: "idx_contracts_merchant_id")
+  @@index([stall_id], map: "idx_contracts_stall_id")
+}
+
+model market_managers {
+  user_id    String   @db.Uuid
+  market_id  String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  markets    markets  @relation(fields: [market_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_market_managers_market_id__markets_id")
+  users      users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_market_managers_user_id__users_id")
+
+  @@id([user_id, market_id])
+}
+
+model markets {
+  id                                      String                  @id @default(uuid()) @db.Uuid
+  province_id                             String                  @db.Uuid
+  code                                    String                  @unique @db.VarChar(50)
+  name                                    String                  @db.VarChar(255)
+  address                                 String
+  latitude                                Decimal?                @db.Decimal(9, 6)
+  longitude                               Decimal?                @db.Decimal(9, 6)
+  phone                                   String?                 @db.VarChar(20)
+  email                                   String?                 @db.VarChar(255)
+  description                             String?
+  images                                  Json[]                  @default([])
+  open_hours                              String?                 @db.VarChar(100)
+  map_link                                String?
+  google_maps_url                         String?
+  // Legacy map draft fields kept for backwards compatibility with existing QL data.
+  map_layout_draft                         Json?
+  map_layout_draft_version                 Int                     @default(0)
+  map_layout_published                     Json?
+  map_layout_revisions                     Json                    @default("[]")
+  status                                  market_status
+  created_at                              DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at                              DateTime                @default(now()) @updatedAt @db.Timestamptz(6)
+  complaints                              complaints[]
+  market_managers                         market_managers[]
+  provinces                               provinces               @relation(fields: [province_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_markets_province_id__provinces_id")
+  merchant_applications                   merchant_applications[]
+  notifications                           notifications[]
+  orders                                  orders[]
+  stalls                                  stalls[]
+  users_users_merchant_market_idTomarkets users[]                 @relation("users_merchant_market_idTomarkets")
+  users_users_selected_market_idTomarkets users[]                 @relation("users_selected_market_idTomarkets")
+  zones                                   zones[]
+  market_map_positions                    market_map_positions[]
+  market_map_drawings                     market_map_drawings[]
+
+  @@index([province_id], map: "idx_markets_province_id")
+}
+
+model merchant_applications {
+  id                                             String             @id @default(uuid()) @db.Uuid
+  user_id                                        String             @db.Uuid
+  market_id                                      String             @db.Uuid
+  category_id                                    String?            @db.Uuid
+  full_name                                      String             @db.VarChar(255)
+  phone                                          String             @db.VarChar(20)
+  id_number                                      String             @db.VarChar(20)
+  business_description                           String?
+  desired_stall_note                             String?
+  documents                                      Json[]             @default([])
+  status                                         application_status
+  admin_note                                     String?
+  reviewed_by                                    String?            @db.Uuid
+  reviewed_at                                    DateTime?          @db.Timestamptz(6)
+  created_at                                     DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at                                     DateTime           @default(now()) @updatedAt @db.Timestamptz(6)
+  categories                                     categories?        @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_merchant_applications_category_id__categories_id")
+  markets                                        markets            @relation(fields: [market_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_merchant_applications_market_id__markets_id")
+  users_merchant_applications_reviewed_byTousers users?             @relation("merchant_applications_reviewed_byTousers", fields: [reviewed_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_merchant_applications_reviewed_by__users_id")
+  users_merchant_applications_user_idTousers     users              @relation("merchant_applications_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_merchant_applications_user_id__users_id")
+
+  @@index([market_id, status], map: "idx_merchant_applications_market_id_status")
+  @@index([user_id], map: "idx_merchant_applications_user_id")
+}
+
+model notification_recipients {
+  notification_id String        @db.Uuid
+  user_id         String        @db.Uuid
+  read_at         DateTime?     @db.Timestamptz(6)
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  notifications   notifications @relation(fields: [notification_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_notification_recipients_notification_id__notifications_id")
+  users           users         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_notification_recipients_user_id__users_id")
+
+  @@id([notification_id, user_id])
+  @@index([user_id], map: "idx_notification_recipients_user_id")
+}
+
+model notifications {
+  id                      String                    @id @default(uuid()) @db.Uuid
+  market_id               String?                   @db.Uuid
+  created_by              String?                   @db.Uuid
+  title                   String                    @db.VarChar(255)
+  content                 String
+  type                    notification_type
+  priority                notification_priority
+  target_type             notification_target
+  target_id               String?                   @db.Uuid
+  attachment              String?
+  ref_type                String?                   @db.VarChar(50)
+  ref_id                  String?                   @db.Uuid
+  sent_at                 DateTime?                 @db.Timestamptz(6)
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                  @default(now()) @updatedAt @db.Timestamptz(6)
+  notification_recipients notification_recipients[]
+  users                   users?                    @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_notifications_created_by__users_id")
+  markets                 markets?                  @relation(fields: [market_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_notifications_market_id__markets_id")
+
+  @@index([market_id], map: "idx_notifications_market_id")
+}
+
+model order_items {
+  id             String   @id @default(uuid()) @db.Uuid
+  order_id       String   @db.Uuid
+  product_id     String   @db.Uuid
+  product_name   String   @db.VarChar(255)
+  product_image  String?
+  unit           String   @db.VarChar(20)
+  original_price Decimal  @db.Decimal(14, 0)
+  unit_price     Decimal  @db.Decimal(14, 0)
+  quantity       Decimal  @db.Decimal(10, 2)
+  line_total     Decimal  @db.Decimal(14, 0)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  orders         orders   @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_order_items_order_id__orders_id")
+  products       products @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_order_items_product_id__products_id")
+
+  @@index([order_id], map: "idx_order_items_order_id")
+  @@index([product_id], map: "idx_order_items_product_id")
+}
+
+model orders {
+  id                String              @id @default(uuid()) @db.Uuid
+  code              String              @unique @db.VarChar(30)
+  customer_id       String?             @db.Uuid
+  market_id         String              @db.Uuid
+  stall_id          String              @db.Uuid
+  checkout_group_id String?             @db.Uuid
+  status            order_status
+  receive_type      receive_type
+  receiver_name     String              @db.VarChar(255)
+  receiver_phone    String              @db.VarChar(20)
+  note              String?
+  total_amount      Decimal             @db.Decimal(14, 0)
+  cancel_reason     String?
+  cancelled_by      order_cancelled_by?
+  confirmed_at      DateTime?           @db.Timestamptz(6)
+  preparing_at      DateTime?           @db.Timestamptz(6)
+  ready_at          DateTime?           @db.Timestamptz(6)
+  completed_at      DateTime?           @db.Timestamptz(6)
+  cancelled_at      DateTime?           @db.Timestamptz(6)
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime            @default(now()) @updatedAt @db.Timestamptz(6)
+  // Legacy ownership references kept so older exports/data remain intact.
+  merchant_id       String?             @db.Uuid
+  contract_id       String?             @db.Uuid
+  table_id          String?             @db.Uuid
+  order_items       order_items[]
+  users             users?              @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_orders_customer_id__users_id")
+  markets           markets             @relation(fields: [market_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_orders_market_id__markets_id")
+  stalls            stalls              @relation(fields: [stall_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_orders_stall_id__stalls_id")
+
+  @@index([checkout_group_id], map: "idx_orders_checkout_group_id")
+  @@index([customer_id, created_at], map: "idx_orders_customer_id_created_at")
+  @@index([market_id, created_at], map: "idx_orders_market_id_created_at")
+  @@index([stall_id, status], map: "idx_orders_stall_id_status")
+}
+
+model products {
+  id                String                @id @default(uuid()) @db.Uuid
+  stall_id          String                @db.Uuid
+  category_id       String                @db.Uuid
+  name              String                @db.VarChar(255)
+  description       String?
+  images            Json[]                @default([])
+  price             Decimal               @db.Decimal(14, 0)
+  unit              String                @db.VarChar(20)
+  quantity          Decimal               @db.Decimal(10, 2)
+  origin            String?               @db.VarChar(255)
+  is_hidden         Boolean               @default(false)
+  discount_type     discount_type?
+  discount_value    Decimal?              @db.Decimal(14, 2)
+  discount_start_at DateTime?             @db.Timestamptz(6)
+  discount_end_at   DateTime?             @db.Timestamptz(6)
+  rating_avg        Decimal               @default(0) @db.Decimal(3, 2)
+  review_count      Int                   @default(0)
+  deleted_at        DateTime?             @db.Timestamptz(6)
+  created_at        DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime              @default(now()) @updatedAt @db.Timestamptz(6)
+  // Legacy ownership references kept so older exports/data remain intact.
+  owner_merchant_id  String?               @db.Uuid
+  contract_id        String?               @db.Uuid
+  complaints        complaints[]
+  order_items       order_items[]
+  categories        categories            @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_products_category_id__categories_id")
+  stalls            stalls                @relation(fields: [stall_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_products_stall_id__stalls_id")
+  reviews           reviews[]
+  traceability      product_traceability?
+  owner_merchant    users?                 @relation("products_owner_merchant_idTousers", fields: [owner_merchant_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([category_id], map: "idx_products_category_id")
+  @@index([stall_id], map: "idx_products_stall_id")
+}
+
+model product_traceability {
+  id                 String    @id @default(uuid()) @db.Uuid
+  product_id         String    @unique @db.Uuid
+  producer_name      String    @db.VarChar(255)
+  production_address String?
+  batch_code         String?   @db.VarChar(100)
+  production_date    DateTime? @db.Date
+  harvest_date       DateTime? @db.Date
+  expiry_date        DateTime? @db.Date
+  certificate_name   String?   @db.VarChar(255)
+  certificate_number String?   @db.VarChar(100)
+  documents          Json[]    @default([])
+  external_url       String?
+  notes              String?
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  products           products  @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_product_traceability_product_id__products_id")
+}
+
+model provinces {
+  id         String    @id @default(uuid()) @db.Uuid
+  code       String    @unique @db.VarChar(20)
+  name       String    @db.VarChar(255)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  markets    markets[]
+  users      users[]
+}
+
+model reviews {
+  id         String   @id @default(uuid()) @db.Uuid
+  product_id String   @db.Uuid
+  user_id    String   @db.Uuid
+  rating     Int      @db.SmallInt
+  content    String?
+  images     Json[]   @default([])
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  products   products @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reviews_product_id__products_id")
+  users      users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reviews_user_id__users_id")
+
+  @@unique([user_id, product_id], map: "uq_reviews_user_id_product_id")
+  @@index([product_id], map: "idx_reviews_product_id")
+}
+
+model stalls {
+  id                   String                 @id @default(uuid()) @db.Uuid
+  market_id            String                 @db.Uuid
+  zone_id              String                 @db.Uuid
+  category_id          String?                @db.Uuid
+  code                 String                 @db.VarChar(20)
+  name                 String?                @db.VarChar(255)
+  description          String?
+  images               Json[]                 @default([])
+  acreage              Decimal?               @db.Decimal(8, 2)
+  phone                String?                @db.VarChar(20)
+  open_hours           String?                @db.VarChar(100)
+  status               stall_status
+  display_order        Int                    @default(0)
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime               @default(now()) @updatedAt @db.Timestamptz(6)
+  complaints           complaints[]
+  contracts            contracts[]
+  orders               orders[]
+  products             products[]
+  categories           categories?            @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stalls_category_id__categories_id")
+  markets              markets                @relation(fields: [market_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stalls_market_id__markets_id")
+  zones                zones                  @relation(fields: [zone_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stalls_zone_id__zones_id")
+  market_map_positions market_map_positions[]
+
+  @@unique([market_id, code], map: "uq_stalls_market_id_code")
+  @@index([market_id, status], map: "idx_stalls_market_id_status")
+  @@index([zone_id], map: "idx_stalls_zone_id")
+}
+
+model system_audits {
+  id          String   @id @default(uuid()) @db.Uuid
+  user_id     String?  @db.Uuid
+  action      String   @db.VarChar(100)
+  table_name  String?  @db.VarChar(100)
+  record_id   String?  @db.Uuid
+  description String?
+  ip_address  String?  @db.VarChar(255)
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  users       users?   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_system_audits_user_id__users_id")
+
+  @@index([table_name, record_id], map: "idx_system_audits_table_name_record_id")
+}
+
+model users {
+  id                                                             String                    @id @default(uuid()) @db.Uuid
+  zalo_id                                                        String?                   @unique @db.VarChar(100)
+  username                                                       String?                   @unique @db.VarChar(100)
+  phone                                                          String?                   @unique @db.VarChar(20)
+  email                                                          String?                   @unique @db.VarChar(255)
+  password_hash                                                  String?                   @db.VarChar(255)
+  full_name                                                      String                    @db.VarChar(255)
+  avatar                                                         String?
+  gender                                                         Int?                      @db.SmallInt
+  role                                                           user_role
+  status                                                         user_status
+  province_id                                                    String?                   @db.Uuid
+  selected_market_id                                             String?                   @db.Uuid
+  merchant_status                                                merchant_status?
+  merchant_mode                                                  String                    @default("simple") @db.VarChar(20)
+  merchant_market_id                                             String?                   @db.Uuid
+  merchant_category_id                                           String?                   @db.Uuid
+  merchant_joined_at                                             DateTime?                 @db.Timestamptz(6)
+  bank_name                                                      String?                   @db.VarChar(255)
+  bank_code                                                      String?                   @db.VarChar(50)
+  bank_account_number                                            String?                   @db.VarChar(50)
+  bank_account_holder                                            String?                   @db.VarChar(255)
+  created_at                                                     DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at                                                     DateTime                  @default(now()) @updatedAt @db.Timestamptz(6)
+  complaints                                                     complaints[]
+  contracts_contracts_created_byTousers                          contracts[]               @relation("contracts_created_byTousers")
+  contracts_contracts_merchant_idTousers                         contracts[]               @relation("contracts_merchant_idTousers")
+  market_managers                                                market_managers[]
+  merchant_applications_merchant_applications_reviewed_byTousers merchant_applications[]   @relation("merchant_applications_reviewed_byTousers")
+  merchant_applications_merchant_applications_user_idTousers     merchant_applications[]   @relation("merchant_applications_user_idTousers")
+  notification_recipients                                        notification_recipients[]
+  notifications                                                  notifications[]
+  orders                                                         orders[]
+  products_owned                                                   products[]                 @relation("products_owner_merchant_idTousers")
+  reviews                                                        reviews[]
+  system_audits                                                  system_audits[]
+  categories                                                     categories?               @relation(fields: [merchant_category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_merchant_category_id__categories_id")
+  markets_users_merchant_market_idTomarkets                      markets?                  @relation("users_merchant_market_idTomarkets", fields: [merchant_market_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_merchant_market_id__markets_id")
+  provinces                                                      provinces?                @relation(fields: [province_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_province_id__provinces_id")
+  markets_users_selected_market_idTomarkets                      markets?                  @relation("users_selected_market_idTomarkets", fields: [selected_market_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_selected_market_id__markets_id")
+
+  @@index([merchant_market_id], map: "idx_users_merchant_market_id")
+}
+
+model zones {
+  id            String      @id @default(uuid()) @db.Uuid
+  market_id     String      @db.Uuid
+  category_id   String?     @db.Uuid
+  code          String      @db.VarChar(20)
+  name          String      @db.VarChar(255)
+  description   String?
+  display_order Int         @default(0)
+  grid_columns  Int?
+  is_active     Boolean     @default(true)
+  created_at    DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime    @default(now()) @updatedAt @db.Timestamptz(6)
+  stalls        stalls[]
+  categories    categories? @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_zones_category_id__categories_id")
+  markets       markets     @relation(fields: [market_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_zones_market_id__markets_id")
+
+  @@unique([market_id, code], map: "uq_zones_market_id_code")
+  @@index([market_id], map: "idx_zones_market_id")
+}
+
+model market_map_positions {
+  id             String   @id @default(uuid()) @db.Uuid
+  market_id      String   @db.Uuid
+  stall_id       String   @db.Uuid
+  x_percent      Decimal  @db.Decimal(6, 3)
+  y_percent      Decimal  @db.Decimal(6, 3)
+  width_percent  Decimal  @db.Decimal(6, 3)
+  height_percent Decimal  @db.Decimal(6, 3)
+  rotation       Decimal  @default(0) @db.Decimal(6, 2)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  markets markets @relation(fields: [market_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  stalls  stalls  @relation(fields: [stall_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([market_id, stall_id], map: "uq_market_map_positions_market_stall")
+  @@index([market_id], map: "idx_market_map_positions_market_id")
+  @@index([stall_id], map: "idx_market_map_positions_stall_id")
+}
+
+model market_map_drawings {
+  id           String   @id @default(uuid()) @db.Uuid
+  market_id    String   @db.Uuid
+  kind         String   @db.VarChar(20)
+  points       Json
+  label        String?  @db.VarChar(255)
+  stroke_color String   @db.VarChar(20)
+  fill_color   String   @db.VarChar(20)
+  stroke_width Decimal  @default(0.8) @db.Decimal(5, 2)
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  markets markets @relation(fields: [market_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([market_id], map: "idx_market_map_drawings_market_id")
+}
+
+enum application_status {
+  pending
+  reviewing
+  need_more_info
+  approved
+  rejected
+  cancelled
+}
+
+enum complaint_status {
+  new
+  processing
+  resolved
+  rejected
+  escalated
+}
+
+enum complaint_type {
+  product_quality
+  price_issue
+  food_safety
+  service_attitude
+  weighing_fraud
+  infrastructure
+  order_issue
+  other
+}
+
+enum discount_type {
+  percent
+  fixed_price
+}
+
+enum market_status {
+  active
+  inactive
+}
+
+enum merchant_status {
+  active
+  suspended
+  inactive
+}
+
+enum notification_priority {
+  normal
+  important
+  urgent
+}
+
+enum notification_target {
+  market
+  zone
+  category
+  user
+}
+
+enum notification_type {
+  general
+  maintenance
+  fee
+  complaint
+  application
+  order
+  promotion
+  urgent
+}
+
+enum order_cancelled_by {
+  buyer
+  seller
+  admin
+}
+
+enum order_status {
+  pending
+  confirmed
+  preparing
+  ready
+  completed
+  cancelled
+}
+
+enum receive_type {
+  pickup
+  delivery
+}
+
+enum stall_status {
+  vacant
+  occupied
+  maintenance
+  reserved
+}
+
+enum user_role {
+  super_admin
+  province_admin
+  market_manager
+  user
+}
+
+enum user_status {
+  inactive
+  active
+}

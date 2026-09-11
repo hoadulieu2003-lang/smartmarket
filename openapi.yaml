@@ -1,0 +1,2216 @@
+openapi: 3.0.3
+info:
+  title: Smart Market API
+  version: 1.0.0
+  description: |
+    Backend API cho **Smart Market – Chợ thông minh** (Zalo Mini App + CMS).
+
+    ## Xác thực
+    - **Mini app**: `POST /auth/zalo-login` với access token Zalo. Môi trường dev bật `ZALO_MOCK=true`
+      cho phép token dạng `mock:<zaloId>:<Tên>` (vd `mock:zalo-buyer-1:Người Mua`).
+    - **CMS**: `POST /auth/login` với username/email/số điện thoại + mật khẩu.
+    - Sau khi đăng nhập, bấm **Authorize** và dán `accessToken` (không cần chữ "Bearer").
+
+    ## Vai trò & phạm vi
+    | Role | Phạm vi |
+    |---|---|
+    | super_admin | Toàn hệ thống |
+    | province_admin | Các chợ trong tỉnh được gán (chủ yếu chỉ đọc + escalate phản ánh) |
+    | market_manager | CRUD trong các chợ được gán |
+    | user | Người mua; nếu `merchant_status=active` và có sạp → dùng được nhóm `/seller/*` |
+
+    ## Quy ước
+    - Envelope: `{ success, data, meta? }` hoặc `{ success: false, error: { code, message, details? } }`.
+    - Phân trang: `?page=1&limit=20` (limit tối đa 100) → `meta { page, limit, total, totalPages }`.
+    - Tiền VND số nguyên. Thời gian ISO 8601. Key JSON camelCase.
+    - Tài khoản demo (seed): SA `admin@smartmarket.vn / Admin@12345`; MM `mm.trungtam@smartmarket.vn / Manager@123`.
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local dev
+tags:
+  - name: Auth
+  - name: Profile
+  - name: Catalog
+    description: Tỉnh/thành, ngành hàng, cấu hình public
+  - name: Markets (App)
+  - name: Stalls (App)
+  - name: Products (App)
+  - name: Orders (Buyer)
+  - name: Reviews
+  - name: Complaints (App)
+  - name: Merchant Application (App)
+  - name: Notifications (App)
+  - name: Uploads
+  - name: Seller
+  - name: Admin - Dashboard
+  - name: Admin - Markets
+  - name: Admin - Zones & Stalls
+  - name: Admin - Contracts
+  - name: Admin - Merchant Approvals
+  - name: Admin - Traders
+  - name: Admin - Products
+  - name: Admin - Orders
+  - name: Admin - Complaints
+  - name: Admin - Notifications
+  - name: Admin - Reports
+  - name: Admin - Exports
+  - name: Admin - Settings & Users
+  - name: Admin - Audits & Jobs
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, default: 1, minimum: 1 }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, default: 20, maximum: 100 }
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    Search:
+      name: search
+      in: query
+      schema: { type: string }
+    MarketIdQuery:
+      name: marketId
+      in: query
+      schema: { type: string, format: uuid }
+  schemas:
+    Error:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        error:
+          type: object
+          properties:
+            code: { type: string, example: STATE_INVALID }
+            message: { type: string, example: Đơn đang ở trạng thái "completed", không thể chuyển sang "confirmed" }
+            details: { nullable: true }
+    Image:
+      type: object
+      required: [url]
+      properties:
+        url: { type: string, format: uri }
+    ProductTraceabilityInput:
+      type: object
+      required: [producerName]
+      properties:
+        producerName: { type: string, maxLength: 255, description: Đơn vị sản xuất hoặc cung cấp }
+        productionAddress: { type: string, nullable: true, description: Địa chỉ hoặc vùng sản xuất }
+        batchCode: { type: string, maxLength: 100, nullable: true }
+        productionDate: { type: string, format: date, nullable: true }
+        harvestDate: { type: string, format: date, nullable: true }
+        expiryDate: { type: string, format: date, nullable: true }
+        certificateName: { type: string, maxLength: 255, nullable: true }
+        certificateNumber: { type: string, maxLength: 100, nullable: true }
+        documents:
+          type: array
+          maxItems: 6
+          items: { $ref: '#/components/schemas/Image' }
+        externalUrl: { type: string, format: uri, nullable: true }
+        notes: { type: string, maxLength: 5000, nullable: true }
+    OrderStatus:
+      type: string
+      enum: [pending, confirmed, preparing, ready, completed, cancelled]
+    ApplicationStatus:
+      type: string
+      enum: [pending, reviewing, need_more_info, approved, rejected, cancelled]
+    ComplaintStatus:
+      type: string
+      enum: [new, processing, resolved, rejected, escalated]
+    ComplaintType:
+      type: string
+      enum: [product_quality, price_issue, food_safety, service_attitude, weighing_fraud, infrastructure, order_issue, other]
+    StallStatus:
+      type: string
+      enum: [vacant, occupied, maintenance, reserved]
+    DisplayStatus:
+      type: string
+      enum: [vacant, occupied, maintenance, reserved, expiring_soon, has_complaint]
+      description: Trạng thái hiển thị (suy ra) — has_complaint > expiring_soon > trạng thái gốc
+    NotificationTarget:
+      type: string
+      enum: [market, zone, category, user]
+  responses:
+    Ok:
+      description: Thành công
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean, example: true }
+              data: {}
+    Paginated:
+      description: Danh sách có phân trang
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean, example: true }
+              data: { type: array, items: {} }
+              meta:
+                type: object
+                properties:
+                  page: { type: integer, example: 1 }
+                  limit: { type: integer, example: 20 }
+                  total: { type: integer, example: 135 }
+                  totalPages: { type: integer, example: 7 }
+    Err:
+      description: Lỗi (400/401/403/404/409/429 — xem `error.code`)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+security: []
+
+paths:
+  # ================= AUTH =================
+  /auth/zalo-login:
+    post:
+      tags: [Auth]
+      summary: Đăng nhập/đăng ký bằng Zalo (mini app)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [accessToken]
+              properties:
+                accessToken: { type: string, example: 'mock:zalo-buyer-1:Người Mua Số Một' }
+                userInfo:
+                  type: object
+                  description: Thông tin chỉ gửi khi scope.userInfo đã được người dùng cấp; backend đối chiếu id với access token.
+                  required: [id]
+                  properties:
+                    id: { type: string }
+                    name: { type: string }
+                    avatar: { type: string, format: uri }
+      responses:
+        '200':
+          description: Token + hồ sơ phiên
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  accessToken: eyJhbGciOi...
+                  refreshToken: eyJhbGciOi...
+                  user: { id: '...', fullName: Người Mua Số Một, role: user }
+                  isMerchant: false
+                  merchantApplication: null
+                  seller: null
+                  selectedMarket: { id: '...', name: Chợ Trung Tâm (Demo) }
+        default: { $ref: '#/components/responses/Err' }
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Đăng nhập CMS (email/phone + mật khẩu)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [identifier, password]
+              properties:
+                identifier: { type: string, example: admin }
+                password: { type: string, example: Admin@12345 }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Cấp lại cặp token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Thông tin phiên hiện tại (app trả seller/selectedMarket, CMS trả scope)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /auth/change-password:
+    put:
+      tags: [Auth]
+      summary: Đổi mật khẩu (role CMS)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [oldPassword, newPassword]
+              properties:
+                oldPassword: { type: string }
+                newPassword: { type: string, minLength: 8 }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= PROFILE =================
+  /users/me:
+    put:
+      tags: [Profile]
+      summary: Cập nhật hồ sơ cá nhân (tên, avatar, giới tính, thông tin ngân hàng)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName: { type: string }
+                avatar: { type: string, format: uri }
+                gender: { type: integer, enum: [0, 1, 2] }
+                bankName: { type: string }
+                bankCode: { type: string }
+                bankAccountNumber: { type: string }
+                bankAccountHolder: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /users/me/zalo-phone:
+    post:
+      tags: [Profile]
+      summary: Đồng bộ thông tin cá nhân và số điện thoại Zalo
+      description: Trên Zalo H5, ứng dụng xin đồng thời `scope.userInfo` và `scope.userPhonenumber`, sau đó gửi `userInfo`, `phoneToken` và `accessToken`. `mockPhone` chỉ được backend chấp nhận khi ZALO_MOCK=true.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phoneToken: { type: string }
+                accessToken: { type: string }
+                mockPhone: { type: string, example: '0912345678' }
+                userInfo:
+                  type: object
+                  required: [id, name]
+                  properties:
+                    id: { type: string }
+                    name: { type: string }
+                    avatar: { type: string, format: uri }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /users/me/selected-market:
+    put:
+      tags: [Profile]
+      summary: Lưu chợ đang chọn
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [marketId]
+              properties:
+                marketId: { type: string, format: uuid }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= CATALOG =================
+  /provinces:
+    get:
+      tags: [Catalog]
+      summary: Danh sách tỉnh/thành (public)
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /categories:
+    get:
+      tags: [Catalog]
+      summary: Danh sách ngành hàng (public)
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /settings/public:
+    get:
+      tags: [Catalog]
+      summary: Cấu hình public (đơn vị bán, thời hạn hợp đồng mặc định)
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+
+  # ================= MARKETS (APP) =================
+  /markets/nearby:
+    post:
+      tags: [Markets (App)]
+      summary: Tìm chợ gần nhất theo tọa độ (browser/dev)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [latitude, longitude]
+              properties:
+                latitude: { type: number, example: 10.776 }
+                longitude: { type: number, example: 106.7 }
+                limit: { type: integer, default: 10 }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /markets/nearby/zalo:
+    post:
+      tags: [Markets (App)]
+      summary: Tìm chợ gần nhất bằng token vị trí ZMP
+      description: Backend xác thực access token thuộc đúng tài khoản đăng nhập rồi giải mã locationToken qua Zalo Graph API.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [locationToken, accessToken]
+              properties:
+                locationToken: { type: string }
+                accessToken: { type: string }
+                limit: { type: integer, minimum: 1, maximum: 50, default: 10 }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /markets:
+    get:
+      tags: [Markets (App)]
+      summary: Danh sách chợ đang hoạt động
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: provinceId, in: query, schema: { type: string, format: uuid } }
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /markets/{id}:
+    get:
+      tags: [Markets (App)]
+      summary: Chi tiết chợ + thống kê + mapLink (sơ đồ)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /markets/{id}/traders:
+    get:
+      tags: [Markets (App)]
+      summary: Danh sách tiểu thương/sạp đang kinh doanh trong chợ
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - { name: categoryId, in: query, schema: { type: string, format: uuid } }
+        - { name: zoneId, in: query, schema: { type: string, format: uuid } }
+        - { name: hasPromotion, in: query, schema: { type: boolean } }
+        - { name: minRating, in: query, schema: { type: number } }
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /markets/{id}/home:
+    get:
+      tags: [Markets (App)]
+      summary: Dữ liệu trang chủ theo chợ (nổi bật + đang giảm giá)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+
+  # ================= STALLS (APP) =================
+  /stalls/{id}:
+    get:
+      tags: [Stalls (App)]
+      summary: Chi tiết sạp/tiểu thương (public app)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= PRODUCTS (APP) =================
+  /products:
+    get:
+      tags: [Products (App)]
+      summary: Danh sách sản phẩm theo chợ (kèm finalPrice, stockStatus, hasTraceability)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: marketId, in: query, required: true, schema: { type: string, format: uuid } }
+        - { name: categoryId, in: query, schema: { type: string, format: uuid } }
+        - { name: stallId, in: query, schema: { type: string, format: uuid } }
+        - { name: onSale, in: query, schema: { type: boolean } }
+        - { name: inStock, in: query, schema: { type: boolean } }
+        - { name: sort, in: query, schema: { type: string, enum: [price, rating, newest] } }
+        - { name: order, in: query, schema: { type: string, enum: [asc, desc] } }
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /products/{id}:
+    get:
+      tags: [Products (App)]
+      summary: Chi tiết sản phẩm + hồ sơ truy xuất tự khai báo + tiểu thương + sản phẩm liên quan
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /products/{id}/reviews:
+    get:
+      tags: [Products (App)]
+      summary: Đánh giá của sản phẩm
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+
+  # ================= ORDERS (BUYER) =================
+  /orders:
+    post:
+      tags: [Orders (Buyer)]
+      summary: Checkout — tách đơn theo sạp, nhóm bằng checkoutGroupId
+      description: |
+        Giỏ hàng ở client. `expectedUnitPrice` = finalPrice client đang thấy —
+        lệch giá server trả `409 PRICE_CHANGED` kèm giá mới. Thiếu kho → `409 STOCK_NOT_ENOUGH`.
+        MVP chỉ hỗ trợ `receiveType=pickup`.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [marketId, receiverName, receiverPhone, items]
+              properties:
+                marketId: { type: string, format: uuid }
+                receiveType: { type: string, enum: [pickup, delivery], default: pickup }
+                receiverName: { type: string }
+                receiverPhone: { type: string, example: '0922000001' }
+                note: { type: string, nullable: true }
+                items:
+                  type: array
+                  minItems: 1
+                  maxItems: 50
+                  items:
+                    type: object
+                    required: [productId, quantity, expectedUnitPrice]
+                    properties:
+                      productId: { type: string, format: uuid }
+                      quantity: { type: number, example: 2 }
+                      expectedUnitPrice: { type: integer, example: 22500 }
+      responses:
+        '201':
+          description: Danh sách đơn đã tạo
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  checkoutGroupId: 5f3c...
+                  orders: [{ id: '...', code: SM260711-X7K2P, totalAmount: 55000, status: pending }]
+        default: { $ref: '#/components/responses/Err' }
+    get:
+      tags: [Orders (Buyer)]
+      summary: Đơn hàng của tôi
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/OrderStatus' } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /orders/{id}:
+    get:
+      tags: [Orders (Buyer)]
+      summary: Chi tiết đơn (kèm items, timeline)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /orders/{id}/cancel:
+    post:
+      tags: [Orders (Buyer)]
+      summary: Buyer hủy đơn (khi pending/confirmed) — tự hoàn kho
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string, nullable: true }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= REVIEWS =================
+  /reviews:
+    post:
+      tags: [Reviews]
+      summary: Đánh giá sản phẩm (mỗi người 1 đánh giá/SP, yêu cầu đã mua)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productId, rating]
+              properties:
+                productId: { type: string, format: uuid }
+                rating: { type: integer, minimum: 1, maximum: 5 }
+                content: { type: string, nullable: true }
+                images: { type: array, items: { $ref: '#/components/schemas/Image' } }
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /reviews/{id}:
+    put:
+      tags: [Reviews]
+      summary: Sửa đánh giá của mình
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating: { type: integer, minimum: 1, maximum: 5 }
+                content: { type: string }
+                images: { type: array, items: { $ref: '#/components/schemas/Image' } }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+    delete:
+      tags: [Reviews]
+      summary: Xóa đánh giá của mình
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /my/reviews:
+    get:
+      tags: [Reviews]
+      summary: Đánh giá của tôi
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+
+  # ================= COMPLAINTS (APP) =================
+  /complaints:
+    post:
+      tags: [Complaints (App)]
+      summary: Gửi phản ánh/khiếu nại (gắn chợ, sạp/sản phẩm nếu có)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [marketId, type, content]
+              properties:
+                marketId: { type: string, format: uuid }
+                stallId: { type: string, format: uuid, nullable: true }
+                productId: { type: string, format: uuid, nullable: true }
+                type: { $ref: '#/components/schemas/ComplaintType' }
+                content: { type: string }
+                images: { type: array, items: { $ref: '#/components/schemas/Image' } }
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /my/complaints:
+    get:
+      tags: [Complaints (App)]
+      summary: Phản ánh của tôi
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/ComplaintStatus' } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /complaints/{id}:
+    get:
+      tags: [Complaints (App)]
+      summary: Chi tiết phản ánh của tôi (kèm phản hồi xử lý)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= MERCHANT APPLICATION (APP) =================
+  /merchant-applications:
+    post:
+      tags: [Merchant Application (App)]
+      summary: Nộp hồ sơ xin làm tiểu thương
+      description: Chỉ tạo hồ sơ lần đầu hoặc sau khi hồ sơ gần nhất đã hủy. Hồ sơ bị từ chối phải được chỉnh sửa và gửi lại qua PUT /my/merchant-application để giữ nguyên ID.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [marketId, fullName, phone, idNumber, documents]
+              properties:
+                marketId: { type: string, format: uuid }
+                categoryId: { type: string, format: uuid, nullable: true }
+                fullName: { type: string }
+                phone: { type: string, example: '0911000003' }
+                idNumber: { type: string, example: '079123456789' }
+                businessDescription: { type: string, nullable: true }
+                desiredStallNote: { type: string, nullable: true }
+                documents:
+                  type: array
+                  minItems: 1
+                  items: { $ref: '#/components/schemas/Image' }
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /my/merchant-application:
+    get:
+      tags: [Merchant Application (App)]
+      summary: Hồ sơ mới nhất + lịch sử
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+    put:
+      tags: [Merchant Application (App)]
+      summary: Bổ sung hoặc sửa hồ sơ bị từ chối trên cùng hồ sơ cũ
+      description: Cho phép need_more_info hoặc rejected chuyển về pending; giữ nguyên application ID và thông báo lại cho quản lý chợ.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryId: { type: string, format: uuid }
+                fullName: { type: string }
+                phone: { type: string }
+                idNumber: { type: string }
+                businessDescription: { type: string }
+                desiredStallNote: { type: string }
+                documents: { type: array, items: { $ref: '#/components/schemas/Image' } }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /my/merchant-application/cancel:
+    post:
+      tags: [Merchant Application (App)]
+      summary: Hủy hồ sơ đang chờ xử lý
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= NOTIFICATIONS (APP) =================
+  /notifications:
+    get:
+      tags: [Notifications (App)]
+      summary: Feed thông báo (trực tiếp + broadcast chợ đang chọn)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /notifications/unread-count:
+    get:
+      tags: [Notifications (App)]
+      summary: Số thông báo chưa đọc (badge)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /notifications/{id}/read:
+    post:
+      tags: [Notifications (App)]
+      summary: Đánh dấu đã đọc
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /notifications/read-all:
+    post:
+      tags: [Notifications (App)]
+      summary: Đọc tất cả
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+
+  # ================= UPLOADS =================
+  /uploads:
+    post:
+      tags: [Uploads]
+      summary: Upload ảnh lên S3 (jpg/png/webp ≤5MB, tối đa 6 file)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items: { type: string, format: binary }
+      responses:
+        '201':
+          description: Danh sách URL
+          content:
+            application/json:
+              example: { success: true, data: { files: [{ url: 'https://s3.example.com/bucket/uploads/2026/07/abc.png' }] } }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= SELLER =================
+  /seller/stall:
+    get:
+      tags: [Seller]
+      summary: Sạp của tôi + hợp đồng + thống kê
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+    put:
+      tags: [Seller]
+      summary: Cập nhật thông tin hiển thị của sạp
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                images: { type: array, items: { $ref: '#/components/schemas/Image' } }
+                phone: { type: string }
+                openHours: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /seller/dashboard:
+    get:
+      tags: [Seller]
+      summary: KPI sạp (đơn mới, SP đang bán/hết hàng/giảm giá, rating, doanh thu hôm nay)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /seller/product-categories:
+    post:
+      tags: [Seller]
+      summary: Tạo hoặc lấy loại mặt hàng trong ngành hàng của sạp
+      description: Nếu đã có loại cùng tên, API trả lại bản ghi hiện có thay vì tạo trùng.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, maxLength: 100, example: Tôm }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /seller/products:
+    get:
+      tags: [Seller]
+      summary: Sản phẩm của sạp (tab all/selling/hidden/out_of_stock/on_sale)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: tab, in: query, schema: { type: string, enum: [all, selling, hidden, out_of_stock, on_sale] } }
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+    post:
+      tags: [Seller]
+      summary: Tạo sản phẩm
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, images, categoryId, price, unit, quantity]
+              properties:
+                name: { type: string }
+                images: { type: array, minItems: 1, items: { $ref: '#/components/schemas/Image' } }
+                categoryId: { type: string, format: uuid }
+                price: { type: integer, minimum: 1, example: 25000 }
+                unit: { type: string, example: kg, description: Thuộc danh mục product_units trong settings }
+                quantity: { type: number, example: 50 }
+                origin: { type: string, nullable: true }
+                description: { type: string, nullable: true }
+                isHidden: { type: boolean, default: false }
+                traceability:
+                  allOf: [{ $ref: '#/components/schemas/ProductTraceabilityInput' }]
+                  nullable: true
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /seller/products/{id}:
+    get:
+      tags: [Seller]
+      summary: Chi tiết sản phẩm của sạp
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+    put:
+      tags: [Seller]
+      summary: Sửa sản phẩm
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                images: { type: array, items: { $ref: '#/components/schemas/Image' } }
+                categoryId: { type: string, format: uuid }
+                price: { type: integer }
+                unit: { type: string }
+                quantity: { type: number }
+                origin: { type: string }
+                description: { type: string }
+                isHidden: { type: boolean }
+                traceability:
+                  allOf: [{ $ref: '#/components/schemas/ProductTraceabilityInput' }]
+                  nullable: true
+                  description: Gửi null để xóa hồ sơ truy xuất của sản phẩm
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+    delete:
+      tags: [Seller]
+      summary: Xóa sản phẩm (soft delete)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /seller/products/{id}/visibility:
+    patch:
+      tags: [Seller]
+      summary: Ẩn/hiện sản phẩm
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [isHidden]
+              properties:
+                isHidden: { type: boolean }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /seller/products/{id}/promotion:
+    put:
+      tags: [Seller]
+      summary: Cài khuyến mãi (percent 1-100 | fixed_price = GIÁ SAU GIẢM)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, value]
+              properties:
+                type: { type: string, enum: [percent, fixed_price] }
+                value: { type: number, example: 10 }
+                startAt: { type: string, format: date-time, nullable: true }
+                endAt: { type: string, format: date-time, nullable: true }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+    delete:
+      tags: [Seller]
+      summary: Gỡ khuyến mãi
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /seller/orders:
+    get:
+      tags: [Seller]
+      summary: Đơn hàng của sạp
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/OrderStatus' } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /seller/orders/{id}:
+    get:
+      tags: [Seller]
+      summary: Chi tiết đơn của sạp
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /seller/orders/{id}/status:
+    patch:
+      tags: [Seller]
+      summary: 'Chuyển trạng thái tuần tự: pending→confirmed→preparing→ready→completed'
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [confirmed, preparing, ready, completed] }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /seller/orders/{id}/cancel:
+    post:
+      tags: [Seller]
+      summary: Seller hủy đơn (bắt buộc lý do) — tự hoàn kho
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= ADMIN - DASHBOARD =================
+  /admin/dashboard/overview:
+    get:
+      tags: [Admin - Dashboard]
+      summary: KPI tổng quan theo scope
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /admin/dashboard/charts:
+    get:
+      tags: [Admin - Dashboard]
+      summary: Chuỗi ngày doanh thu/đơn/phản ánh
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: days, in: query, schema: { type: integer, enum: [7, 30], default: 7 } }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /admin/dashboard/pending-tasks:
+    get:
+      tags: [Admin - Dashboard]
+      summary: Việc cần xử lý (hồ sơ, phản ánh, HĐ sắp hết hạn, đơn tồn)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+
+  # ================= ADMIN - MARKETS =================
+  /admin/markets/resolve-google-maps:
+    post:
+      tags: [Admin - Markets]
+      summary: Kiểm tra link Google Maps và trả tọa độ (SA)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [googleMapsUrl]
+              properties:
+                googleMapsUrl: { type: string, format: uri }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/markets:
+    get:
+      tags: [Admin - Markets]
+      summary: Danh sách chợ theo scope
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: provinceId, in: query, schema: { type: string, format: uuid } }
+        - { name: status, in: query, schema: { type: string, enum: [active, inactive] } }
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+    post:
+      tags: [Admin - Markets]
+      summary: Tạo chợ (SA)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provinceId, code, name, address]
+              properties:
+                provinceId: { type: string, format: uuid }
+                code: { type: string, example: CHO-TT-HCM }
+                name: { type: string }
+                address: { type: string }
+                googleMapsUrl: { type: string, format: uri, nullable: true, description: Backend phân tích link để lưu latitude/longitude }
+                phone: { type: string, nullable: true }
+                email: { type: string, nullable: true }
+                description: { type: string, nullable: true }
+                images: { type: array, items: { $ref: '#/components/schemas/Image' } }
+                openHours: { type: string, nullable: true }
+                mapLink: { type: string, format: uri, nullable: true, description: URL ảnh sơ đồ chợ }
+                managerIds: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= ADMIN - EXPORTS =================
+  /admin/exports/{resource}.xlsx:
+    get:
+      tags: [Admin - Exports]
+      summary: Xuất Excel theo phạm vi quyền và bộ lọc hiện tại
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: resource
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [markets, stalls, traders, merchant-approvals, products, orders, complaints, contracts, audits, users, reports]
+        - { name: marketId, in: query, schema: { type: string, format: uuid } }
+        - { name: status, in: query, schema: { type: string } }
+        - { name: displayStatus, in: query, schema: { type: string } }
+        - { name: type, in: query, schema: { type: string } }
+        - { name: from, in: query, schema: { type: string, format: date } }
+        - { name: to, in: query, schema: { type: string, format: date } }
+        - { name: groupBy, in: query, schema: { type: string, enum: [day, month], default: day } }
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: File Excel
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/markets/{id}:
+    get:
+      tags: [Admin - Markets]
+      summary: Chi tiết chợ + thống kê + quản lý
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+    put:
+      tags: [Admin - Markets]
+      summary: Sửa thông tin chợ + mapLink (SA)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code: { type: string }
+                name: { type: string }
+                address: { type: string }
+                googleMapsUrl: { type: string, format: uri, nullable: true, description: Gửi link mới để cập nhật tọa độ; null chỉ xóa link đã lưu }
+                phone: { type: string }
+                email: { type: string }
+                description: { type: string }
+                images: { type: array, items: { $ref: '#/components/schemas/Image' } }
+                openHours: { type: string }
+                mapLink: { type: string, format: uri }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+    delete:
+      tags: [Admin - Markets]
+      summary: Xóa chợ chưa có dữ liệu (SA)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/markets/{id}/status:
+    patch:
+      tags: [Admin - Markets]
+      summary: Đổi trạng thái chợ (SA)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [active, inactive] }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /admin/markets/{id}/managers:
+    get:
+      tags: [Admin - Markets]
+      summary: Danh sách quản lý của chợ
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+    post:
+      tags: [Admin - Markets]
+      summary: Gán quản lý (SA)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId: { type: string, format: uuid }
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/markets/{id}/managers/{userId}:
+    delete:
+      tags: [Admin - Markets]
+      summary: Bỏ gán quản lý (SA)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - { name: userId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+
+  # ================= ADMIN - ZONES & STALLS =================
+  /admin/markets/{id}/zones:
+    get:
+      tags: [Admin - Zones & Stalls]
+      summary: Danh sách khu của chợ (kèm đếm sạp theo trạng thái)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+    post:
+      tags: [Admin - Zones & Stalls]
+      summary: Tạo khu (SA/MM)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, name]
+              properties:
+                code: { type: string, example: A }
+                name: { type: string, example: Khu A - Rau củ quả }
+                categoryId: { type: string, format: uuid, nullable: true }
+                description: { type: string, nullable: true }
+                displayOrder: { type: integer }
+                gridColumns: { type: integer, example: 6 }
+                isActive: { type: boolean, default: true }
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/zones/{id}:
+    put:
+      tags: [Admin - Zones & Stalls]
+      summary: Sửa khu
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code: { type: string }
+                name: { type: string }
+                categoryId: { type: string, format: uuid }
+                description: { type: string }
+                displayOrder: { type: integer }
+                gridColumns: { type: integer }
+                isActive: { type: boolean }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+    delete:
+      tags: [Admin - Zones & Stalls]
+      summary: Xóa khu (chỉ khi không còn sạp — R8)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/zones/{id}/stalls:
+    post:
+      tags: [Admin - Zones & Stalls]
+      summary: Tạo 1 sạp trong khu
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, example: A-13 }
+                name: { type: string, nullable: true }
+                description: { type: string, nullable: true }
+                images: { type: array, items: { $ref: '#/components/schemas/Image' } }
+                acreage: { type: number, example: 6 }
+                phone: { type: string, nullable: true }
+                openHours: { type: string, nullable: true }
+                categoryId: { type: string, format: uuid, nullable: true }
+                status: { type: string, enum: [vacant, maintenance, reserved], default: vacant }
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/zones/{id}/stalls/bulk:
+    post:
+      tags: [Admin - Zones & Stalls]
+      summary: Tạo sạp hàng loạt (A-01…A-12), trùng mã trả 409 kèm danh sách
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prefix, startNumber, count]
+              properties:
+                prefix: { type: string, example: A }
+                startNumber: { type: integer, example: 1 }
+                count: { type: integer, maximum: 200, example: 12 }
+                digits: { type: integer, default: 2 }
+                separator: { type: string, default: '-' }
+                defaults:
+                  type: object
+                  properties:
+                    acreage: { type: number, nullable: true }
+                    categoryId: { type: string, format: uuid, nullable: true }
+                    status: { type: string, enum: [vacant, maintenance, reserved], default: vacant }
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/zones/{id}/stalls/reorder:
+    put:
+      tags: [Admin - Zones & Stalls]
+      summary: Sắp xếp thứ tự sạp trong khu
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderedStallIds]
+              properties:
+                orderedStallIds:
+                  type: array
+                  items: { type: string, format: uuid }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/stalls:
+    get:
+      tags: [Admin - Zones & Stalls]
+      summary: Danh sách sạp (kèm displayStatus + hợp đồng hiện tại)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/MarketIdQuery'
+        - { name: zoneId, in: query, schema: { type: string, format: uuid } }
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/StallStatus' } }
+        - { name: displayStatus, in: query, schema: { $ref: '#/components/schemas/DisplayStatus' } }
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /admin/stalls/{id}:
+    get:
+      tags: [Admin - Zones & Stalls]
+      summary: Drawer chi tiết sạp (hợp đồng, lịch sử, phản ánh mở, doanh thu 30 ngày)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+    put:
+      tags: [Admin - Zones & Stalls]
+      summary: Sửa thông tin sạp
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                images: { type: array, items: { $ref: '#/components/schemas/Image' } }
+                acreage: { type: number }
+                phone: { type: string }
+                openHours: { type: string }
+                categoryId: { type: string, format: uuid }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+    delete:
+      tags: [Admin - Zones & Stalls]
+      summary: Xóa sạp chưa từng có dữ liệu (R7)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/stalls/{id}/status:
+    patch:
+      tags: [Admin - Zones & Stalls]
+      summary: Đổi trạng thái sạp (không set occupied tay — do hợp đồng)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [vacant, maintenance, reserved] }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= ADMIN - CONTRACTS =================
+  /admin/stalls/{id}/assign:
+    post:
+      tags: [Admin - Contracts]
+      summary: Gán sạp cho tiểu thương đã duyệt (tạo hợp đồng)
+      description: endDate mặc định = startDate + contract_default_duration_months. `renewFromContractId` để gia hạn (kết thúc HĐ cũ + tạo mới cùng transaction — R11).
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [merchantId, startDate]
+              properties:
+                merchantId: { type: string, format: uuid }
+                startDate: { type: string, example: '2026-08-01' }
+                endDate: { type: string, nullable: true, example: '2028-08-01' }
+                fee: { type: integer, example: 2000000 }
+                categoryId: { type: string, format: uuid, nullable: true }
+                note: { type: string, nullable: true }
+                renewFromContractId: { type: string, format: uuid, nullable: true }
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/stalls/{id}/unassign:
+    post:
+      tags: [Admin - Contracts]
+      summary: Kết thúc thuê (sạp về vacant, ẩn sản phẩm của sạp)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/stalls/{id}/contracts:
+    get:
+      tags: [Admin - Contracts]
+      summary: Lịch sử hợp đồng của sạp
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /admin/contracts:
+    get:
+      tags: [Admin - Contracts]
+      summary: Danh sách hợp đồng theo phạm vi quản lý (kèm sạp, khu vực, chợ và người tạo)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/MarketIdQuery'
+        - { name: merchantId, in: query, schema: { type: string, format: uuid } }
+        - { name: activeOnly, in: query, schema: { type: boolean } }
+        - { name: expiringInDays, in: query, schema: { type: integer, example: 30 } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+
+  # ================= ADMIN - MERCHANT APPROVALS =================
+  /admin/merchant-approvals:
+    get:
+      tags: [Admin - Merchant Approvals]
+      summary: Danh sách hồ sơ theo scope
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/ApplicationStatus' } }
+        - $ref: '#/components/parameters/MarketIdQuery'
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /admin/merchant-approvals/{id}:
+    get:
+      tags: [Admin - Merchant Approvals]
+      summary: Chi tiết hồ sơ + giấy tờ
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/merchant-approvals/{id}/review:
+    post:
+      tags: [Admin - Merchant Approvals]
+      summary: Đánh dấu đang xem (pending → reviewing)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/merchant-approvals/{id}/approve:
+    post:
+      tags: [Admin - Merchant Approvals]
+      summary: Duyệt hồ sơ (tùy chọn gán sạp ngay)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryId: { type: string, format: uuid, nullable: true }
+                note: { type: string, nullable: true }
+                stallId: { type: string, format: uuid, nullable: true, description: Sạp trống thuộc chợ của hồ sơ }
+                startDate: { type: string, example: '2026-08-01' }
+                endDate: { type: string, nullable: true }
+                fee: { type: integer, nullable: true }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/merchant-approvals/{id}/reject:
+    post:
+      tags: [Admin - Merchant Approvals]
+      summary: Từ chối (bắt buộc lý do)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, example: Giấy tờ không hợp lệ }
+                note: { type: string, nullable: true }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/merchant-approvals/{id}/request-info:
+    post:
+      tags: [Admin - Merchant Approvals]
+      summary: Yêu cầu bổ sung thông tin
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [note]
+              properties:
+                note: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= ADMIN - TRADERS =================
+  /admin/traders:
+    get:
+      tags: [Admin - Traders]
+      summary: Danh sách tiểu thương theo scope
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/MarketIdQuery'
+        - { name: status, in: query, schema: { type: string, enum: [active, suspended, inactive] } }
+        - { name: categoryId, in: query, schema: { type: string, format: uuid } }
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /admin/traders/{id}:
+    get:
+      tags: [Admin - Traders]
+      summary: Chi tiết tiểu thương (hợp đồng, sạp, SP, đơn, phản ánh gần nhất)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/traders/{id}/status:
+    patch:
+      tags: [Admin - Traders]
+      summary: Đổi trạng thái (suspended sẽ ẩn sản phẩm + chặn quyền seller)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [active, suspended, inactive] }
+                reason: { type: string, nullable: true }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= ADMIN - PRODUCTS =================
+  /admin/products:
+    get:
+      tags: [Admin - Products]
+      summary: Giám sát sản phẩm theo scope
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/MarketIdQuery'
+        - { name: stallId, in: query, schema: { type: string, format: uuid } }
+        - { name: includeHidden, in: query, schema: { type: boolean, default: true } }
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /admin/products/{id}/visibility:
+    patch:
+      tags: [Admin - Products]
+      summary: Ẩn/hiện sản phẩm vi phạm (thông báo cho tiểu thương)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [isHidden, reason]
+              properties:
+                isHidden: { type: boolean }
+                reason: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= ADMIN - ORDERS =================
+  /admin/orders:
+    get:
+      tags: [Admin - Orders]
+      summary: Danh sách đơn theo scope
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/MarketIdQuery'
+        - { name: stallId, in: query, schema: { type: string, format: uuid } }
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/OrderStatus' } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /admin/orders/{id}:
+    get:
+      tags: [Admin - Orders]
+      summary: Chi tiết đơn
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/orders/{id}/cancel:
+    post:
+      tags: [Admin - Orders]
+      summary: Admin hủy đơn xử lý sự cố (bắt buộc lý do, hoàn kho, báo 2 phía)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= ADMIN - COMPLAINTS =================
+  /admin/complaints:
+    get:
+      tags: [Admin - Complaints]
+      summary: Danh sách phản ánh theo scope
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/ComplaintStatus' } }
+        - { name: type, in: query, schema: { $ref: '#/components/schemas/ComplaintType' } }
+        - $ref: '#/components/parameters/MarketIdQuery'
+        - { name: stallId, in: query, schema: { type: string, format: uuid } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /admin/complaints/{id}:
+    get:
+      tags: [Admin - Complaints]
+      summary: Chi tiết phản ánh
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/complaints/{id}/status:
+    patch:
+      tags: [Admin - Complaints]
+      summary: Chuyển trạng thái (processing/escalated/rejected — PA chỉ được escalate)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [processing, escalated, rejected] }
+                note: { type: string, nullable: true, description: Bắt buộc khi rejected }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/complaints/{id}/resolve:
+    post:
+      tags: [Admin - Complaints]
+      summary: Xử lý xong (kèm nội dung + ảnh kết quả, báo người gửi)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [resolutionNote]
+              properties:
+                resolutionNote: { type: string }
+                resolutionImages: { type: array, items: { $ref: '#/components/schemas/Image' } }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= ADMIN - NOTIFICATIONS =================
+  /admin/notifications:
+    get:
+      tags: [Admin - Notifications]
+      summary: Danh sách thông báo (kèm số người nhận/đã đọc)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/MarketIdQuery'
+        - { name: state, in: query, schema: { type: string, enum: [draft, sent] } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+    post:
+      tags: [Admin - Notifications]
+      summary: Tạo thông báo (send=false để lưu nháp)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [marketId, title, content, targetType]
+              properties:
+                marketId: { type: string, format: uuid }
+                title: { type: string }
+                content: { type: string }
+                type: { type: string, enum: [general, maintenance, fee, complaint, application, order, promotion, urgent], default: general }
+                priority: { type: string, enum: [normal, important, urgent], default: normal }
+                targetType: { $ref: '#/components/schemas/NotificationTarget' }
+                targetId: { type: string, format: uuid, nullable: true, description: zoneId/categoryId/userId theo targetType }
+                attachment: { type: string, format: uri, nullable: true }
+                send: { type: boolean, default: true }
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/notifications/{id}:
+    get:
+      tags: [Admin - Notifications]
+      summary: Chi tiết + thống kê đọc
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+    put:
+      tags: [Admin - Notifications]
+      summary: Sửa nháp
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                marketId: { type: string, format: uuid }
+                title: { type: string }
+                content: { type: string }
+                type: { type: string }
+                priority: { type: string }
+                targetType: { $ref: '#/components/schemas/NotificationTarget' }
+                targetId: { type: string, format: uuid }
+                attachment: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+    delete:
+      tags: [Admin - Notifications]
+      summary: Xóa nháp
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/notifications/{id}/send:
+    post:
+      tags: [Admin - Notifications]
+      summary: Gửi thông báo nháp (fan-out người nhận)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= ADMIN - REPORTS =================
+  /admin/reports/revenue:
+    get:
+      tags: [Admin - Reports]
+      summary: Doanh thu theo ngày/tháng (đơn completed)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: groupBy, in: query, schema: { type: string, enum: [day, month], default: day } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+        - $ref: '#/components/parameters/MarketIdQuery'
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /admin/reports/stalls:
+    get:
+      tags: [Admin - Reports]
+      summary: Tỷ lệ lấp đầy + hợp đồng sắp hết hạn theo chợ
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/MarketIdQuery' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /admin/reports/traders:
+    get:
+      tags: [Admin - Reports]
+      summary: Top tiểu thương doanh thu cao + bị phản ánh nhiều
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+        - $ref: '#/components/parameters/MarketIdQuery'
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /admin/reports/complaints:
+    get:
+      tags: [Admin - Reports]
+      summary: Phản ánh theo loại/trạng thái
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+        - $ref: '#/components/parameters/MarketIdQuery'
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /admin/reports/approvals:
+    get:
+      tags: [Admin - Reports]
+      summary: Hồ sơ tiểu thương theo trạng thái
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+        - $ref: '#/components/parameters/MarketIdQuery'
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+
+  # ================= ADMIN - SETTINGS & USERS =================
+  /admin/settings:
+    get:
+      tags: [Admin - Settings & Users]
+      summary: Toàn bộ cấu hình (SA)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /admin/settings/{key}:
+    get:
+      tags: [Admin - Settings & Users]
+      summary: Đọc 1 cấu hình theo key
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: key, in: path, required: true, schema: { type: string, example: product_units } }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+    put:
+      tags: [Admin - Settings & Users]
+      summary: Cập nhật cấu hình (SA) — upsert theo key
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: key, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value: { description: 'JSON bất kỳ: number/array/object' }
+                description: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /admin/users:
+    get:
+      tags: [Admin - Settings & Users]
+      summary: Tìm người dùng và tài khoản quản trị (SA toàn hệ thống; PA tìm user hoặc xem MM trong tỉnh)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: role, in: query, schema: { type: string, enum: [super_admin, province_admin, market_manager, user] } }
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+    post:
+      tags: [Admin - Settings & Users]
+      summary: Tạo tài khoản PA/MM (SA)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role, fullName, password]
+              properties:
+                role: { type: string, enum: [province_admin, market_manager] }
+                fullName: { type: string }
+                email: { type: string }
+                phone: { type: string }
+                password: { type: string, minLength: 8 }
+                provinceId: { type: string, format: uuid, description: Bắt buộc với province_admin }
+                marketIds: { type: array, items: { type: string, format: uuid }, description: Chợ gán cho market_manager }
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/users/{id}:
+    put:
+      tags: [Admin - Settings & Users]
+      summary: Sửa tài khoản quản trị (SA)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName: { type: string }
+                email: { type: string }
+                phone: { type: string }
+                provinceId: { type: string, format: uuid }
+                marketIds: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/users/{id}/status:
+    patch:
+      tags: [Admin - Settings & Users]
+      summary: Khóa/mở tài khoản (SA)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [active, inactive] }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/users/{id}/reset-password:
+    post:
+      tags: [Admin - Settings & Users]
+      summary: Đặt lại mật khẩu (SA)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newPassword]
+              properties:
+                newPassword: { type: string, minLength: 8 }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /admin/users/{id}/role:
+    patch:
+      tags: [Admin - Settings & Users]
+      summary: Cấp, đổi hoặc gỡ quyền quản trị cho người dùng
+      description: Super Admin thao tác toàn hệ thống. Cấp tỉnh chỉ được cấp/gỡ quyền market_manager và chỉ được gán các chợ thuộc tỉnh mình.
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string, enum: [province_admin, market_manager, user] }
+                provinceId: { type: string, format: uuid }
+                marketIds: { type: array, items: { type: string, format: uuid } }
+                phone: { type: string, pattern: '^0[0-9]{9}$' }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/provinces:
+    get:
+      tags: [Admin - Settings & Users]
+      summary: Danh sách tỉnh (kèm số chợ)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+    post:
+      tags: [Admin - Settings & Users]
+      summary: Tạo tỉnh (SA)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, name]
+              properties:
+                code: { type: string }
+                name: { type: string }
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/provinces/{id}:
+    put:
+      tags: [Admin - Settings & Users]
+      summary: Sửa tỉnh (SA)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code: { type: string }
+                name: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+    delete:
+      tags: [Admin - Settings & Users]
+      summary: Xóa tỉnh chưa dùng (SA)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/categories:
+    get:
+      tags: [Admin - Settings & Users]
+      summary: Danh sách ngành hàng
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+    post:
+      tags: [Admin - Settings & Users]
+      summary: Tạo ngành hàng (SA)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                description: { type: string }
+                displayOrder: { type: integer }
+      responses:
+        '201': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+  /admin/categories/{id}:
+    put:
+      tags: [Admin - Settings & Users]
+      summary: Sửa ngành hàng (SA)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                displayOrder: { type: integer }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+    delete:
+      tags: [Admin - Settings & Users]
+      summary: Xóa ngành hàng chưa dùng (SA)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }
+
+  # ================= ADMIN - AUDITS & JOBS =================
+  /admin/audits:
+    get:
+      tags: [Admin - Audits & Jobs]
+      summary: Audit log (SA tất cả; PA/MM chỉ thao tác của mình)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: tableName, in: query, schema: { type: string } }
+        - { name: recordId, in: query, schema: { type: string, format: uuid } }
+        - { name: userId, in: query, schema: { type: string, format: uuid } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/Paginated' }
+  /admin/jobs/contract-expiry/run:
+    post:
+      tags: [Admin - Audits & Jobs]
+      summary: Chạy tay job cảnh báo hợp đồng sắp hết hạn (SA) — idempotent
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        default: { $ref: '#/components/responses/Err' }

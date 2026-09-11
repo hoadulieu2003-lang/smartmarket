@@ -1,0 +1,14 @@
+# Chạy backend bằng Docker:  docker compose up -d --build
+# - DB lấy từ DATABASE_URL trong .env (đang trỏ Postgres remote) — image KHÔNG tự chạy migration.
+# - Secrets inject lúc chạy qua env_file, KHÔNG bake vào image.
+services:
+  backend:
+    build: .
+    image: smart-market-api
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "6000:3000"
+    restart: unless-stopped
