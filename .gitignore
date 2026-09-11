@@ -1,0 +1,10 @@
+.claude
+CLAUDE.md
+dist
+node_modules
+package-lock.json
+.env
+*.md
+.codex
+
+*.log

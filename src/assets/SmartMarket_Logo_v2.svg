@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#78C943"/>
+      <stop offset="100%" stop-color="#138C3D"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#007BFF"/>
+      <stop offset="100%" stop-color="#0058B5"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="100%" height="100%" fill="white"/>
+
+  <!-- outer green arc -->
+  <path d="M260,720 C150,520 220,260 500,180 C720,120 920,220 980,420"
+        fill="none" stroke="url(#g1)" stroke-width="48" stroke-linecap="round"/>
+
+  <!-- blue hand -->
+  <path d="M280,760 C420,880 650,920 850,840
+           C910,815 945,780 960,730
+           C905,760 860,790 825,820
+           C760,760 690,735 610,735
+           C500,735 395,740 280,760 Z"
+        fill="url(#g2)"/>
+
+  <!-- green support -->
+  <path d="M220,700 C360,790 520,820 700,800
+           C610,740 520,690 390,665
+           C330,655 275,665 220,700 Z"
+        fill="url(#g1)"/>
+
+  <!-- market roof -->
+  <g>
+    <path d="M380 360 L600 250 L820 360 L820 420 L380 420 Z" fill="#138C3D"/>
+    <path d="M400 420 L800 420" stroke="white" stroke-width="8"/>
+    <rect x="405" y="420" width="16" height="170" fill="#138C3D"/>
+    <rect x="779" y="420" width="16" height="170" fill="#138C3D"/>
+    <rect x="520" y="600" width="160" height="22" rx="11" fill="#138C3D"/>
+  </g>
+
+  <!-- produce -->
+  <circle cx="560" cy="560" r="28" fill="#FF8A00"/>
+  <circle cx="640" cy="560" r="28" fill="#FFC107"/>
+
+  <!-- wifi -->
+  <g fill="none" stroke="#138C3D" stroke-width="16" stroke-linecap="round">
+    <path d="M900 360 Q960 300 1020 360"/>
+    <path d="M920 400 Q960 360 1000 400"/>
+    <path d="M940 440 Q960 420 980 440"/>
+  </g>
+  <circle cx="960" cy="475" r="10" fill="#138C3D"/>
+
+  <!-- text -->
+  <text x="600" y="930" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="110" font-weight="800">
+    <tspan fill="#138C3D">SMART </tspan>
+    <tspan fill="#007BFF">MARKET</tspan>
+  </text>
+
+  <text x="600" y="1010" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="42" font-weight="600"
+        fill="#0F172A">
+    CHỢ TRUYỀN THỐNG HIỆN ĐẠI
+  </text>
+</svg>
