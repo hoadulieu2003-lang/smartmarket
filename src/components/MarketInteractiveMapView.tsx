@@ -8,7 +8,8 @@ import {
   DollarSign, Users, Search, Filter, Info, Phone,
   QrCode, ExternalLink, ChevronRight, X, Layers,
   Compass, Eye, Wrench, ArrowRight, Building2,
-  Radio, ShoppingBag, ShieldCheck, Check, Loader2
+  Radio, ShoppingBag, ShieldCheck, Check, Loader2,
+  UserX, UserPlus, FileText, Calendar, BadgeCheck
 } from 'lucide-react';
 import {
   CLIENT_STALLS, CLIENT_ZONES, CLIENT_MARKETS,
@@ -246,36 +247,136 @@ export default function MarketInteractiveMapView({
     });
   }, [complaints, selectedMarketId, allResolvedSet]);
 
-  const effectiveStalls = useMemo(() => {
-    const raw = (stalls && stalls.length > 0) ? stalls : CLIENT_STALLS;
-    const filtered = (selectedMarketId && selectedMarketId !== 'all')
-      ? raw.filter((s: any) => s.marketId === selectedMarketId)
-      : raw;
+  // 1. Quản lý danh sách sạp đã thanh lý hợp đồng / trả sạp (Persisted)
+  const [vacatedStallCodes, setVacatedStallCodes] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return JSON.parse(localStorage.getItem('smartmarket_vacated_stalls') || '[]');
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
 
-    return filtered.map((s: any) => {
+  // 2. Quản lý danh sách sạp ký hợp đồng trực tiếp tại BQL (Persisted)
+  const [customAssignedStalls, setCustomAssignedStalls] = useState<Record<string, any>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return JSON.parse(localStorage.getItem('smartmarket_custom_assigned_stalls') || '{}');
+      } catch {
+        return {};
+      }
+    }
+    return {};
+  });
+
+  // 3. Quản lý Modal Thu Hồi Sạp
+  const [isVacateModalOpen, setIsVacateModalOpen] = useState(false);
+  const [vacateReason, setVacateReason] = useState('voluntary_leave');
+  const [vacateNote, setVacateNote] = useState('');
+  const [isHandoverChecked, setIsHandoverChecked] = useState(true);
+
+  // 4. Quản lý Modal Tiếp Nhận & Ký Hợp Đồng Trực Tiếp Tại BQL
+  const [isDirectOnboardModalOpen, setIsDirectOnboardModalOpen] = useState(false);
+  const [directForm, setDirectForm] = useState({
+    fullName: '',
+    phone: '',
+    idNumber: '',
+    category: '',
+    monthlyFeeStr: '3.5',
+    leaseDurationMonths: 12,
+    startDate: new Date().toISOString().split('T')[0],
+  });
+
+  // 5. Full Mesh Coverage: Hợp nhất toàn diện 50 sạp A-01 -> E-10
+  const effectiveStalls = useMemo(() => {
+    // Khởi tạo Base Map gồm ĐẦY ĐỦ 50 sạp từ CLIENT_STALLS
+    const baseMap = new Map<string, any>();
+    CLIENT_STALLS.forEach((s) => {
+      baseMap.set(s.code, { ...s });
+    });
+
+    // Ghi đè bằng dữ liệu thực tế từ live backend API (nếu sạp cùng mã tồn tại trong API)
+    if (stalls && stalls.length > 0) {
+      stalls.forEach((s: any) => {
+        if (s.code && baseMap.has(s.code)) {
+          const base = baseMap.get(s.code);
+          baseMap.set(s.code, {
+            ...base,
+            ...s,
+            id: s.id || base.id,
+            name: s.name || base.name,
+            description: s.description || base.description,
+            acreage: s.acreage || base.acreage,
+            status: s.status || base.status,
+            currentContract: s.currentContract !== undefined ? s.currentContract : base.currentContract,
+            zones: s.zones || base.zones,
+            markets: s.markets || base.markets,
+            revenue30d: (s.revenue30d && s.revenue30d > 0) ? s.revenue30d : base.revenue30d,
+          });
+        }
+      });
+    }
+
+    const vacatedSet = new Set(vacatedStallCodes);
+
+    const mergedList: any[] = [];
+    baseMap.forEach((s, code) => {
+      let stall = { ...s };
+
+      // Áp dụng trạng thái sạp đã trả / thu hồi
+      if (vacatedSet.has(code)) {
+        stall.status = 'vacant';
+        stall.displayStatus = 'vacant';
+        stall.currentContract = null;
+        stall.openComplaintCount = 0;
+        stall.revenue30d = 0;
+      }
+      // Áp dụng trạng thái sạp ký hợp đồng trực tiếp mới
+      else if (customAssignedStalls[code]) {
+        const assigned = customAssignedStalls[code];
+        stall.status = 'occupied';
+        stall.displayStatus = 'occupied';
+        stall.currentContract = {
+          id: `ct-custom-${code}`,
+          startDate: assigned.startDate || new Date().toISOString().split('T')[0],
+          endDate: assigned.endDate || '2027-12-31',
+          daysLeft: assigned.daysLeft || 365,
+          fee: assigned.monthlyFee || (stall.acreage * 350000),
+          merchant: {
+            id: `trader-custom-${code}`,
+            fullName: assigned.fullName,
+            phone: assigned.phone,
+            idNumber: assigned.idNumber,
+            category: assigned.category || stall.zones?.name,
+          }
+        };
+      }
+
+      // Đếm phản ánh chưa giải quyết của sạp
       const stallOpenComplaints = effectiveComplaints.filter((c: any) => {
         const match =
-          c.stallId === s.id ||
-          c.stallId === s.code ||
-          (c.stalls && (c.stalls.id === s.id || c.stalls.code === s.code)) ||
-          (c as any).stallCode === s.code;
+          c.stallId === stall.id ||
+          c.stallId === stall.code ||
+          (c.stalls && (c.stalls.id === stall.id || c.stalls.code === stall.code)) ||
+          (c as any).stallCode === stall.code;
         return match && c.status !== 'resolved';
       });
-      const openComplaintCount = stallOpenComplaints.length;
-      let displayStatus = s.displayStatus;
-      if (openComplaintCount === 0 && s.displayStatus === 'has_complaint') {
-        const isExpiring = s.currentContract && s.currentContract.daysLeft != null && s.currentContract.daysLeft <= 30;
-        displayStatus = isExpiring ? 'expiring_soon' : (s.status === 'occupied' ? 'occupied' : s.status);
+      stall.openComplaintCount = stallOpenComplaints.length;
+      if (stall.openComplaintCount > 0) {
+        stall.displayStatus = 'has_complaint';
+      } else if (stall.status === 'occupied' && stall.currentContract?.daysLeft && stall.currentContract.daysLeft <= 30) {
+        stall.displayStatus = 'expiring_soon';
       }
-      return {
-        ...s,
-        openComplaintCount,
-        displayStatus,
-      };
-    });
-  }, [stalls, selectedMarketId, effectiveComplaints]);
 
-  // Stalls Map Lookup Map: Code -> Stall Entity
+      mergedList.push(stall);
+    });
+
+    return mergedList;
+  }, [stalls, effectiveComplaints, vacatedStallCodes, customAssignedStalls]);
+
+  // Stalls Map Lookup Map: 100% 50 mã sạp đều tra cứu được
   const stallsByCode = useMemo(() => {
     const map = new Map<string, any>();
     effectiveStalls.forEach((s) => map.set(s.code, s));
@@ -434,8 +535,32 @@ export default function MarketInteractiveMapView({
 
     if (currentTool === 'inspect') {
       if (target.type === 'stall' && target.stallCode) {
-        const found = stallsByCode.get(target.stallCode);
-        if (found) setSelectedStall(found);
+        let found = stallsByCode.get(target.stallCode);
+        if (!found) {
+          const prefix = target.stallCode.split('-')[0] || 'A';
+          const zoneMap: Record<string, { code: string; name: string }> = {
+            A: { code: 'KHU-A', name: 'Khu A · Tươi sống' },
+            B: { code: 'KHU-B', name: 'Khu B · Nông sản khô' },
+            C: { code: 'KHU-C', name: 'Khu C · Ẩm thực' },
+            D: { code: 'KHU-D', name: 'Khu D · Bách hóa' },
+            E: { code: 'KHU-E', name: 'Khu E · Vải sợi' },
+          };
+          const zoneInfo = zoneMap[prefix] || { code: 'KHU-' + prefix, name: `Khu ${prefix}` };
+          found = {
+            id: `stall-${target.stallCode.toLowerCase()}`,
+            code: target.stallCode,
+            name: `Sạp ${target.stallCode}`,
+            acreage: 10.0,
+            status: 'vacant',
+            displayStatus: 'vacant',
+            openComplaintCount: 0,
+            zones: { id: `z-${prefix.toLowerCase()}`, ...zoneInfo },
+            markets: activeMarket,
+            currentContract: null,
+            revenue30d: 0,
+          } as any;
+        }
+        setSelectedStall(found);
       }
       return;
     }
@@ -513,6 +638,118 @@ export default function MarketInteractiveMapView({
     } finally {
       setAssigningAppId(null);
     }
+  };
+
+  // 1. Chấm dứt hợp đồng & Thu hồi sạp khi tiểu thương nghỉ kinh doanh
+  const handleConfirmVacateStall = () => {
+    if (!selectedStall) return;
+    const code = selectedStall.code;
+
+    // Lưu mã sạp vào danh sách đã trả
+    setVacatedStallCodes((prev) => {
+      const next = Array.from(new Set([...prev, code]));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('smartmarket_vacated_stalls', JSON.stringify(next));
+      }
+      return next;
+    });
+
+    // Gỡ khỏi customAssigned nếu có
+    setCustomAssignedStalls((prev) => {
+      const next = { ...prev };
+      delete next[code];
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('smartmarket_custom_assigned_stalls', JSON.stringify(next));
+      }
+      return next;
+    });
+
+    // Cập nhật ngay lập tức selectedStall sang trạng thái TRỐNG
+    setSelectedStall((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        status: 'vacant',
+        displayStatus: 'vacant',
+        currentContract: null,
+        openComplaintCount: 0,
+        revenue30d: 0,
+      };
+    });
+
+    setIsVacateModalOpen(false);
+    showToast(`📢 Đã thanh lý hợp đồng sạp ${code}. Sạp đã sẵn sàng tiếp nhận tiểu thương mới!`);
+  };
+
+  // 2. Ký hợp đồng & Bàn giao sạp trực tiếp cho tiểu thương mới tại BQL
+  const handleConfirmDirectOnboard = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStall) return;
+    if (!directForm.fullName.trim() || !directForm.phone.trim()) {
+      showToast('⚠️ Vui lòng nhập đầy đủ họ tên và số điện thoại tiểu thương!');
+      return;
+    }
+
+    const code = selectedStall.code;
+    const monthlyFee = parseFloat(directForm.monthlyFeeStr || '3.5') * 1000000;
+    const months = Number(directForm.leaseDurationMonths) || 12;
+
+    const assignedData = {
+      fullName: directForm.fullName.trim(),
+      phone: directForm.phone.trim(),
+      idNumber: directForm.idNumber.trim() || 'CCCD-0012026',
+      category: directForm.category || selectedStall.zones?.name || 'Rau củ quả tươi',
+      monthlyFee,
+      months,
+      startDate: directForm.startDate,
+      endDate: new Date(new Date(directForm.startDate).getTime() + months * 30 * 86400000).toISOString().split('T')[0],
+      daysLeft: months * 30,
+    };
+
+    // Gỡ khỏi vacated nếu trước đó từng bị trả
+    setVacatedStallCodes((prev) => {
+      const next = prev.filter((c) => c !== code);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('smartmarket_vacated_stalls', JSON.stringify(next));
+      }
+      return next;
+    });
+
+    // Lưu vào customAssignedStalls
+    setCustomAssignedStalls((prev) => {
+      const next = { ...prev, [code]: assignedData };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('smartmarket_custom_assigned_stalls', JSON.stringify(next));
+      }
+      return next;
+    });
+
+    // Cập nhật selectedStall ngay lập tức sang ĐANG KINH DOANH
+    setSelectedStall((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        status: 'occupied',
+        displayStatus: 'occupied',
+        currentContract: {
+          id: `ct-direct-${code}`,
+          startDate: assignedData.startDate,
+          endDate: assignedData.endDate,
+          daysLeft: assignedData.daysLeft,
+          fee: assignedData.monthlyFee,
+          merchant: {
+            id: `trader-direct-${code}`,
+            fullName: assignedData.fullName,
+            phone: assignedData.phone,
+            idNumber: assignedData.idNumber,
+            category: assignedData.category,
+          } as any,
+        } as any,
+      };
+    });
+
+    setIsDirectOnboardModalOpen(false);
+    showToast(`🎉 Đã ký hợp đồng & bàn giao sạp ${code} cho tiểu thương ${assignedData.fullName} thành công!`);
   };
 
   // Xử lý phản ánh trực tiếp từ sơ đồ
@@ -642,11 +879,69 @@ export default function MarketInteractiveMapView({
     return () => clearInterval(interval);
   }, [isSimulating, grid]);
 
-  // Các sản phẩm của sạp đang chọn
+  // Các sản phẩm của sạp đang chọn (bảo đảm phản ánh chính xác theo từng phân khu)
   const selectedStallProducts = useMemo(() => {
-    if (!selectedStall) return [];
+    if (!selectedStall || selectedStall.status === 'vacant') return [];
     const sourceProducts = products && products.length > 0 ? products : CLIENT_PRODUCTS;
-    return sourceProducts.filter((p: any) => p.stallId === selectedStall.id || p.stalls?.code === selectedStall.code);
+    const directMatches = sourceProducts.filter((p: any) => p.stallId === selectedStall.id || p.stalls?.code === selectedStall.code);
+    if (directMatches.length > 0) return directMatches;
+
+    // Gợi ý sản phẩm đặc trưng chuẩn theo từng phân khu sạp
+    const zoneCode = selectedStall.zones?.code || selectedStall.code.split('-')[0];
+    const mockCatalog: Record<string, Array<{ name: string; price: number; unit: string }>> = {
+      'KHU-A': [
+        { name: 'Thịt đùi heo VietGAP tươi ngon', price: 160000, unit: 'kg' },
+        { name: 'Sườn non heo sạch nóng', price: 140000, unit: 'kg' }
+      ],
+      A: [
+        { name: 'Thịt đùi heo VietGAP tươi ngon', price: 160000, unit: 'kg' },
+        { name: 'Sườn non heo sạch nóng', price: 140000, unit: 'kg' }
+      ],
+      'KHU-B': [
+        { name: 'Mộc nhĩ nấm hương rừng Sa Pa', price: 190000, unit: 'kg' },
+        { name: 'Hạt sen sấy giòn thượng hạng', price: 220000, unit: 'hộp' }
+      ],
+      B: [
+        { name: 'Mộc nhĩ nấm hương rừng Sa Pa', price: 190000, unit: 'kg' },
+        { name: 'Hạt sen sấy giòn thượng hạng', price: 220000, unit: 'hộp' }
+      ],
+      'KHU-C': [
+        { name: 'Suất ẩm thực truyền thống đặc biệt', price: 65000, unit: 'suất' },
+        { name: 'Trà sâm bí đao hạt chia thanh nhiệt', price: 25000, unit: 'ly' }
+      ],
+      C: [
+        { name: 'Suất ẩm thực truyền thống đặc biệt', price: 65000, unit: 'suất' },
+        { name: 'Trà sâm bí đao hạt chia thanh nhiệt', price: 25000, unit: 'ly' }
+      ],
+      'KHU-D': [
+        { name: 'Trà Tân Cương hoa lài nguyên chất', price: 320000, unit: 'hộp' },
+        { name: 'Bánh chè lam Phố Cổ truyền thống', price: 85000, unit: 'hộp' }
+      ],
+      D: [
+        { name: 'Trà Tân Cương hoa lài nguyên chất', price: 320000, unit: 'hộp' },
+        { name: 'Bánh chè lam Phố Cổ truyền thống', price: 85000, unit: 'hộp' }
+      ],
+      'KHU-E': [
+        { name: 'Khăn lụa Vạn Phúc hoa sen dệt tay', price: 350000, unit: 'chiếc' },
+        { name: 'Áo dài lụa tơ tằm cách tân', price: 1200000, unit: 'bộ' }
+      ],
+      E: [
+        { name: 'Khăn lụa Vạn Phúc hoa sen dệt tay', price: 350000, unit: 'chiếc' },
+        { name: 'Áo dài lụa tơ tằm cách tân', price: 1200000, unit: 'bộ' }
+      ],
+    };
+
+    const zoneSamples = mockCatalog[zoneCode] || mockCatalog['KHU-' + zoneCode] || [
+      { name: 'Mặt hàng nông sản OCOP', price: 95000, unit: 'gói' }
+    ];
+
+    return zoneSamples.map((item, idx) => ({
+      id: `prod-${selectedStall.code}-${idx}`,
+      name: item.name,
+      price: item.price,
+      unit: item.unit,
+      traceabilityQr: `QR-${selectedStall.code}-${idx + 1}`
+    }));
   }, [selectedStall, products]);
 
   // Phản ánh của sạp đang chọn (chỉ lấy các phản ánh chưa giải quyết)
@@ -870,18 +1165,19 @@ export default function MarketInteractiveMapView({
         </div>
 
         {/* Duty Mode Context Helper */}
-        <div className="text-[11px] text-slate-400 hidden xl:flex items-center gap-1.5 font-medium">
+        <div className="text-[11px] text-emerald-200 hidden lg:flex items-center gap-1.5 font-medium bg-emerald-950/60 px-3 py-1.5 rounded-xl border border-emerald-700/40">
+          <Info className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
           {dutyMode === 'leasing' && (
-            <span>🏢 Sạp trống viền nét đứt màu ngọc. Click vào sạp trống để mở hồ sơ Zalo và gán tiểu thương.</span>
+            <span>💡 <b>Quy trình mặt bằng:</b> Bấm sạp đang bán để <b>Thu hồi sạp</b> khi nghỉ buôn · Bấm <b>SẠP TRỐNG</b> để tiếp nhận & ký hợp đồng mới.</span>
           )}
           {dutyMode === 'incidents' && (
-            <span className="text-rose-300">🚨 Đang theo dõi các sạp phát sinh phản ánh người tiêu dùng để điều động trật tự.</span>
+            <span className="text-rose-200">🚨 <b>Xử lý sự cố:</b> Đang theo dõi các sạp phát sinh phản ánh người tiêu dùng để điều động trật tự.</span>
           )}
           {dutyMode === 'commerce' && (
-            <span className="text-amber-300">🛒 Hiển thị phân loại mặt hàng, tem QR truy xuất và phân khu nông sản OCOP.</span>
+            <span className="text-amber-200">🛒 <b>Thương mại số:</b> Hiển thị phân loại mặt hàng, tem QR truy xuất nguồn gốc từng sạp.</span>
           )}
           {dutyMode === 'safety' && (
-            <span className="text-teal-300">🧯 Làm nổi bật trụ cứu hỏa PCCC, lối thoát hiểm và cụm cân đối chứng minh bạch.</span>
+            <span className="text-teal-200">🧯 <b>An toàn chợ:</b> Làm nổi bật trụ PCCC, lối thoát hiểm và cụm cân đối chứng minh bạch.</span>
           )}
         </div>
       </div>
@@ -1369,19 +1665,42 @@ export default function MarketInteractiveMapView({
                     SẠP ĐANG TRỐNG
                   </span>
                   <p className="text-xs text-slate-600 font-medium">
-                    Sẵn sàng tiếp nhận & mở phê duyệt hồ sơ từ Zalo Mini App
+                    Sẵn sàng tiếp nhận & bàn giao sạp cho tiểu thương mới
                   </p>
                 </div>
 
-                {/* Action CTA: Assign Merchant */}
-                <button
-                  type="button"
-                  onClick={() => setIsAssignModalOpen(true)}
-                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#0B7A3A] to-emerald-600 hover:from-emerald-700 hover:to-emerald-800 text-white text-xs font-black transition-all shadow-md shadow-emerald-700/20 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
-                >
-                  <Users className="w-4 h-4" />
-                  <span>Gán hồ sơ tiểu thương Zalo ({pendingApplications.length})</span>
-                </button>
+                <div className="space-y-2 pt-1">
+                  {/* Action 1: Tiếp nhận ký hợp đồng trực tiếp tại BQL */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDirectForm({
+                        fullName: '',
+                        phone: '',
+                        idNumber: '',
+                        category: selectedStall.zones?.name || '',
+                        monthlyFeeStr: ((((selectedStall.acreage || 10) * 350000)) / 1000000).toFixed(1),
+                        leaseDurationMonths: 12,
+                        startDate: new Date().toISOString().split('T')[0],
+                      });
+                      setIsDirectOnboardModalOpen(true);
+                    }}
+                    className="w-full py-2.5 px-3 rounded-xl bg-[#0B7A3A] hover:bg-emerald-700 text-white text-xs font-black transition-all shadow-md shadow-emerald-800/20 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    <span>Ký Hợp Đồng & Bàn Giao Trực Tiếp</span>
+                  </button>
+
+                  {/* Action 2: Gán hồ sơ từ Zalo */}
+                  <button
+                    type="button"
+                    onClick={() => setIsAssignModalOpen(true)}
+                    className="w-full py-2 px-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Users className="w-4 h-4 text-emerald-700" />
+                    <span>Gán hồ sơ tiểu thương Zalo ({pendingApplications.length})</span>
+                  </button>
+                </div>
               </div>
             )}
 
@@ -1390,15 +1709,17 @@ export default function MarketInteractiveMapView({
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="text-[10px] text-slate-500 uppercase font-bold">Diện tích sạp</div>
                 <div className="text-sm font-extrabold text-slate-900 mt-0.5 font-mono">
-                  {selectedStall.acreage} m²
+                  {selectedStall.acreage || 10} m²
                 </div>
               </div>
 
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="text-[10px] text-slate-500 uppercase font-bold">Giá thuê tháng</div>
                 <div className="text-sm font-extrabold text-amber-700 mt-0.5 font-mono">
-                  {selectedStall.currentContract
+                  {selectedStall.currentContract && selectedStall.currentContract.fee > 0
                     ? `${(selectedStall.currentContract.fee / 1000000).toFixed(1)} tr`
+                    : selectedStall.status === 'occupied'
+                    ? `${(((selectedStall.acreage || 10) * 350000) / 1000000).toFixed(1)} tr`
                     : 'Chưa niêm yết'}
                 </div>
               </div>
@@ -1406,8 +1727,10 @@ export default function MarketInteractiveMapView({
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="text-[10px] text-slate-500 uppercase font-bold">Doanh thu 30 ngày</div>
                 <div className="text-sm font-extrabold text-[#0B7A3A] mt-0.5 font-mono">
-                  {selectedStall.revenue30d
+                  {selectedStall.revenue30d && selectedStall.revenue30d > 0
                     ? `${(selectedStall.revenue30d / 1000000).toFixed(0)} tr`
+                    : selectedStall.status === 'occupied'
+                    ? `${Math.round((selectedStall.acreage || 10) * 5.5)} tr`
                     : '0 tr'}
                 </div>
               </div>
@@ -1512,28 +1835,45 @@ export default function MarketInteractiveMapView({
               )}
             </div>
 
-            {/* Quick Actions */}
-            <div className="mt-auto space-y-1.5 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  showToast(`📢 Đã gửi thông báo nhắc hạn hợp đồng tới chủ sạp ${selectedStall.code}`);
-                }}
-                className="w-full py-2 rounded-xl bg-[#0B7A3A] hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-              >
-                <span>Gửi Thông Báo Gia Hạn</span>
-              </button>
+            {/* Quick Actions (Dành cho sạp đang có người kinh doanh) */}
+            {selectedStall.status === 'occupied' && (
+              <div className="mt-auto space-y-2 pt-2 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    showToast(`📢 Đã gửi thông báo nhắc hạn hợp đồng tới chủ sạp ${selectedStall.code}`);
+                  }}
+                  className="w-full py-2 rounded-xl bg-[#0B7A3A] hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                >
+                  <span>Gửi Thông Báo Gia Hạn</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  showToast(`💰 Đã ghi nhận thu phí dịch vụ sạp ${selectedStall.code} thành công`);
-                }}
-                className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-              >
-                <span>Thu Phí Dịch Vụ Tháng</span>
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    showToast(`💰 Đã ghi nhận thu phí dịch vụ sạp ${selectedStall.code} thành công`);
+                  }}
+                  className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                >
+                  <span>Thu Phí Dịch Vụ Tháng</span>
+                </button>
+
+                {/* Action: Chấm dứt kinh doanh & Thu hồi sạp khi tiểu thương nghỉ */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVacateReason('voluntary_leave');
+                    setVacateNote('');
+                    setIsHandoverChecked(true);
+                    setIsVacateModalOpen(true);
+                  }}
+                  className="w-full py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 hover:border-red-300 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                >
+                  <UserX className="w-3.5 h-3.5 text-red-600" />
+                  <span>Thanh Lý Hợp Đồng & Thu Hồi Sạp</span>
+                </button>
+              </div>
+            )}
           </aside>
         )}
       </div>
@@ -1650,6 +1990,271 @@ export default function MarketInteractiveMapView({
                 Đóng
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 1: XÁC NHẬN THU HỒI SẠP / CHẤM DỨT KINH DOANH KHI TIỂU THƯƠNG NGHỈ */}
+      {isVacateModalOpen && selectedStall && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-red-700 to-rose-600 text-white p-4 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white border border-white/20">
+                  <UserX className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-black tracking-wide">
+                    THANH LÝ HỢP ĐỒNG & THU HỒI SẠP {selectedStall.code}
+                  </h3>
+                  <p className="text-[11px] text-rose-100 font-medium">
+                    {selectedStall.zones?.name || 'Phân khu chợ'} · Sạp sẽ chuyển về trạng thái TRỐNG sau khi thu hồi
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsVacateModalOpen(false)}
+                className="p-1 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 overflow-y-auto space-y-3.5 flex-1 text-xs">
+              {/* Current Merchant Info */}
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+                <div className="text-[10px] uppercase font-bold text-slate-500">Hộ tiểu thương hiện tại</div>
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-slate-900 text-sm">
+                    {selectedStall.currentContract?.merchant?.fullName || 'Tiểu thương sạp'}
+                  </span>
+                  <span className="font-mono text-slate-600">
+                    📞 {selectedStall.currentContract?.merchant?.phone || '0908 *** ***'}
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-200/60">
+                  <span>Thời hạn hợp đồng còn lại:</span>
+                  <span className="font-bold text-amber-700 font-mono">
+                    {selectedStall.currentContract?.daysLeft ?? 0} ngày
+                  </span>
+                </div>
+              </div>
+
+              {/* Vacate Reason Selection */}
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 block">Lý do chấm dứt & thu hồi sạp (*):</label>
+                <select
+                  value={vacateReason}
+                  onChange={(e) => setVacateReason(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-800 focus:ring-2 focus:ring-red-500 focus:outline-hidden cursor-pointer"
+                >
+                  <option value="voluntary_leave">Tiểu thương chủ động xin nghỉ kinh doanh / trả mặt bằng</option>
+                  <option value="contract_expired">Hết hạn hợp đồng và không tiếp tục gia hạn</option>
+                  <option value="stall_transfer">Chuyển nhượng / đổi sang vị trí sạp khác</option>
+                  <option value="rule_violation">Vi phạm quy chế quản lý chợ (ATTP / PCCC / Gian lận đo lường)</option>
+                  <option value="debt_unpaid">Nợ đọng tiền thuê và phí dịch vụ quá thời hạn quy định</option>
+                </select>
+              </div>
+
+              {/* Handover & Debt Confirmation */}
+              <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200 space-y-2">
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isHandoverChecked}
+                    onChange={(e) => setIsHandoverChecked(e.target.checked)}
+                    className="mt-0.5 rounded text-red-600 focus:ring-red-500 cursor-pointer"
+                  />
+                  <span className="text-[11px] text-slate-700 leading-relaxed">
+                    Xác nhận BQL đã hoàn tất <b>kiểm kê hiện trạng mặt bằng sạp</b>, đối soát <b>chỉ số điện nước</b> và thu dọn tài sản an toàn.
+                  </span>
+                </label>
+              </div>
+
+              {/* Note input */}
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 block">Ghi chú biên bản bàn giao:</label>
+                <textarea
+                  rows={2}
+                  value={vacateNote}
+                  onChange={(e) => setVacateNote(e.target.value)}
+                  placeholder="Nhập ghi chú biên bản hoàn cọc, tình trạng bàn giao sạp..."
+                  className="w-full p-2 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-red-500 focus:outline-hidden"
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsVacateModalOpen(false)}
+                className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                disabled={!isHandoverChecked}
+                onClick={handleConfirmVacateStall}
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black transition-colors cursor-pointer shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <UserX className="w-3.5 h-3.5" />
+                <span>Xác Nhận Thu Hồi Sạp</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: TIẾP NHẬN TIỂU THƯƠNG & KÝ HỢP ĐỒNG TRỰC TIẾP TẠI BQL */}
+      {isDirectOnboardModalOpen && selectedStall && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-emerald-800 to-[#0B7A3A] text-white p-4 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white border border-white/20">
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-black tracking-wide">
+                    TIẾP NHẬN & BÀN GIAO SẠP {selectedStall.code}
+                  </h3>
+                  <p className="text-[11px] text-emerald-100 font-medium">
+                    Ký hợp đồng trực tiếp tại BQL · {selectedStall.zones?.name || 'Phân khu'} · {selectedStall.acreage} m²
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsDirectOnboardModalOpen(false)}
+                className="p-1 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body Form */}
+            <form onSubmit={handleConfirmDirectOnboard} className="flex-1 flex flex-col overflow-hidden">
+              <div className="p-4 overflow-y-auto space-y-3 flex-1 text-xs">
+                {/* Họ tên & Số điện thoại */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 block">Họ và tên tiểu thương (*):</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="vd: Trần Văn An"
+                      value={directForm.fullName}
+                      onChange={(e) => setDirectForm({ ...directForm, fullName: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 block">Số điện thoại liên hệ (*):</label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="vd: 0912 345 678"
+                      value={directForm.phone}
+                      onChange={(e) => setDirectForm({ ...directForm, phone: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                    />
+                  </div>
+                </div>
+
+                {/* CCCD & Ngành hàng */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 block">Số CCCD / Định danh:</label>
+                    <input
+                      type="text"
+                      placeholder="vd: 001203008989"
+                      value={directForm.idNumber}
+                      onChange={(e) => setDirectForm({ ...directForm, idNumber: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 block">Ngành hàng kinh doanh:</label>
+                    <input
+                      type="text"
+                      placeholder={selectedStall.zones?.name || 'vd: Rau củ quả sạch'}
+                      value={directForm.category}
+                      onChange={(e) => setDirectForm({ ...directForm, category: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                    />
+                  </div>
+                </div>
+
+                {/* Giá thuê tháng & Thời hạn hợp đồng */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 block">Giá thuê tháng (triệu đ):</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0.5"
+                      placeholder="vd: 3.5"
+                      value={directForm.monthlyFeeStr}
+                      onChange={(e) => setDirectForm({ ...directForm, monthlyFeeStr: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 block">Thời hạn hợp đồng:</label>
+                    <select
+                      value={directForm.leaseDurationMonths}
+                      onChange={(e) => setDirectForm({ ...directForm, leaseDurationMonths: Number(e.target.value) })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden cursor-pointer"
+                    >
+                      <option value={6}>6 tháng (Thử nghiệm)</option>
+                      <option value={12}>12 tháng (1 năm - Chuẩn)</option>
+                      <option value={24}>24 tháng (2 năm)</option>
+                      <option value={36}>36 tháng (3 năm)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Ngày bắt đầu bàn giao */}
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 block">Ngày bắt đầu kinh doanh:</label>
+                  <input
+                    type="date"
+                    value={directForm.startDate}
+                    onChange={(e) => setDirectForm({ ...directForm, startDate: e.target.value })}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                  />
+                </div>
+
+                <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 text-[11px] text-emerald-800 flex items-center gap-2">
+                  <BadgeCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Sạp sẽ lập tức chuyển sang trạng thái <b>ĐANG KINH DOANH</b> trên sơ đồ mặt bằng.</span>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsDirectOnboardModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-[#0B7A3A] hover:bg-emerald-700 text-white text-xs font-black transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Kích Hoạt Hợp Đồng & Bàn Giao Sạp</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
